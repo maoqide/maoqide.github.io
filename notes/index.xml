@@ -19,7 +19,9 @@
       <guid>/notes/build-blog-with-hugo/</guid>
       <description>documentations https://gohugo.io/getting-started/usage/ https://learn.netlify.com/en/
 setup  install hugo following offical install guide.
-download packages from Hugo Release and put executale file hugo in PATH. execute hugo new site sitename, To create a new site. directory structure will like this:  . ├── archetypes ├── assets ├── config.toml ├── content ├── data ├── layouts ├── static └── themes  download theme from github. unzip the archive and copy files to you site dir, overwriting directory and files of the same name.</description>
+download packages from Hugo Release and put executale file hugo in PATH.
+ execute hugo new site sitename, To create a new site. directory structure will like this:
+. ├── archetypes ├── assets ├── config.toml ├── content ├── data ├── layouts ├── static └── themes  download theme from github. unzip the archive and copy files to you site dir, overwriting directory and files of the same name.</description>
     </item>
     
   </channel>
