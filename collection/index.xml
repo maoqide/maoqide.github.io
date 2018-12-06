@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Collection on Maoqide</title>
+    <link>/collection/</link>
+    <description>Recent content in Collection on Maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 03 Dec 2018 21:38:40 +0800</lastBuildDate>
+    
+	<atom:link href="/collection/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Collection 1</title>
+      <link>/collection/collection-1/</link>
+      <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
+      
+      <guid>/collection/collection-1/</guid>
+      <description> Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。
+https://www.infoq.cn/article/analyse-mesos-part-04/ bakup_url
+ goroutine 调度器解析。 https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler// bakup_url
+  </description>
+    </item>
+    
+  </channel>
+</rss>

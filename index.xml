@@ -6,10 +6,33 @@
     <description>Recent content on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 21 Nov 2018 19:46:06 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 04 Dec 2018 18:37:11 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Build Blog With Hugo</title>
+      <link>/notes/build-blog-with-hugo/</link>
+      <pubDate>Tue, 04 Dec 2018 18:37:11 +0800</pubDate>
+      
+      <guid>/notes/build-blog-with-hugo/</guid>
+      <description>documentations https://gohugo.io/getting-started/usage/ https://learn.netlify.com/en/
+setup  install hugo following offical install guide.
+download packages from Hugo Release and put executale file hugo in PATH. execute hugo new site sitename, To create a new site. directory structure will like this:  . ├── archetypes ├── assets ├── config.toml ├── content ├── data ├── layouts ├── static └── themes  download theme from github. unzip the archive and copy files to you site dir, overwriting directory and files of the same name.</description>
+    </item>
+    
+    <item>
+      <title>Collection 1</title>
+      <link>/collection/collection-1/</link>
+      <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
+      
+      <guid>/collection/collection-1/</guid>
+      <description> Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。
+https://www.infoq.cn/article/analyse-mesos-part-04/ bakup_url
+ goroutine 调度器解析。 https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler// bakup_url
+  </description>
+    </item>
     
     <item>
       <title>Apiserver</title>
