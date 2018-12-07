@@ -49,6 +49,13 @@
 	"content": "Kubelet 源码阅读笔记\n"
 },
 {
+	"uri": "/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/",
+	"title": "阿里云主机搭建 K8S 集群",
+	"tags": ["cloud", "k8s"],
+	"description": "",
+	"content": "通过阿里云ECS实例搭建K8S集群\n环境  阿里云ECS * 2 centos7.4 阿里云两台机器需要内网互通（同一k可用区可以创建免费VPC高速通道实现）  安装 docker 官方文档\nsudo yum install -y yum-utils \\ device-mapper-persistent-data \\ lvm2 sudo yum-config-manager \\ --add-repo \\ https://download.docker.com/linux/centos/docker-ce.repo sudo yum install docker-ce  配置代理  shadowsocks服务端 provixy shadowsocks客户端 sslocal  安装 shadowsocks yum -y install python-pip pip install shadowsocks  配置 shadowsocks vim /etc/shadowsocks.json  { \u0026quot;server\u0026quot;:\u0026quot;1.1.1.1\u0026quot;, //shadowsocks server ip \u0026quot;server_port\u0026quot;:8888,\t//shadowsocks server port \u0026quot;local_address\u0026quot;: \u0026quot;127.0.0.1\u0026quot;,\t\u0026quot;local_port\u0026quot;:1080,\t//default 1080 \u0026quot;password\u0026quot;:\u0026quot;ssserver_passwd\u0026quot;, \u0026quot;timeout\u0026quot;:300, \u0026quot;method\u0026quot;:\u0026quot;aes-256-cfb\u0026quot;, \u0026quot;fast_open\u0026quot;: false, \u0026quot;workers\u0026quot;: 1 }  安装 privoxy 配置全局代理或 gfwlist 代理\nyum -y install privoxy # 全局代理 echo 'forward-socks5 / 127.0.0.1:1080 .' \u0026gt;\u0026gt;/etc/privoxy/config # gfwlist 代理 # 获取 gfwlist2privoxy 脚本 curl -4sSkL https://raw.github.com/zfl9/gfwlist2privoxy/master/gfwlist2privoxy -O # 生成 gfwlist.action 文件 bash gfwlist2privoxy '127.0.0.1:1080' # 检查 gfwlist.action 文件 more gfwlist.action # 一般有 5000+ 行 # 应用 gfwlist.action 文件 mv -f gfwlist.action /etc/privoxy echo 'actionsfile gfwlist.action' \u0026gt;\u0026gt;/etc/privoxy/config  配置快捷命令 在 /etc/profile.d 新建 set_proxy.sh, linux开机会自动执行该目录下可执行文件\nvim /etc/profile.d/set_proxy.sh  [root@localhost ~]$ cat /etc/profile.d/set_proxy.sh # Initialization script for bash and sh # export proxy for GFW alias proxy_on='nohup sslocal -c /etc/shadowsocks.json \u0026amp; systemctl start privoxy' alias proxy_off='systemctl stop privoxy \u0026amp;\u0026amp; pkill sslocal' alias proxy_export='export http_proxy=http://127.0.0.1:8118 \u0026amp;\u0026amp; export https_proxy=http://127.0.0.1:8118 \u0026amp;\u0026amp; export no_proxy=localhost' alias proxy_unset='unset http_proxy https_proxy no_proxy' alias proxy_test='curl google.com'  手动执行 /etc/profile, 会重新执行/etc/profile.d下文件\nsource /etc/profile  执行alias查看，发现有proxy前缀的别名，则配置成功\n[root@localhost ~]$ alias alias egrep='egrep --color=auto' alias fgrep='fgrep --color=auto' alias grep='grep --color=auto' alias l.='ls -d .* --color=auto' alias ll='ls -l --color=auto' alias ls='ls --color=auto' alias proxy_export='export http_proxy=http://127.0.0.1:8118 \u0026amp;\u0026amp; export https_proxy=http://127.0.0.1:8118 \u0026amp;\u0026amp; export no_proxy=localhost' alias proxy_off='systemctl stop privoxy \u0026amp;\u0026amp; pkill sslocal' alias proxy_on='nohup sslocal -c /etc/shadowsocks.json \u0026amp; systemctl start privoxy' alias proxy_test='curl google.com' alias proxy_unset='unset http_proxy https_proxy no_proxy' alias vi='vim' alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'  执行下面命令开启代理，并配置环境变量(只对当前shell生效，若要永久生效需要在/etc/proxy中export环境变量)\nproxy_on \u0026amp;\u0026amp; proxy_export  执行 proxy_test 测试代理是否配置成功，出现如下输出则配置成功。\n[root@mqd1c2g ~]$ proxy_test \u0026lt;HTML\u0026gt;\u0026lt;HEAD\u0026gt;\u0026lt;meta http-equiv=\u0026quot;content-type\u0026quot; content=\u0026quot;text/html;charset=utf-8\u0026quot;\u0026gt; \u0026lt;TITLE\u0026gt;301 Moved\u0026lt;/TITLE\u0026gt;\u0026lt;/HEAD\u0026gt;\u0026lt;BODY\u0026gt; \u0026lt;H1\u0026gt;301 Moved\u0026lt;/H1\u0026gt; The document has moved \u0026lt;A HREF=\u0026quot;http://www.google.com/\u0026quot;\u0026gt;here\u0026lt;/A\u0026gt;. \u0026lt;/BODY\u0026gt;\u0026lt;/HTML\u0026gt;  参考: ss-local 终端代理（gfwlist）\n安装 Kubernetes 官方文档\n安装kubeadm 检查机器是否符合文档中的Before you begin的要求, 符合的话才能进行接下来的步骤。\ncat \u0026lt;\u0026lt;EOF \u0026gt; /etc/yum.repos.d/kubernetes.repo [kubernetes] name=Kubernetes baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64 enabled=1 gpgcheck=1 repo_gpgcheck=1 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg exclude=kube* EOF # Set SELinux in permissive mode (effectively disabling it) setenforce 0 sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes systemctl enable kubelet \u0026amp;\u0026amp; systemctl start kubelet  创建 master 节点 # pod-network-cidr 10.244.0.0/16 是后面 flannel 默认配置的 pod Network，配置成这个地址不用改的flannel的 默认配置 kubeadm init --pod-network-cidr 10.244.0.0/16  成功执行后 master 节点就已经启动了, 可以选择安装一种网络插件，这里选择flannel\n# 使用默认配置启动 flannel 的 DaemonSet kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml  创建 node 节点 在 master 节点执行下面命令生成创建子节点命令\nkubeadm token create --print-join-command  [root@localhost ~]$ kubeadm token create --print-join-command kubeadm join masterip:6443 --token 5zk5ql.5eq0rgoui0dl0xx3 --discovery-token-ca-cert-hash sha256:5bef3894fc492bf9d93c9f248f84ec3sdsadasdss7685191a9d841fd32a88bb9ac9  在 node 节点执行上述命令生成的命令\nkubeadm join masterip:6443 --token 5zk5ql.5eq0rgoui0dl0xx3 --discovery-token-ca-cert-hash sha256:5bef3894fc492bf9d93c9f248f84ec3sdsadasdss7685191a9d841fd32a88bb9ac9  执行成功则 node 节点添加成功\n"
+},
+{
 	"uri": "/contact/",
 	"title": "Contact",
 	"tags": [],
@@ -65,6 +72,20 @@
 {
 	"uri": "/categories/",
 	"title": "Categories",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/tags/cloud/",
+	"title": "Cloud",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/tags/k8s/",
+	"title": "K8s",
 	"tags": [],
 	"description": "",
 	"content": ""

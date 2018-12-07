@@ -2,32 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Cloud on Maoqide</title>
-    <link>/cloud/</link>
+    <link>/tags/cloud/</link>
     <description>Recent content in Cloud on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 02 Dec 2018 15:39:05 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 14 Nov 2018 14:31:38 +0800</lastBuildDate>
     
-	<atom:link href="/cloud/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/cloud/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Apiserver</title>
-      <link>/cloud/apiserver/</link>
-      <pubDate>Wed, 21 Nov 2018 19:46:06 +0800</pubDate>
-      
-      <guid>/cloud/apiserver/</guid>
-      <description>&lt;p&gt;k8s apiserver 源码阅读笔记&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>Kubelet</title>
-      <link>/cloud/kubelet/</link>
-      <pubDate>Wed, 21 Nov 2018 18:48:01 +0800</pubDate>
-      
-      <guid>/cloud/kubelet/</guid>
-      <description>&lt;p&gt;Kubelet 源码阅读笔记&lt;/p&gt;</description>
-    </item>
     
     <item>
       <title>阿里云主机搭建 K8S 集群</title>
