@@ -21,15 +21,6 @@
     </item>
     
     <item>
-      <title>Kubelet</title>
-      <link>/cloud/kubelet/</link>
-      <pubDate>Wed, 21 Nov 2018 18:48:01 +0800</pubDate>
-      
-      <guid>/cloud/kubelet/</guid>
-      <description>&lt;p&gt;Kubelet 源码阅读笔记&lt;/p&gt;</description>
-    </item>
-    
-    <item>
       <title>阿里云主机搭建 K8S 集群</title>
       <link>/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/</link>
       <pubDate>Wed, 14 Nov 2018 14:31:38 +0800</pubDate>
