@@ -18,7 +18,7 @@
 	"title": "Collection 1",
 	"tags": [],
 	"description": "",
-	"content": " Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。\nhttps://www.infoq.cn/article/analyse-mesos-part-04\nbakup_url\n goroutine 调度器解析。\nhttps://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/\nbakup_url\n 一致性哈希算法。\nhttps://segmentfault.com/a/1190000013533592\nbakup_url\n  "
+	"content": " Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。\nhttps://www.infoq.cn/article/analyse-mesos-part-04\nbakup_url\n goroutine 调度器解析。\nhttps://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/\nbakup_url\n 一致性哈希算法。\nhttps://segmentfault.com/a/1190000013533592\nbakup_url\n Kubernetes调度详解。 http://dockone.io/article/2885 bakup_url\n  "
 },
 {
 	"uri": "/algorithm/",
