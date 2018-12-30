@@ -9,17 +9,17 @@
 
     <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
 <link rel="icon" href="/images/favicon.png" type="image/x-icon" />
-    <title>Goroutine Management In Golang :: Maoqide</title>
+    <title>Goroutine 的管理 :: Maoqide</title>
 
     
-    <link href="/css/nucleus.css?1546149161" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1546149161" rel="stylesheet">
-    <link href="/css/hybrid.css?1546149161" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1546149161" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1546149161" rel="stylesheet">
-    <link href="/css/auto-complete.css?1546149161" rel="stylesheet">
-    <link href="/css/theme.css?1546149161" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1546149161" rel="stylesheet">
+    <link href="/css/nucleus.css?1546149691" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1546149691" rel="stylesheet">
+    <link href="/css/hybrid.css?1546149691" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1546149691" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1546149691" rel="stylesheet">
+    <link href="/css/auto-complete.css?1546149691" rel="stylesheet">
+    <link href="/css/theme.css?1546149691" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1546149691" rel="stylesheet">
     
     
     <script>
@@ -31,7 +31,7 @@
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
-    <script src="/js/jquery-2.x.min.js?1546149161"></script>
+    <script src="/js/jquery-2.x.min.js?1546149691"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -67,14 +67,14 @@
     <span data-search-clear=""><i class="fas fa-close"></i></span>
 </div>
 
-<script type="text/javascript" src="/js/lunr.min.js?1546149161"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1546149161"></script>
+<script type="text/javascript" src="/js/lunr.min.js?1546149691"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1546149691"></script>
 <script type="text/javascript">
     
         var baseurl = "";
     
 </script>
-<script type="text/javascript" src="/js/search.js?1546149161"></script>
+<script type="text/javascript" src="/js/search.js?1546149691"></script>
 
     
   </div>
@@ -332,9 +332,9 @@
  
   
     
-      <li data-nav-id="/golang/goroutine/" title="Goroutine Management In Golang" class="dd-item active">
+      <li data-nav-id="/golang/goroutine/" title="Goroutine 的管理" class="dd-item active">
         <a href="/golang/goroutine/">
-        Goroutine Management In Golang
+        Goroutine 的管理
         <i class="fas fa-check read-icon"></i>
         </a>
     </li>
@@ -489,7 +489,7 @@
                   <span class="links">
                  
                  
-                   Goroutine Management In Golang 
+                   Goroutine 的管理 
                  
                   </span>
                 </div>
@@ -502,9 +502,9 @@
 <ul>
 <li><a href="#几点原则">几点原则</a>
 <ul>
-<li><a href="#不要和-goroutine-失去联系-don-t-loose-contact-with-your-goroutines">不要和 goroutine 失去联系(Don&rsquo;t loose contact with your goroutines)</a></li>
-<li><a href="#不要用-waitgroup-来计数多种类型的-goroutine-don-t-use-wait-groups-to-count-more-than-one-type-of-goroutine">不要用 WaitGroup 来计数多种类型的 goroutine(Don&rsquo;t use wait groups to count more than one type of goroutine)</a></li>
-<li><a href="#不要让一个-channel-的消费者说什么时候结束-don-t-let-a-channel-consumer-say-when-it-is-done">不要让一个 channel 的消费者说什么时候结束(Don&rsquo;t let a channel consumer say when it is done)</a></li>
+<li><a href="#不要和-goroutine-失去联系">不要和 goroutine 失去联系</a></li>
+<li><a href="#不要用-waitgroup-来计数多种类型的-goroutine">不要用 WaitGroup 来计数多种类型的 goroutine</a></li>
+<li><a href="#不要让一个-channel-的消费者说什么时候结束">不要让一个 channel 的消费者说什么时候结束</a></li>
 <li><a href="#总结">总结</a></li>
 </ul></li>
 <li><a href="#从外部结束一个-goroutine">从外部结束一个 goroutine</a></li>
@@ -528,7 +528,7 @@
         
         <div id="body-inner">
           
-            <h1>Goroutine Management In Golang</h1>
+            <h1>Goroutine 的管理</h1>
           
 
         
@@ -543,26 +543,31 @@
 <p><a href="https://github.com/codeship/go-best-practices/tree/master/concurrency">go-best-practices-concurrency</a><br />
 在 github上的 <a href="https://github.com/codeship/go-best-practices">go-best-practices</a> 项目中，提到了几点最佳实践，这里记录下。</p>
 
-<h3 id="不要和-goroutine-失去联系-don-t-loose-contact-with-your-goroutines">不要和 goroutine 失去联系(Don&rsquo;t loose contact with your goroutines)</h3>
+<h3 id="不要和-goroutine-失去联系">不要和 goroutine 失去联系</h3>
+
+<blockquote>
+<p>Don&rsquo;t loose contact with your goroutines</p>
+</blockquote>
 
 <p>如何避免? 使用<code>make(chan struct{})</code>/<code>sync.WaitGroup</code>/<code>context.Context</code>或<code>select</code>。<br />
 你可能需要这样：<br />
-1. 当必要的时候可以*中断*创建的 goroutine。
+1. 当必要的时候可以*中断*创建的 goroutine。<br />
 2. 等待直到产生的所有 goroutine 都完成了。</p>
 
-<ul>
-<li><strong>中断(Interruption)</strong><br />
-可以用以下方式实现：</li>
-<li>共享一个无缓冲的空结构体通道（<code>make（chan struct {}）</code>），由 goroutine 的创建者发出关闭信号以关闭。</li>
-<li>一个可取消的<code>context.Context</code>。</li>
+<p><strong>中断(Interruption)</strong><br />
+可以用以下方式实现：<br />
+1. 共享一个无缓冲的空结构体通道（<code>make（chan struct {}）</code>），由 goroutine 的创建者发出关闭信号以关闭。<br />
+2. 一个可取消的<code>context.Context</code>。<br />
+3. 确保你的 goroutine 使用<code>select</code>来不时检查他们的信号，而不会无限期地阻塞住。</p>
 
-<li><p>确保你的 goroutine 使用<code>select</code>来不时检查他们的信号，而不会无限期地阻塞住。</p></li>
+<p><strong>等待 goroutine 完成(Waiting for goroutines to finish)</strong><br />
+实现的最简单方法是使用<code>sync.WaitGroup</code>。在创建 goroutine 之前，请确保调用了<code>wg.Add(1)</code>。在运行 goroutine 之后，但在它 return 之前，请确保<code>wg.Done()</code>。这种场景下，<code>defer</code>是很好的选择。</p>
 
-<li><p><strong>等待 goroutine 完成(Waiting for goroutines to finish)</strong><br />
-实现的最简单方法是使用<code>sync.WaitGroup</code>。在创建 goroutine 之前，请确保调用了<code>wg.Add(1)</code>。在运行 goroutine 之后，但在它 return 之前，请确保<code>wg.Done()</code>。这种场景下，<code>defer</code>是很好的选择。</p></li>
-</ul>
+<h3 id="不要用-waitgroup-来计数多种类型的-goroutine">不要用 WaitGroup 来计数多种类型的 goroutine</h3>
 
-<h3 id="不要用-waitgroup-来计数多种类型的-goroutine-don-t-use-wait-groups-to-count-more-than-one-type-of-goroutine">不要用 WaitGroup 来计数多种类型的 goroutine(Don&rsquo;t use wait groups to count more than one type of goroutine)</h3>
+<blockquote>
+<p>Don&rsquo;t use wait groups to count more than one type of goroutine</p>
+</blockquote>
 
 <p>这里说的 gouroutine 的类型和被作为 gouroutine 调用的函数相关联，此函数可以是另一种类型的成员函数，可以是包中的命名函数，也可以是匿名函数。重要的一点是，你不应该在作为goroutine 调用的不同函数之间共享 WaitGroup。保持简单，如果你需要对一个不同类型的函数使用<code>go</code>关键字，创建一个新的 WaitGroup，并对它正确命名。</p>
 
@@ -590,13 +595,14 @@ func (p *Parent) Go() {
 
 <p>虽然共享一个 WaitGroup 可能是正确的解决方案，但是当下一位工程师接受时，它会增加问题的认知复杂性。</p>
 
-<h3 id="不要让一个-channel-的消费者说什么时候结束-don-t-let-a-channel-consumer-say-when-it-is-done">不要让一个 channel 的消费者说什么时候结束(Don&rsquo;t let a channel consumer say when it is done)</h3>
+<h3 id="不要让一个-channel-的消费者说什么时候结束">不要让一个 channel 的消费者说什么时候结束</h3>
 
 <blockquote>
-<p>对一个已关闭的 channel 发送会导致 panic</p>
+<p>Don&rsquo;t let a channel consumer say when it is done</p>
 </blockquote>
 
-<p>首先且最重要的是，代码实现是 channel 的消费者和生产者模型，这本身就是一种很好的做法。这是一个明显的关注点分离。<br />
+<p><em>对一个已关闭的 channel 发送会导致 panic</em><br />
+首先且最重要的是，代码是基于 channel 的消费者和生产者模型的实现，这本身就是一种很好的做法。这是一个明显的关注点分离。<br />
 golang 给你在编译时定义一个 channel 的方向的能力<code>recvOnly &lt;-chan Thing := make(chan Thing)</code>。这在定义变量时很少有用，但是，在定义函数的接收参数时非常有用。比如：</p>
 
 <pre><code class="language-golang">func consume(things &lt;-chan Thing) {
@@ -608,9 +614,10 @@ golang 给你在编译时定义一个 channel 的方向的能力<code>recvOnly &
 </code></pre>
 
 <p>这强制（在编译时）消费者 goroutine 无法在对 channel 发送数据，包括关闭该 channel 的能力。<br />
-这强制顶一个租户(goroutine)安全管理 channel。只有当所有生产者停止发送，才关闭 channel。谨记对一个已关闭的 channel 发送会导致 panic。</p>
+这强制顶一个租户(goroutine)安全管理 channel。只有当所有生产者停止发送，才关闭 channel。谨记对<strong>一个已关闭的 channel 发送会导致 panic</strong>。</p>
 
-<p><strong>关闭 channel 的代码必须选保证不会再对此 channel 发送(The piece of code which closes a channel must first guarantee that nothing else will produce on it).</strong></p>
+<p><strong>关闭 channel 的代码必须选保证不会再对此 channel 发送</strong><br />
+&gt; The piece of code which closes a channel must first guarantee that nothing else will produce on it</p>
 
 <p>如果所有对 channel 的发送都在关闭前同步发生，只要你不重试并再次发送，那就是安全的。<br />
 如果该 channel 上的生产(production)被放弃到其他 goroutine，那么你需要能够与这些 goroutine 同步退出。</p>
@@ -664,14 +671,14 @@ golang 给你在编译时定义一个 channel 的方向的能力<code>recvOnly &
 <p>[参考]<a href="https://gulu-dev.com/post/2016-02-02-kill-goroutine#toc_3">从外部结束一个 goroutine</a></p>
 
 <p><strong>可响应 channel 的 goroutine</strong><br />
-&gt; 最直接的方法是关闭与这个 goroutine 通信的 channel close(ch)。如果这个 goroutine 此时阻塞在 read 上，那么阻塞会失效，并在第二个返回值中返回 false (此时可以检测并退出)；如果阻塞在 write 上，那么会 panic，这时合理的做法是在 goroutine 的顶层 recover 并退出。
+最直接的方法是关闭与这个 goroutine 通信的 channel close(ch)。如果这个 goroutine 此时阻塞在 read 上，那么阻塞会失效，并在第二个返回值中返回 false (此时可以检测并退出)；如果阻塞在 write 上，那么会 panic，这时合理的做法是在 goroutine 的顶层 recover 并退出。
 更健壮的设计一般会把 data channel (用于传递业务逻辑的数据) 和 signal channel (用于管理 goroutine 的状态) 分开。不会让 goroutine 直接读写 data channel，而是通过 select-default 或 select-timeout 来避免完全阻塞，同时周期性地在 signal channel 检查是否有结束的请求。</p>
 
 <p><strong>不可响应的 goroutine</strong><br />
-&gt; 1. 尽量使用 Non-blocking IO (正如 go runtime 那样)<br />
-&gt; 2. 尽量使用阻塞粒度较小的 sys calls (对外部调用也一样)<br />
-&gt; 3. 业务逻辑总是考虑退出机制，编码时避免潜在的死循环<br />
-&gt; 4. 在合适的地方插入响应 channel 的代码，保持一定频率的 channel 响应能力</p>
+1. 尽量使用 Non-blocking IO (正如 go runtime 那样)<br />
+2. 尽量使用阻塞粒度较小的 sys calls (对外部调用也一样)<br />
+2. 业务逻辑总是考虑退出机制，编码时避免潜在的死循环<br />
+3. 在合适的地方插入响应 channel 的代码，保持一定频率的 channel 响应能力</p>
 
 <h2 id="使用-context">使用 context</h2>
 
@@ -1029,20 +1036,20 @@ func WithValue(parent Context, key interface{}, val interface{}) Context
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1546149161"></script>
-    <script src="/js/perfect-scrollbar.min.js?1546149161"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1546149161"></script>
-    <script src="/js/jquery.sticky.js?1546149161"></script>
-    <script src="/js/featherlight.min.js?1546149161"></script>
-    <script src="/js/html5shiv-printshiv.min.js?1546149161"></script>
-    <script src="/js/highlight.pack.js?1546149161"></script>
+    <script src="/js/clipboard.min.js?1546149691"></script>
+    <script src="/js/perfect-scrollbar.min.js?1546149691"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1546149691"></script>
+    <script src="/js/jquery.sticky.js?1546149691"></script>
+    <script src="/js/featherlight.min.js?1546149691"></script>
+    <script src="/js/html5shiv-printshiv.min.js?1546149691"></script>
+    <script src="/js/highlight.pack.js?1546149691"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/js/modernizr.custom.71422.js?1546149161"></script>
-    <script src="/js/learn.js?1546149161"></script>
-    <script src="/js/hugo-learn.js?1546149161"></script>
+    <script src="/js/modernizr.custom.71422.js?1546149691"></script>
+    <script src="/js/learn.js?1546149691"></script>
+    <script src="/js/hugo-learn.js?1546149691"></script>
 
-    <link href="/mermaid/mermaid.css?1546149161" type="text/css" rel="stylesheet" />
-    <script src="/mermaid/mermaid.js?1546149161"></script>
+    <link href="/mermaid/mermaid.css?1546149691" type="text/css" rel="stylesheet" />
+    <script src="/mermaid/mermaid.js?1546149691"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>
