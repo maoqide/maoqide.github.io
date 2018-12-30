@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/golang/</loc>
+    <lastmod>2018-12-28T16:27:41+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/algorithm/basic-data-structure/</loc>
     <lastmod>2018-12-07T16:31:03+08:00</lastmod>
   </url>
@@ -70,12 +75,6 @@
   <url>
     <loc>/tags/cloud/</loc>
     <lastmod>2018-11-14T14:31:38+08:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/golang/</loc>
-    <lastmod>2018-12-28T16:29:32+08:00</lastmod>
     <priority>0</priority>
   </url>
   

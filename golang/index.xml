@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Golangs on Maoqide</title>
+    <title>Golang on Maoqide</title>
     <link>/golang/</link>
-    <description>Recent content in Golangs on Maoqide</description>
+    <description>Recent content in Golang on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 28 Dec 2018 16:29:32 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 28 Dec 2018 16:27:41 +0800</lastBuildDate>
     
 	<atom:link href="/golang/index.xml" rel="self" type="application/rss+xml" />
     
