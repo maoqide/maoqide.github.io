@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
 <link rel="icon" href="/images/favicon.png" type="image/x-icon" />
-    <title>Build Blog With Hugo :: Maoqide</title>
+    <title>将网站部署在 Kubernetes 上 :: Maoqide</title>
 
     
     <link href="/css/nucleus.css?1546351800" rel="stylesheet">
@@ -45,7 +45,7 @@
     </style>
     
   </head>
-  <body class="" data-url="/notes/build-blog-with-hugo/">
+  <body class="" data-url="/notes/publish-your-site-on-k8s/">
     <nav id="sidebar" class="showVisitedLinks">
 
 
@@ -388,8 +388,8 @@
   
     
     <li data-nav-id="/notes/publish-your-site-on-k8s/" title="将网站部署在 Kubernetes 上" class="dd-item 
-        
-        
+        parent
+        active
         
         ">
       <a href="/notes/publish-your-site-on-k8s/">
@@ -413,7 +413,7 @@
  
   
     
-      <li data-nav-id="/notes/build-blog-with-hugo/" title="Build Blog With Hugo" class="dd-item active">
+      <li data-nav-id="/notes/build-blog-with-hugo/" title="Build Blog With Hugo" class="dd-item ">
         <a href="/notes/build-blog-with-hugo/">
         Build Blog With Hugo
         <i class="fas fa-check read-icon"></i>
@@ -517,7 +517,7 @@
                   <span class="links">
                  
                  
-                   Build Blog With Hugo 
+                   将网站部署在 Kubernetes 上 
                  
                   </span>
                 </div>
@@ -528,12 +528,17 @@
 <ul>
 <li>
 <ul>
-<li><a href="#documentations">documentations</a></li>
-<li><a href="#setup">setup</a></li>
-<li><a href="#menu">menu</a></li>
-<li><a href="#example">example</a></li>
-<li><a href="#change-theme">change theme</a></li>
-<li><a href="#overall">overall</a></li>
+<li><a href="#kubernetes-环境">Kubernetes 环境</a></li>
+<li><a href="#网站">网站</a></li>
+<li><a href="#部署">部署</a>
+<ul>
+<li><a href="#准备">准备</a></li>
+<li><a href="#创建-deployment-service">创建 Deployment &amp; Service</a></li>
+<li><a href="#创建-ingress-controller">创建 ingress-controller</a></li>
+<li><a href="#创建-ingress">创建 Ingress</a></li>
+<li><a href="#配置域名">配置域名</a></li>
+<li><a href="#附件">附件</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -548,7 +553,7 @@
         
         <div id="body-inner">
           
-            <h1>Build Blog With Hugo</h1>
+            <h1>将网站部署在 Kubernetes 上</h1>
           
 
         
@@ -556,71 +561,385 @@
 
 
 
-<h2 id="documentations">documentations</h2>
+<h2 id="kubernetes-环境">Kubernetes 环境</h2>
 
-<p><a href="https://gohugo.io/getting-started/usage/">https://gohugo.io/getting-started/usage/</a>
-<a href="https://learn.netlify.com/en/">https://learn.netlify.com/en/</a></p>
+<p>之前在 <a href="https://maoqide.live:30091/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/">阿里云主机搭建-k8s-集群</a> 这篇文章介绍了如何在阿里云环境快速搭建一个 Kubernetes 环境，按照文章的步骤，可以快速搭建一个可用的 Kubernetes 集群。</p>
 
-<h2 id="setup">setup</h2>
+<h2 id="网站">网站</h2>
 
-<ol>
-<li><p>install hugo following <a href="https://gohugo.io/getting-started/installing/">offical install guide</a>.<br />
-download packages from <a href="https://github.com/gohugoio/hugo/releases">Hugo Release</a> and put executale file <code>hugo</code> in <code>PATH</code>.</p></li>
+<p>同样在 <a href="https://maoqide.live:30091/notes/build-blog-with-hugo/">Build Blog With Hugo</a> 这边文章中，介绍了怎么使用 hugo 快速搭建一个自己的个人博客。</p>
 
-<li><p>execute <code>hugo new site sitename</code>, To create a new site. directory structure will like this:</p>
+<h2 id="部署">部署</h2>
 
-<pre><code>.
-├── archetypes
-├── assets
-├── config.toml
-├── content
-├── data
-├── layouts
-├── static
-└── themes
-</code></pre></li>
+<p>本文介绍如何将自己的个人博客通过 Kubernetes 发布到公网，让大家可以访问。<br />
+&gt; 当然，最简单的发布方法是通过 <a href="https://pages.github.com/">Github Pages</a>, 直接将 hugo 生成的 publish 文件夹上传到自己 github 的命名为 your-username.github.io 的仓库下，即可以通过 <a href="https://your-username.github.io">https://your-username.github.io</a> 访问到自己的网站。</p>
 
-<li><p>download theme from <a href="https://github.com/matcornic/hugo-theme-learn/archive/master.zip">github</a>. unzip the archive and copy files to you site dir, overwriting directory and files of the same name. you can change your website config by changing <code>config.toml</code>.</p></li>
+<h3 id="准备">准备</h3>
 
-<li><p>wirte you first blog. <code>hugo new content/first.md</code>, will gen a markdown file in <code>content</code>. you can use <code>hugo server -w</code> to start a server locally, and visit <a href="localhost:1313">localhost:1313</a> for preview.</p></li>
+<ul>
+<li>域名</li>
+<li>云服务器</li>
+</ul>
 
-<li><p>execute <code>hugo</code>, this will gen <code>md</code> files in dir <code>content</code> to <code>html</code> files in dir <code>public</code>.</p></li>
+<h3 id="创建-deployment-service">创建 Deployment &amp; Service</h3>
 
-<li><p>put your <code>public</code> directory in a <a href="https://www.nginx.com/resources/wiki/">nginx</a>.</p></li>
-</ol>
+<p>首先创建 Deployment 和 Service。</p>
 
-<h2 id="menu">menu</h2>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysite
+spec:
+  selector:
+    matchLabels:
+      app: site
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: site
+    spec:
+      containers:
+      - name: mysite
+        image: maoqide/site
+        ports:
+        - containerPort: 80
 
-<p>directorys in directory <code>content</code> will display as menu in the left. and file named <code>_index.md</code> is the default page of the directory.</p>
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mysite
+spec:
+  selector:
+    app: site
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
 
-<h2 id="example">example</h2>
-
-<p>you can visit my github repo <a href="https://github.com/maoqide/hugo-docs">hugo-blog</a>, the article itself is generated by this repo.</p>
-
-<h2 id="change-theme">change theme</h2>
-
-<p>you can change your styles by changing different themes. themes could be found at <a href="http://themes.gohugo.io">http://themes.gohugo.io</a>.</p>
-
-<h2 id="overall">overall</h2>
-
-<p>overall, you can easily create your own doc/blog by follow command:</p>
-
-<pre><code class="language-shell"># create a new site
-hugo new site mysite
-cd mysite/
-# create your first page
-hugo new first.md
-# build page
-hugo
 </code></pre>
 
-<p>then you can find your site in directory <code>public</code>.</p>
+<h3 id="创建-ingress-controller">创建 ingress-controller</h3>
+
+<p>为了能够从外部访问，还需要创建 Ingress。<br />
+这里使用nginx ingress，首先要创建 nginx-ingress-controller。</p>
+
+<pre><code class="language-yaml">kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configuration
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: tcp-services
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: udp-services
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-ingress-serviceaccount
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: nginx-ingress-clusterrole
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+rules:
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - configmaps
+      - endpoints
+      - nodes
+      - pods
+      - secrets
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - nodes
+    verbs:
+      - get
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - &quot;extensions&quot;
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - &quot;extensions&quot;
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: nginx-ingress-role
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+rules:
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - configmaps
+      - pods
+      - secrets
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - configmaps
+    resourceNames:
+      # Defaults to &quot;&lt;election-id&gt;-&lt;ingress-class&gt;&quot;
+      # Here: &quot;&lt;ingress-controller-leader&gt;-&lt;nginx&gt;&quot;
+      # This has to be adapted if you change either parameter
+      # when launching the nginx-ingress-controller.
+      - &quot;ingress-controller-leader-nginx&quot;
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - configmaps
+    verbs:
+      - create
+  - apiGroups:
+      - &quot;&quot;
+    resources:
+      - endpoints
+    verbs:
+      - get
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: nginx-ingress-role-nisa-binding
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-ingress-role
+subjects:
+  - kind: ServiceAccount
+    name: nginx-ingress-serviceaccount
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: nginx-ingress-clusterrole-nisa-binding
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-ingress-clusterrole
+subjects:
+  - kind: ServiceAccount
+    name: nginx-ingress-serviceaccount
+    namespace: default
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-ingress-controller
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+      annotations:
+        prometheus.io/port: &quot;10254&quot;
+        prometheus.io/scrape: &quot;true&quot;
+    spec:
+      serviceAccountName: nginx-ingress-serviceaccount
+      containers:
+        - name: nginx-ingress-controller
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.21.0
+          args:
+            - /nginx-ingress-controller
+            - --configmap=$(POD_NAMESPACE)/nginx-configuration
+            - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+            - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+            - --publish-service=$(POD_NAMESPACE)/ingress-nginx
+            - --annotations-prefix=nginx.ingress.kubernetes.io
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+            # www-data -&gt; 33
+            runAsUser: 33
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+
+---
+</code></pre>
+
+<p>以上 yaml 创建了一个 nginx-ingress-controller 的 Deployment，并赋给 Deployment 下的 Pod 对 Ingress 等集群内资源的 API 访问权限。</p>
+
+<p>接着要为 nginx-ingress-controller 创建 Node port 类型的 Service，让我们可以通过云服务器的公网地址访问到 ingress:</p>
+
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+</code></pre>
+
+<h3 id="创建-ingress">创建 Ingress</h3>
+
+<p>创建 Ingress 策略。</p>
+
+<pre><code class="language-yaml">apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: site-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: mysite
+          servicePort: 80
+</code></pre>
+
+<h3 id="配置域名">配置域名</h3>
+
+<p>上述步骤完成，已经可以通过云服务器公网IP= <a href="https://IP:ingress_svc-port">https://IP:ingress_svc-port</a> 访问网站了。<br />
+为了访问方便，还可以给站点配置一个域名，直接在阿里云购买一个域名，然后通过绑定一个 A 类型的域名解析，解析到阿里云公网IP，就可以通过域名加端口访问了。<br />
+如果不想访问的时候加上端口，还需要再配置一个 隐性URL 的域名解析（需要先将域名备案）。</p>
+
+<h3 id="附件">附件</h3>
+
+<p>以下是上面用到的 yaml 文件：<br />
+- <a href="./mysite.yaml">site-deployment</a><br />
+- <a href="./nginx_ingress.yaml">nginx-ingress-controller</a><br />
+- <a href="./ingress_svc.yaml">ingress-svc</a><br />
+- <a href="./ingress.yaml">ingress</a></p>
 
 
 <footer class=" footline" >
 	
 </footer>
-
 
         
         </div> 
@@ -836,8 +1155,6 @@ hugo
             
                 
                     
-                        
-                        
                     
                 
                 
@@ -855,6 +1172,8 @@ hugo
             
                 
                     
+                        
+                        
                     
                 
                 
@@ -874,9 +1193,6 @@ hugo
             
             
                 
-                    
-                        
-                        
                     
                 
                 
@@ -925,4 +1241,3 @@ hugo
 
   </body>
 </html>
-
