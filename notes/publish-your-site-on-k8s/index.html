@@ -12,14 +12,14 @@
     <title>将网站部署在 Kubernetes 上 :: Maoqide</title>
 
     
-    <link href="/css/nucleus.css?1546674999" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1546674999" rel="stylesheet">
-    <link href="/css/hybrid.css?1546674999" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1546674999" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1546674999" rel="stylesheet">
-    <link href="/css/auto-complete.css?1546674999" rel="stylesheet">
-    <link href="/css/theme.css?1546674999" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1546674999" rel="stylesheet">
+    <link href="/css/nucleus.css?1546780503" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1546780503" rel="stylesheet">
+    <link href="/css/hybrid.css?1546780503" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1546780503" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1546780503" rel="stylesheet">
+    <link href="/css/auto-complete.css?1546780503" rel="stylesheet">
+    <link href="/css/theme.css?1546780503" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1546780503" rel="stylesheet">
     
     
     <script>
@@ -31,7 +31,7 @@
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
-    <script src="/js/jquery-2.x.min.js?1546674999"></script>
+    <script src="/js/jquery-2.x.min.js?1546780503"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -67,14 +67,14 @@
     <span data-search-clear=""><i class="fas fa-close"></i></span>
 </div>
 
-<script type="text/javascript" src="/js/lunr.min.js?1546674999"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1546674999"></script>
+<script type="text/javascript" src="/js/lunr.min.js?1546780503"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1546780503"></script>
 <script type="text/javascript">
     
         var baseurl = "";
     
 </script>
-<script type="text/javascript" src="/js/search.js?1546674999"></script>
+<script type="text/javascript" src="/js/search.js?1546780503"></script>
 
     
   </div>
@@ -530,6 +530,7 @@
 <ul>
 <li><a href="#kubernetes-环境">Kubernetes 环境</a></li>
 <li><a href="#网站">网站</a></li>
+<li><a href="#容器化">容器化</a></li>
 <li><a href="#部署">部署</a>
 <ul>
 <li><a href="#准备">准备</a></li>
@@ -569,6 +570,11 @@
 
 <p>同样在 <a href="https://maoqide.live:30091/notes/build-blog-with-hugo/">Build Blog With Hugo</a> 这边文章中，介绍了怎么使用 hugo 快速搭建一个自己的个人博客。</p>
 
+<h2 id="容器化">容器化</h2>
+
+<p>我的项目 <a href="https://github.com/maoqide/hugo-docs">hugo-dcos</a> 包含了容器化一个 hugo 网站项目所需的一些脚本和 Dockerfile, 可以参考本项目自行容器化自己的项目。<br />
+项目使用了<a href="https://github.com/adnanh/webhook">webhook</a>接收 github 的通知，并在github上配置项目<a href="https://github.com/maoqide/maoqide.github.io">maoqide.github.io</a>的 Webhooks, 当本项目有更新时，会调用 webhook 服务触发操作，拉取最新的代码。</p>
+
 <h2 id="部署">部署</h2>
 
 <p>本文介绍如何将自己的个人博客通过 Kubernetes 发布到公网，让大家可以访问。<br />
@@ -601,9 +607,20 @@ spec:
     spec:
       containers:
       - name: mysite
-        image: maoqide/site
+        image: maoqide/site:v1.1
+        env:
+        - name: GITHUB_HOOK_SECRET
+          value: MY_SECRET
         ports:
         - containerPort: 80
+        - containerPort: 9000
+        livenessProbe:
+          httpGet:
+          # scheme: HTTPS
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
 
 ---
 kind: Service
@@ -614,9 +631,15 @@ spec:
   selector:
     app: site
   ports:
-  - protocol: TCP
+  - name: nginx
+    protocol: TCP
     port: 80
     targetPort: 80
+  - name: webhook
+    protocol: TCP
+    port: 9000
+    targetPort: 9000
+
 
 </code></pre>
 
@@ -912,14 +935,20 @@ metadata:
   name: site-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: &quot;false&quot;
 spec:
   rules:
   - http:
       paths:
+      - path: /_hook
+        backend:
+          serviceName: mysite
+          servicePort: 9000
       - path: /
         backend:
           serviceName: mysite
           servicePort: 80
+
 </code></pre>
 
 <h3 id="配置域名">配置域名</h3>
@@ -1220,20 +1249,20 @@ spec:
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1546674999"></script>
-    <script src="/js/perfect-scrollbar.min.js?1546674999"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1546674999"></script>
-    <script src="/js/jquery.sticky.js?1546674999"></script>
-    <script src="/js/featherlight.min.js?1546674999"></script>
-    <script src="/js/html5shiv-printshiv.min.js?1546674999"></script>
-    <script src="/js/highlight.pack.js?1546674999"></script>
+    <script src="/js/clipboard.min.js?1546780503"></script>
+    <script src="/js/perfect-scrollbar.min.js?1546780503"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1546780503"></script>
+    <script src="/js/jquery.sticky.js?1546780503"></script>
+    <script src="/js/featherlight.min.js?1546780503"></script>
+    <script src="/js/html5shiv-printshiv.min.js?1546780503"></script>
+    <script src="/js/highlight.pack.js?1546780503"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/js/modernizr.custom.71422.js?1546674999"></script>
-    <script src="/js/learn.js?1546674999"></script>
-    <script src="/js/hugo-learn.js?1546674999"></script>
+    <script src="/js/modernizr.custom.71422.js?1546780503"></script>
+    <script src="/js/learn.js?1546780503"></script>
+    <script src="/js/hugo-learn.js?1546780503"></script>
 
-    <link href="/mermaid/mermaid.css?1546674999" type="text/css" rel="stylesheet" />
-    <script src="/mermaid/mermaid.js?1546674999"></script>
+    <link href="/mermaid/mermaid.css?1546780503" type="text/css" rel="stylesheet" />
+    <script src="/mermaid/mermaid.js?1546780503"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>
