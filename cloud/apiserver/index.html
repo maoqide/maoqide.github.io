@@ -12,14 +12,14 @@
     <title>Apiserver :: Maoqide</title>
 
     
-    <link href="/css/nucleus.css?1547695662" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1547695662" rel="stylesheet">
-    <link href="/css/hybrid.css?1547695662" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1547695662" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1547695662" rel="stylesheet">
-    <link href="/css/auto-complete.css?1547695662" rel="stylesheet">
-    <link href="/css/theme.css?1547695662" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1547695662" rel="stylesheet">
+    <link href="/css/nucleus.css?1547699848" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1547699848" rel="stylesheet">
+    <link href="/css/hybrid.css?1547699848" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1547699848" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1547699848" rel="stylesheet">
+    <link href="/css/auto-complete.css?1547699848" rel="stylesheet">
+    <link href="/css/theme.css?1547699848" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1547699848" rel="stylesheet">
     
     
     <script>
@@ -31,7 +31,7 @@
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
-    <script src="/js/jquery-2.x.min.js?1547695662"></script>
+    <script src="/js/jquery-2.x.min.js?1547699848"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -67,14 +67,14 @@
     <span data-search-clear=""><i class="fas fa-close"></i></span>
 </div>
 
-<script type="text/javascript" src="/js/lunr.min.js?1547695662"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1547695662"></script>
+<script type="text/javascript" src="/js/lunr.min.js?1547699848"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1547699848"></script>
 <script type="text/javascript">
     
         var baseurl = "";
     
 </script>
-<script type="text/javascript" src="/js/search.js?1547695662"></script>
+<script type="text/javascript" src="/js/search.js?1547699848"></script>
 
     
   </div>
@@ -869,12 +869,14 @@ apiserver对应的路径为<code>$GOPATH\k8s.io\kubernetes\cmd\kube-apiserver\ap
 具体Run方法，定义在<code>$GOPATH\k8s.io\kubernetes\cmd\kube-apiserver\app\server.go</code>中。</p>
 
 <p>apiserver的<code>app.Run()</code>，主要通过 <code>CreateServerChain()</code> 方法，创建出一个<code>*genericapiserver.GenericAPIServer</code>实例。<br />
-在<code>GenericAPIServer</code>中，包含的主要结构体有<br />
-- <code>*APIServerHandler</code>(<em>Handler holds the handlers being used by this API server</em>)<br />
-- <code>DelegationTarget</code>(<em>delegationTarget is the next delegate in the chain or nil</em>)<br />
-其中最重要的是<code>APIServerHandler</code>这个结构体，它包含了go-restful中的<code>*restful.Container</code>结构体，后面注册API时用到的<code>InstallAPIs()</code>方法，最终也是将路由注册到这个Container中，定义如下:</p>
+在<code>GenericAPIServer</code>中，包含的主要结构体有</p>
 
-<pre><code class="language-golang">// APIServerHandlers holds the different http.Handlers used by the API server.
+<ul>
+<li><code>*APIServerHandler</code>(<em>Handler holds the handlers being used by this API server</em>)<br /></li>
+<li><code>DelegationTarget</code>(<em>delegationTarget is the next delegate in the chain or nil</em>)<br />
+其中最重要的是<code>APIServerHandler</code>这个结构体，它包含了go-restful中的<code>*restful.Container</code>结构体，后面注册API时用到的<code>InstallAPIs()</code>方法，最终也是将路由注册到这个Container中，定义如下:
+<code>golang
+// APIServerHandlers holds the different http.Handlers used by the API server.
 // This includes the full handler chain, the director (which chooses between gorestful and nonGoRestful,
 // the gorestful handler (used for the API) which falls through to the nonGoRestful handler on unregistered paths,
 // and the nonGoRestful handler (which can contain a fallthrough of its own)
@@ -892,9 +894,9 @@ type APIServerHandler struct {
 	// Other servers should only use this opaquely to delegate to an API server.
 	Director http.Handler
 }
-</code></pre>
-
-<p><code>DelegationTarget</code>(<em>DelegationTarget is an interface which allows for composition of API servers with top level handling that works as expected.</em>)是一个<code>interface</code>，是构成方法名<code>CreateServerChain</code>中ServerChain的结构，结构体内定义了<code>NextDelegate()</code>方法，返回chain中的下一个<code>DelegationTarget</code>，由它串起了多个api servers。(为什么会有多个api server从后面代码中可以看到。)</p>
+</code>
+<code>DelegationTarget</code>(<em>DelegationTarget is an interface which allows for composition of API servers with top level handling that works as expected.</em>)是一个<code>interface</code>，是构成方法名<code>CreateServerChain</code>中ServerChain的结构，结构体内定义了<code>NextDelegate()</code>方法，返回chain中的下一个<code>DelegationTarget</code>，由它串起了多个api servers。(为什么会有多个api server从后面代码中可以看到。)<br /></li>
+</ul>
 
 <h2 id="createserverchain">CreateServerChain</h2>
 
@@ -1648,20 +1650,20 @@ type RESTStorageProvider interface {
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1547695662"></script>
-    <script src="/js/perfect-scrollbar.min.js?1547695662"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1547695662"></script>
-    <script src="/js/jquery.sticky.js?1547695662"></script>
-    <script src="/js/featherlight.min.js?1547695662"></script>
-    <script src="/js/html5shiv-printshiv.min.js?1547695662"></script>
-    <script src="/js/highlight.pack.js?1547695662"></script>
+    <script src="/js/clipboard.min.js?1547699848"></script>
+    <script src="/js/perfect-scrollbar.min.js?1547699848"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1547699848"></script>
+    <script src="/js/jquery.sticky.js?1547699848"></script>
+    <script src="/js/featherlight.min.js?1547699848"></script>
+    <script src="/js/html5shiv-printshiv.min.js?1547699848"></script>
+    <script src="/js/highlight.pack.js?1547699848"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/js/modernizr.custom.71422.js?1547695662"></script>
-    <script src="/js/learn.js?1547695662"></script>
-    <script src="/js/hugo-learn.js?1547695662"></script>
+    <script src="/js/modernizr.custom.71422.js?1547699848"></script>
+    <script src="/js/learn.js?1547699848"></script>
+    <script src="/js/hugo-learn.js?1547699848"></script>
 
-    <link href="/mermaid/mermaid.css?1547695662" type="text/css" rel="stylesheet" />
-    <script src="/mermaid/mermaid.js?1547695662"></script>
+    <link href="/mermaid/mermaid.css?1547699848" type="text/css" rel="stylesheet" />
+    <script src="/mermaid/mermaid.js?1547699848"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>
