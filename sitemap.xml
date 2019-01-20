@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/cloud/docker-%E5%8E%9F%E7%90%86/</loc>
+    <lastmod>2019-01-17T14:08:37+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/notes/publish-your-site-on-k8s/</loc>
     <lastmod>2019-01-01T17:04:25+08:00</lastmod>
   </url>

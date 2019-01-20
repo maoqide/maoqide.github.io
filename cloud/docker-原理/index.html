@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
 <link rel="icon" href="/images/favicon.png" type="image/x-icon" />
-    <title>将网站部署在 Kubernetes 上 :: Maoqide</title>
+    <title>Docker 原理 :: Maoqide</title>
 
     
     <link href="/css/nucleus.css?1547996981" rel="stylesheet">
@@ -45,7 +45,7 @@
     </style>
     
   </head>
-  <body class="" data-url="/notes/publish-your-site-on-k8s/">
+  <body class="" data-url="/cloud/docker-%E5%8E%9F%E7%90%86/">
     <nav id="sidebar" class="showVisitedLinks">
 
 
@@ -259,7 +259,7 @@
   
     
     <li data-nav-id="/cloud/" title="Cloud" class="dd-item 
-        
+        parent
         
         
         ">
@@ -288,8 +288,8 @@
   
     
     <li data-nav-id="/cloud/docker-%E5%8E%9F%E7%90%86/" title="Docker 原理" class="dd-item 
-        
-        
+        parent
+        active
         
         ">
       <a href="/cloud/docker-%E5%8E%9F%E7%90%86/">
@@ -385,7 +385,7 @@
   
     
     <li data-nav-id="/notes/" title="Notes" class="dd-item 
-        parent
+        
         
         
         ">
@@ -414,8 +414,8 @@
   
     
     <li data-nav-id="/notes/publish-your-site-on-k8s/" title="将网站部署在 Kubernetes 上" class="dd-item 
-        parent
-        active
+        
+        
         
         ">
       <a href="/notes/publish-your-site-on-k8s/">
@@ -543,7 +543,7 @@
                   <span class="links">
                  
                  
-                   将网站部署在 Kubernetes 上 
+                   Docker 原理 
                  
                   </span>
                 </div>
@@ -554,18 +554,30 @@
 <ul>
 <li>
 <ul>
-<li><a href="#kubernetes-环境">Kubernetes 环境</a></li>
-<li><a href="#网站">网站</a></li>
-<li><a href="#容器化">容器化</a></li>
-<li><a href="#部署">部署</a>
+<li><a href="#namespace">Namespace</a></li>
+<li><a href="#cgroup">Cgroup</a>
 <ul>
-<li><a href="#准备">准备</a></li>
-<li><a href="#创建-deployment-service">创建 Deployment &amp; Service</a></li>
-<li><a href="#创建-ingress-controller">创建 ingress-controller</a></li>
-<li><a href="#创建-ingress">创建 Ingress</a></li>
-<li><a href="#配置域名">配置域名</a></li>
-<li><a href="#附件">附件</a></li>
+<li><a href="#子系统文件">子系统文件</a>
+<ul>
+<li><a href="#公共">公共</a></li>
+<li><a href="#cpu">cpu</a></li>
+<li><a href="#memory">memory</a></li>
 </ul></li>
+</ul></li>
+<li><a href="#storage-driver">Storage Driver</a>
+<ul>
+<li><a href="#aufs-unionfs">aufs(UnionFS)</a>
+<ul>
+<li><a href="#性能表现">性能表现</a></li>
+</ul></li>
+<li><a href="#device-mapper">device mapper</a>
+<ul>
+<li><a href="#需要时分配-allocate-on-demand">需要时分配(allocate-on-demand)</a></li>
+<li><a href="#写时复制-copy-on-write">写时复制(copy-on-write)</a></li>
+</ul></li>
+<li><a href="#overlayfs-unionfs">overlayfs(UnionFS)</a></li>
+</ul></li>
+<li><a href="#参考">参考</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -580,7 +592,7 @@
         
         <div id="body-inner">
           
-            <h1>将网站部署在 Kubernetes 上</h1>
+            <h1>Docker 原理</h1>
           
 
         
@@ -588,408 +600,218 @@
 
 
 
-<h2 id="kubernetes-环境">Kubernetes 环境</h2>
-
-<p>之前在 <a href="https://maoqide.live:30091/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/">阿里云主机搭建-k8s-集群</a> 这篇文章介绍了如何在阿里云环境快速搭建一个 Kubernetes 环境，按照文章的步骤，可以快速搭建一个可用的 Kubernetes 集群。</p>
-
-<h2 id="网站">网站</h2>
-
-<p>同样在 <a href="https://maoqide.live:30091/notes/build-blog-with-hugo/">Build Blog With Hugo</a> 这边文章中，介绍了怎么使用 hugo 快速搭建一个自己的个人博客。</p>
-
-<h2 id="容器化">容器化</h2>
-
-<p>我的项目 <a href="https://github.com/maoqide/hugo-docs">hugo-dcos</a> 包含了容器化一个 hugo 网站项目所需的一些脚本和 Dockerfile, 可以参考本项目自行容器化自己的项目。<br />
-项目使用了<a href="https://github.com/adnanh/webhook">webhook</a>接收 github 的通知，并在github上配置项目<a href="https://github.com/maoqide/maoqide.github.io">maoqide.github.io</a>的 Webhooks, 当本项目有更新时，会调用 webhook 服务触发操作，拉取最新的代码。</p>
-
-<h2 id="部署">部署</h2>
-
-<p>本文介绍如何将自己的个人博客通过 Kubernetes 发布到公网，让大家可以访问。<br />
-&gt; 当然，最简单的发布方法是通过 <a href="https://pages.github.com/">Github Pages</a>, 直接将 hugo 生成的 publish 文件夹上传到自己 github 的命名为 your-username.github.io 的仓库下，即可以通过 <a href="https://your-username.github.io">https://your-username.github.io</a> 访问到自己的网站。</p>
-
-<h3 id="准备">准备</h3>
-
 <ul>
-<li>域名</li>
-<li>云服务器</li>
+<li>Namespace</li>
+<li>Cgroup</li>
+<li>UnionFS</li>
 </ul>
 
-<h3 id="创建-deployment-service">创建 Deployment &amp; Service</h3>
+<h2 id="namespace">Namespace</h2>
 
-<p>首先创建 Deployment 和 Service。</p>
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>隔离内容</th>
+</tr>
+</thead>
 
-<pre><code class="language-yaml">apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysite
-spec:
-  selector:
-    matchLabels:
-      app: site
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: site
-    spec:
-      containers:
-      - name: mysite
-        image: maoqide/site:v1.1
-        env:
-        - name: GITHUB_HOOK_SECRET
-          value: MY_SECRET
-        ports:
-        - containerPort: 80
-        - containerPort: 9000
-        livenessProbe:
-          httpGet:
-          # scheme: HTTPS
-            path: /
-            port: 80
-          initialDelaySeconds: 15
-          timeoutSeconds: 1
+<tbody>
+<tr>
+<td>UTS</td>
+<td>主机名与域名</td>
+</tr>
 
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: mysite
-spec:
-  selector:
-    app: site
-  ports:
-  - name: nginx
-    protocol: TCP
-    port: 80
-    targetPort: 80
-  - name: webhook
-    protocol: TCP
-    port: 9000
-    targetPort: 9000
+<tr>
+<td>IPC</td>
+<td>信号量、消息队列和共享内存</td>
+</tr>
 
+<tr>
+<td>PID</td>
+<td>进程编号</td>
+</tr>
 
+<tr>
+<td>Network</td>
+<td>网络设备、网络栈、端口等</td>
+</tr>
+
+<tr>
+<td>Mount</td>
+<td>挂载点（文件系统）</td>
+</tr>
+
+<tr>
+<td>User</td>
+<td>用户和用户组</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="cgroup">Cgroup</h2>
+
+<ul>
+<li>blkio: 为块设备设定输入输出/限制，比如物理驱动设备（包括磁盘、固态硬盘、USB等）<br /></li>
+<li>cpu: 使用调度程序控制任务对 CPU 的使用<br /></li>
+<li>cpuacct: 自动生成 cgroup 中任务对 CPU 资源使用情况的报告<br /></li>
+<li>cpuset: 为 cgroup 中的任务分配独立的 CPU 和内存<br /></li>
+<li>devices: 可以开启或关闭 cgroup 中任务对设备的访问<br /></li>
+<li>freezer: 可以挂起或恢复 cgroup 中的任务<br /></li>
+<li>memory: 可以设定 cgroup 中任务对内存使用量的限定，并且自动生成这些任务对内存资源使用情况的报告<br /></li>
+<li>perf_event: 使用后使 cgroup 中的任务可以进行统一的性能测试<br /></li>
+<li>net_cls: Docker 没有直接使用它，它通过使用等级识别符（classid）标记网络数据包，从而允许 Linux 流量控制程序识别从具体 cgroup 中生成的数据包<br /></li>
+</ul>
+
+<h3 id="子系统文件">子系统文件</h3>
+
+<h4 id="公共">公共</h4>
+
+<ul>
+<li>tasks: 这个文件罗列所有该 cgroup 中任务的 TID，即所有线程或进程的 ID<br /></li>
+<li>cgroup.procs: 这个文件罗列所有该 cgroup 中的线程组ID(TGID), 及线程组中第一个进程的ID<br /></li>
+<li>notify_on_release: 0或1，表示是否在 cgroup 中最后一个任务退出时通知运行 release agent, 默认0, 表示不运行<br /></li>
+<li>release_agent: 指定 release agent 执行脚本的文件路径，这个脚本通常用于自动化卸载无用的 cgroup<br /></li>
+</ul>
+
+<h4 id="cpu">cpu</h4>
+
+<p>cpu子系统根据进程设置的调度属性，选择对应的CPU资源调度方法。<br />
+1. <strong>完全公平调度 Completely Fair Scheduler (CFS)</strong><br />
+限上限，cpu.cfs_period_us, cpu.cfs_quota_us<br />
+cpu.cfs_period_us = 统计CPU使用时间的周期<br />
+cpu.cfs_quota_us = 周期内允许占用的CPU时间(指单核的时间, 多核则需要在设置时累加)</p>
+
+<p>CFS 用于处理以下几种进程调度策略:<br />
+- SCHED_OTHER<br />
+- SCHED_BATCH<br />
+- SCHED_IDLE</p>
+
+<p>cfs_period_us用来配置时间周期长度, cfs_quota_us用来配置当前 cgroup 在设置的周期长度内所能使用的 CPU 时间数，两个文件配合起来设置 CPU 的使用上限。两个文件的单位都是微秒（us），cfs_period_us的取值范围为1毫秒（ms）到1秒（s），cfs_quota_us的取值大于 1ms 即可，如果 cfs_quota_us 的值为 -1（默认值），表示不受 cpu 时间的限制。<br />
+例：</p>
+
+<pre><code class="language-shell">#设置只能使用1个cpu的20%的时间
+echo 50000 &gt; cpu.cfs_period_us
+echo 10000 &gt; cpu.cfs_quota_us
+#设置完全使用4个cpu的时间
+echo 1000000 &gt; cpu.cfs_period_us
+echo 4000000 &gt; cpu.cfs_quota_us
 </code></pre>
 
-<h3 id="创建-ingress-controller">创建 ingress-controller</h3>
+<ol>
+<li><strong>实时调度 Real-Time scheduler (RT)</strong><br />
+限实时任务上限，cpu.rt_period_us，cpu.rt_runtime_us<br />
+cpu.rt_period_us = 统计CPU使用时间的周期<br />
+cpu.rt_runtime_us = 周期内允许任务使用单个CPU核的时间，如果系统中有多个核，则可以使用核倍数的时间 (计算方法与cfs不一样，需要注意)<br /></li>
+</ol>
 
-<p>为了能够从外部访问，还需要创建 Ingress。<br />
-这里使用nginx ingress，首先要创建 nginx-ingress-controller。</p>
+<p>RT用于处理以下几种进程调度策略<br />
+- SCHED_FIFO<br />
+- SCHED_RR</p>
 
-<pre><code class="language-yaml">kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: nginx-configuration
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
+<ol>
+<li><strong>cpu.shares</strong><br />
+shares用来设置CPU的相对值，并且是针对所有的CPU（内核），默认值是1024。<br />
+假如系统中有两个cgroup，分别是A和B，A的shares值是1024，B的shares值是512，那么A将获得1024/(1204+512)=66%的CPU资源，而B将获得33%的CPU资源。
+shares有两个特点：<br /></li>
+<li>如果A不忙，没有使用到66%的CPU时间，那么剩余的CPU时间将会被系统分配给B，即B的CPU使用率可以超过33%<br /></li>
 
----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: tcp-services
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
+<li><p>如果添加了一个新的cgroup C，且它的shares值是1024，那么A的限额变成了1024/(1204+512+1024)=40%，B的变成了20%</p></li>
 
----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: udp-services
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
+<li><p><strong>cpu.stat</strong><br />
+包含了下面三项统计结果：<br />
+nr_periods： 表示过去了多少个cpu.cfs_period_us里面配置的时间周期<br />
+nr_throttled： 在上面的这些周期中，有多少次是受到了限制（即cgroup中的进程在指定的时间周期中用光了它的配额）<br />
+throttled_time: cgroup中的进程被限制使用CPU持续了多长时间(纳秒)</p></li>
+</ol>
 
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: nginx-ingress-serviceaccount
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
+<h4 id="memory">memory</h4>
 
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  name: nginx-ingress-clusterrole
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-rules:
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-      - endpoints
-      - nodes
-      - pods
-      - secrets
-    verbs:
-      - list
-      - watch
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - nodes
-    verbs:
-      - get
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - services
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - &quot;extensions&quot;
-    resources:
-      - ingresses
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - events
-    verbs:
-      - create
-      - patch
-  - apiGroups:
-      - &quot;extensions&quot;
-    resources:
-      - ingresses/status
-    verbs:
-      - update
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  name: nginx-ingress-role
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-rules:
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-      - pods
-      - secrets
-      - namespaces
-    verbs:
-      - get
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-    resourceNames:
-      # Defaults to &quot;&lt;election-id&gt;-&lt;ingress-class&gt;&quot;
-      # Here: &quot;&lt;ingress-controller-leader&gt;-&lt;nginx&gt;&quot;
-      # This has to be adapted if you change either parameter
-      # when launching the nginx-ingress-controller.
-      - &quot;ingress-controller-leader-nginx&quot;
-    verbs:
-      - get
-      - update
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-    verbs:
-      - create
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - endpoints
-    verbs:
-      - get
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  name: nginx-ingress-role-nisa-binding
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: nginx-ingress-role
-subjects:
-  - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: nginx-ingress-clusterrole-nisa-binding
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: nginx-ingress-clusterrole
-subjects:
-  - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
-    namespace: default
-
----
-
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: nginx-ingress-controller
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: ingress-nginx
-      app.kubernetes.io/part-of: ingress-nginx
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: ingress-nginx
-        app.kubernetes.io/part-of: ingress-nginx
-      annotations:
-        prometheus.io/port: &quot;10254&quot;
-        prometheus.io/scrape: &quot;true&quot;
-    spec:
-      serviceAccountName: nginx-ingress-serviceaccount
-      containers:
-        - name: nginx-ingress-controller
-          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.21.0
-          args:
-            - /nginx-ingress-controller
-            - --configmap=$(POD_NAMESPACE)/nginx-configuration
-            - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
-            - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
-            - --publish-service=$(POD_NAMESPACE)/ingress-nginx
-            - --annotations-prefix=nginx.ingress.kubernetes.io
-          securityContext:
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - NET_BIND_SERVICE
-            # www-data -&gt; 33
-            runAsUser: 33
-          env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-          ports:
-            - name: http
-              containerPort: 80
-            - name: https
-              containerPort: 443
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: 10254
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
-          readinessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: 10254
-              scheme: HTTP
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
-
----
+<pre><code class="language-shell"> cgroup.event_control       #用于eventfd的接口
+ memory.usage_in_bytes      #显示当前已用的内存
+ memory.limit_in_bytes      #设置/显示当前限制的内存额度
+ memory.failcnt             #显示内存使用量达到限制值的次数
+ memory.max_usage_in_bytes  #历史内存最大使用量
+ memory.soft_limit_in_bytes #设置/显示当前限制的内存软额度
+ memory.stat                #显示当前cgroup的内存使用情况
+ memory.use_hierarchy       #设置/显示是否将子cgroup的内存使用情况统计到当前cgroup里面
+ memory.force_empty         #触发系统立即尽可能的回收当前cgroup中可以回收的内存
+ memory.pressure_level      #设置内存压力的通知事件，配合cgroup.event_control一起使用
+ memory.swappiness          #设置和显示当前的swappiness
+ memory.move_charge_at_immigrate #设置当进程移动到其他cgroup中时，它所占用的内存是否也随着移动过去
+ memory.oom_control         #设置/显示oom controls相关的配置
+ memory.numa_stat           #显示numa相关的内存
 </code></pre>
 
-<p>以上 yaml 创建了一个 nginx-ingress-controller 的 Deployment，并赋给 Deployment 下的 Pod 对 Ingress 等集群内资源的 API 访问权限。</p>
+<p>#### cpuacct</p>
 
-<p>接着要为 nginx-ingress-controller 创建 Node port 类型的 Service，让我们可以通过云服务器的公网地址访问到 ingress:</p>
-
-<pre><code class="language-yaml">apiVersion: v1
-kind: Service
-metadata:
-  name: ingress-nginx
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-spec:
-  type: NodePort
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-      protocol: TCP
-    - name: https
-      port: 443
-      targetPort: 443
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-
----
+<pre><code class="language-shell">cpuacct.usage      			#所有cpu核的累加使用时间(nanoseconds)  
+cpuacct.usage_percpu 	    #针对多核，输出的是每个CPU的使用时间(nanoseconds)  
+cpuacct.stat       			#输出系统（system/kernel mode）耗时和用户（user mode）耗时 ， 单位为USER_HZ。 
 </code></pre>
 
-<h3 id="创建-ingress">创建 Ingress</h3>
+<h2 id="storage-driver">Storage Driver</h2>
 
-<p>创建 Ingress 策略。</p>
+<h3 id="aufs-unionfs">aufs(UnionFS)</h3>
 
-<pre><code class="language-yaml">apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: site-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: &quot;false&quot;
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /_hook
-        backend:
-          serviceName: mysite
-          servicePort: 9000
-      - path: /
-        backend:
-          serviceName: mysite
-          servicePort: 80
+<ul>
+<li>容器启动速度很快<br /></li>
+<li>存储空间利用很高效<br /></li>
+<li>内存的利用很高效<br /></li>
+</ul>
 
-</code></pre>
+<p>读写：写时复制<br />
+删除：whiteout 屏蔽</p>
 
-<h3 id="配置域名">配置域名</h3>
+<p>Docker 镜像的各层的全部内容都存储在<code>var/lib/docker/aufs/diff/&lt;image-id&gt;</code>文件夹下，每个文件夹下包含了该镜像层的全部文件和目录，文件以各层的 UUID 命名。<br />
+正在运行的容器的<strong>文件系统</strong>被挂载在<code>/var/lib/docker/aufs/mnt/&lt;container-id&gt;</code>文件夹下，这就是 AUFS 的联合挂载点，在这里的文件夹下，你可以看到容器文件系统的所有文件。如果容器没有在运行，它的挂载目录仍然存在，不过是个空文件夹。<br />
+容器的<strong>元数据</strong>和<strong>各种配置文件</strong>被放在<code>/var/lib/docker/containers/&lt;container-id&gt;</code>文件夹下，无论容器是运行还是停止都会有一个文件夹。如果容器正在运行，其对应的文件夹下会有一个 log 文件。<br />
+容器的<strong>只读层</strong>存储在<code>/var/lib/docker/aufs/diff/&lt;container-id&gt;</code>目录下，对容器的所有修改都会保存在这个文件夹下，即便容器停止，这个文件夹也不会删除。也就是说，容器重启后并不会丢失原先的更改。<br />
+容器中<strong>镜像层</strong>的信息存储在<code>/var/lib/docker/aufs/layers/&lt;container-id&gt;</code>文件中。文件中从上至下依次记录了容器使用的各镜像层。</p>
 
-<p>上述步骤完成，已经可以通过云服务器公网IP= <a href="https://IP:ingress_svc-port">https://IP:ingress_svc-port</a> 访问网站了。<br />
-为了访问方便，还可以给站点配置一个域名，直接在阿里云购买一个域名，然后通过绑定一个 A 类型的域名解析，解析到阿里云公网IP，就可以通过域名加端口访问了。<br />
-如果不想访问的时候加上端口，还需要再配置一个 隐性URL 的域名解析（需要先将域名备案）。</p>
+<h4 id="性能表现">性能表现</h4>
 
-<h3 id="附件">附件</h3>
+<ul>
+<li>在容器密度比较告的场景下，AUFS 是非常好的选择，因为AUFS的容器间共享镜像层的特性使其磁盘利用率很高，容器的启动时间很短<br /></li>
+<li>AUFS 中容器之间的共享使对系统页缓存的利用率很高<br /></li>
+<li>AUFS 的写时复制策略会带来很高的性能开销，因为 AUFS 对文件的第一次更改需要将整个文件复制带读写层，当容器层数很多或文件所在目录很深时尤其明显<br /></li>
+</ul>
 
-<p>以下是上面用到的 yaml 文件：<br />
-- <a href="./mysite.yaml">site-deployment</a><br />
-- <a href="./nginx_ingress.yaml">nginx-ingress-controller</a><br />
-- <a href="./ingress_svc.yaml">ingress-svc</a><br />
-- <a href="./ingress.yaml">ingress</a></p>
+<h3 id="device-mapper">device mapper</h3>
+
+<p>device mapper工作在块层次上而不是文件层次上，这意味着它的写时复制策略不需要拷贝整个文件。<br />
+在device mapper中，对容器的写操作由<strong>需要时分配</strong>策略完成。更新已有数据由<strong>写时复制</strong>策略完成，这些操作都在块的层次上完成，每个块的大小为64KB。</p>
+
+<h4 id="需要时分配-allocate-on-demand">需要时分配(allocate-on-demand)</h4>
+
+<p>每当容器中的进程需要向容器写入数据时，device mapper就从资源池中分配一些数据块并将其映射到容器。当容器频繁进行小数据的写操作时，这种机制非常影响影响性能。</p>
+
+<h4 id="写时复制-copy-on-write">写时复制(copy-on-write)</h4>
+
+<p>device mapper的写时复制策略以64KB作为粒度，意味着无论是对32KB的文件还是对1GB大小的文件的修改都仅复制64KB大小的文件。这相对于在文件层面进行的读操作具有很明显的性能优势。但是，如果容器频繁对小于64KB的文件进行改写，device mapper的性能是低于aufs的。</p>
+
+<h3 id="overlayfs-unionfs">overlayfs(UnionFS)</h3>
+
+<p>OverlayFS与AUFS相似，也是一种联合文件系统(union filesystem)，与AUFS相比，OverlayFS：<br />
+- 设计更简单<br />
+- 被加入Linux3.18版本内核<br />
+- 可能更快</p>
+
+<p>OverlayFS 将一个 Linux 主机中的两个目录组合起来，一个在上，一个在下，对外提供统一的视图。这两个目录就是层<code>layer</code>，将两个层组合在一起的技术被成为联合挂载<code>union mount</code>。在OverlayFS中，上层的目录被称作<code>upperdir</code>，下层的目录被称作<code>lowerdir</code>，对外提供的统一视图被称作<code>merged</code>。<br />
+[](./overlay_constructs.jpg)<br />
+OverlayFS 仅有两层，也就是说镜像中的每一层并不对应 OverlayFS 中的层，而是镜像中的每一层对应<code>/var/lib/docker/overlay</code>中的一个文件夹，文件夹以该层的 UUID 命名。然后使用硬连接将下面层的文件引用到上层。这在一定程度上节省了磁盘空间。这样 OverlayFS中 的<code>lowerdir</code>就对应镜像层的最上层，并且是只读的。在创建镜像时，Docker 会新建一个文件夹作为OverlayFS的<code>upperdir</code>，它是可写的。</p>
+
+<p>读写：第一次修改时，文件不在container layer(upperdir)中，overlay driver 调用<code>copy-up</code>操作将文件从<code>lowerdir</code>读到<code>upperdir</code>中，然后对文件的副本做出修改。<br />
+overlay的<code>copy-up</code>操作工作在文件层面, 对文件的修改需要将整个文件拷贝到<code>upperdir</code>中。<br />
+- <code>copy-up</code>操作仅发生在文件第一次被修改时，此后对文件的读写都直接在<code>upperdir</code>中进行<br />
+- overlayfs中仅有两层，这使得文件的查找效率很高(相对于aufs)。<br />
+删除：whiteout 覆盖</p>
+
+<h2 id="参考">参考</h2>
+
+<p>(<a href="https://yq.aliyun.com/articles/54483)[https://yq.aliyun.com/articles/54483">https://yq.aliyun.com/articles/54483)[https://yq.aliyun.com/articles/54483</a>]
+(<a href="https://segmentfault.com/a/1190000008323952)[https://segmentfault.com/a/1190000008323952">https://segmentfault.com/a/1190000008323952)[https://segmentfault.com/a/1190000008323952</a>]
+(<a href="https://blog.csdn.net/vchy_zhao/article/details/70238690)[https://blog.csdn.net/vchy_zhao/article/details/70238690">https://blog.csdn.net/vchy_zhao/article/details/70238690)[https://blog.csdn.net/vchy_zhao/article/details/70238690</a>]</p>
 
 
 <footer class=" footline" >
@@ -1128,6 +950,7 @@ spec:
             
                 
                     
+                    
                 
                 
 
@@ -1142,6 +965,26 @@ spec:
             
             
                 
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
                     
                 
                 
@@ -1186,6 +1029,24 @@ spec:
             
         
                     
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
                         
             
             
@@ -1202,49 +1063,10 @@ spec:
             
         
                     
-            
-        
-                    
                         
             
             
                 
-                    
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
                     
                 
                 
