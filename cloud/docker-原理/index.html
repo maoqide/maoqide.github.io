@@ -12,14 +12,14 @@
     <title>Docker 原理 :: Maoqide</title>
 
     
-    <link href="/css/nucleus.css?1547996981" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1547996981" rel="stylesheet">
-    <link href="/css/hybrid.css?1547996981" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1547996981" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1547996981" rel="stylesheet">
-    <link href="/css/auto-complete.css?1547996981" rel="stylesheet">
-    <link href="/css/theme.css?1547996981" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1547996981" rel="stylesheet">
+    <link href="/css/nucleus.css?1548036741" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1548036741" rel="stylesheet">
+    <link href="/css/hybrid.css?1548036741" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1548036741" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1548036741" rel="stylesheet">
+    <link href="/css/auto-complete.css?1548036741" rel="stylesheet">
+    <link href="/css/theme.css?1548036741" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1548036741" rel="stylesheet">
     
     
     <script>
@@ -31,7 +31,7 @@
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
-    <script src="/js/jquery-2.x.min.js?1547996981"></script>
+    <script src="/js/jquery-2.x.min.js?1548036741"></script>
 
     <style type="text/css">
       :root #header + #content > #left > #rlblock_left{
@@ -67,14 +67,14 @@
     <span data-search-clear=""><i class="fas fa-close"></i></span>
 </div>
 
-<script type="text/javascript" src="/js/lunr.min.js?1547996981"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1547996981"></script>
+<script type="text/javascript" src="/js/lunr.min.js?1548036741"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1548036741"></script>
 <script type="text/javascript">
     
         var baseurl = "";
     
 </script>
-<script type="text/javascript" src="/js/search.js?1547996981"></script>
+<script type="text/javascript" src="/js/search.js?1548036741"></script>
 
     
   </div>
@@ -763,11 +763,12 @@ cpuacct.stat       			#输出系统（system/kernel mode）耗时和用户（use
 <p>读写：写时复制<br />
 删除：whiteout 屏蔽</p>
 
-<p>Docker 镜像的各层的全部内容都存储在<code>var/lib/docker/aufs/diff/&lt;image-id&gt;</code>文件夹下，每个文件夹下包含了该镜像层的全部文件和目录，文件以各层的 UUID 命名。<br />
+<p>Docker 镜像的各层的全部内容都存储在<code>/var/lib/docker/aufs/diff/&lt;image-id&gt;</code>文件夹下，每个文件夹下包含了该镜像层的全部文件和目录，文件以各层的 UUID 命名。<br />
 正在运行的容器的<strong>文件系统</strong>被挂载在<code>/var/lib/docker/aufs/mnt/&lt;container-id&gt;</code>文件夹下，这就是 AUFS 的联合挂载点，在这里的文件夹下，你可以看到容器文件系统的所有文件。如果容器没有在运行，它的挂载目录仍然存在，不过是个空文件夹。<br />
 容器的<strong>元数据</strong>和<strong>各种配置文件</strong>被放在<code>/var/lib/docker/containers/&lt;container-id&gt;</code>文件夹下，无论容器是运行还是停止都会有一个文件夹。如果容器正在运行，其对应的文件夹下会有一个 log 文件。<br />
 容器的<strong>只读层</strong>存储在<code>/var/lib/docker/aufs/diff/&lt;container-id&gt;</code>目录下，对容器的所有修改都会保存在这个文件夹下，即便容器停止，这个文件夹也不会删除。也就是说，容器重启后并不会丢失原先的更改。<br />
-容器中<strong>镜像层</strong>的信息存储在<code>/var/lib/docker/aufs/layers/&lt;container-id&gt;</code>文件中。文件中从上至下依次记录了容器使用的各镜像层。</p>
+容器中<strong>镜像层</strong>的信息存储在<code>/var/lib/docker/aufs/layers/&lt;container-id&gt;</code>文件中。文件中从上至下依次记录了容器使用的各镜像层。<br />
+<img src="./aufs_layers.jpg" alt="" /></p>
 
 <h4 id="性能表现">性能表现</h4>
 
@@ -798,7 +799,7 @@ cpuacct.stat       			#输出系统（system/kernel mode）耗时和用户（use
 - 可能更快</p>
 
 <p>OverlayFS 将一个 Linux 主机中的两个目录组合起来，一个在上，一个在下，对外提供统一的视图。这两个目录就是层<code>layer</code>，将两个层组合在一起的技术被成为联合挂载<code>union mount</code>。在OverlayFS中，上层的目录被称作<code>upperdir</code>，下层的目录被称作<code>lowerdir</code>，对外提供的统一视图被称作<code>merged</code>。<br />
-[](./overlay_constructs.jpg)<br />
+<img src="./overlay_constructs.jpg" alt="" /><br />
 OverlayFS 仅有两层，也就是说镜像中的每一层并不对应 OverlayFS 中的层，而是镜像中的每一层对应<code>/var/lib/docker/overlay</code>中的一个文件夹，文件夹以该层的 UUID 命名。然后使用硬连接将下面层的文件引用到上层。这在一定程度上节省了磁盘空间。这样 OverlayFS中 的<code>lowerdir</code>就对应镜像层的最上层，并且是只读的。在创建镜像时，Docker 会新建一个文件夹作为OverlayFS的<code>upperdir</code>，它是可写的。</p>
 
 <p>读写：第一次修改时，文件不在container layer(upperdir)中，overlay driver 调用<code>copy-up</code>操作将文件从<code>lowerdir</code>读到<code>upperdir</code>中，然后对文件的副本做出修改。<br />
@@ -809,9 +810,9 @@ overlay的<code>copy-up</code>操作工作在文件层面, 对文件的修改需
 
 <h2 id="参考">参考</h2>
 
-<p>(<a href="https://yq.aliyun.com/articles/54483)[https://yq.aliyun.com/articles/54483">https://yq.aliyun.com/articles/54483)[https://yq.aliyun.com/articles/54483</a>]
-(<a href="https://segmentfault.com/a/1190000008323952)[https://segmentfault.com/a/1190000008323952">https://segmentfault.com/a/1190000008323952)[https://segmentfault.com/a/1190000008323952</a>]
-(<a href="https://blog.csdn.net/vchy_zhao/article/details/70238690)[https://blog.csdn.net/vchy_zhao/article/details/70238690">https://blog.csdn.net/vchy_zhao/article/details/70238690)[https://blog.csdn.net/vchy_zhao/article/details/70238690</a>]</p>
+<p><a href="https://yq.aliyun.com/articles/54483">https://yq.aliyun.com/articles/54483</a><br />
+<a href="https://segmentfault.com/a/1190000008323952">https://segmentfault.com/a/1190000008323952</a><br />
+<a href="https://blog.csdn.net/vchy_zhao/article/details/70238690">https://blog.csdn.net/vchy_zhao/article/details/70238690</a></p>
 
 
 <footer class=" footline" >
@@ -1113,20 +1114,20 @@ overlay的<code>copy-up</code>操作工作在文件层面, 对文件的修改需
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1547996981"></script>
-    <script src="/js/perfect-scrollbar.min.js?1547996981"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1547996981"></script>
-    <script src="/js/jquery.sticky.js?1547996981"></script>
-    <script src="/js/featherlight.min.js?1547996981"></script>
-    <script src="/js/html5shiv-printshiv.min.js?1547996981"></script>
-    <script src="/js/highlight.pack.js?1547996981"></script>
+    <script src="/js/clipboard.min.js?1548036741"></script>
+    <script src="/js/perfect-scrollbar.min.js?1548036741"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1548036741"></script>
+    <script src="/js/jquery.sticky.js?1548036741"></script>
+    <script src="/js/featherlight.min.js?1548036741"></script>
+    <script src="/js/html5shiv-printshiv.min.js?1548036741"></script>
+    <script src="/js/highlight.pack.js?1548036741"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/js/modernizr.custom.71422.js?1547996981"></script>
-    <script src="/js/learn.js?1547996981"></script>
-    <script src="/js/hugo-learn.js?1547996981"></script>
+    <script src="/js/modernizr.custom.71422.js?1548036741"></script>
+    <script src="/js/learn.js?1548036741"></script>
+    <script src="/js/hugo-learn.js?1548036741"></script>
 
-    <link href="/mermaid/mermaid.css?1547996981" type="text/css" rel="stylesheet" />
-    <script src="/mermaid/mermaid.js?1547996981"></script>
+    <link href="/mermaid/mermaid.css?1548036741" type="text/css" rel="stylesheet" />
+    <script src="/mermaid/mermaid.js?1548036741"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>
