@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/collection/collection-2/</loc>
+    <lastmod>2019-02-20T10:51:58+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/cloud/container-network/</loc>
     <lastmod>2019-01-22T17:28:28+08:00</lastmod>
   </url>
@@ -79,11 +84,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-12-04T18:37:11+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/collection/clooection-2/</loc>
+    <lastmod>2019-02-20T10:51:58+08:00</lastmod>
   </url>
   
   <url>

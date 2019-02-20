@@ -6,10 +6,28 @@
     <description>Recent content on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 04 Dec 2018 18:37:11 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 20 Feb 2019 10:51:58 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Collection 2</title>
+      <link>/collection/collection-2/</link>
+      <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
+      
+      <guid>/collection/collection-2/</guid>
+      <description> goroutine 调度器解析。
+https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/
+备用链接
+ Golang for range性能分析及优化: for range 会有元素拷贝操作，造成性能方面的影响。
+golang for range
+备用链接
+ 一致性哈希算法。
+https://segmentfault.com/a/1190000013533592
+备用链接
+  </description>
+    </item>
     
     <item>
       <title>Build Blog With Hugo</title>
@@ -84,24 +102,6 @@ https://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt
       
       <guid>/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/</guid>
       <description>&lt;p&gt;通过阿里云ECS实例搭建K8S集群&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/collection/clooection-2/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/collection/clooection-2/</guid>
-      <description> goroutine 调度器解析。
-https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/
-备用链接
- Golang for range性能分析及优化: for range 会有元素拷贝操作，造成性能方面的影响。
-golang for range
-备用链接
- 一致性哈希算法。
-https://segmentfault.com/a/1190000013533592
-备用链接
-  </description>
     </item>
     
   </channel>
