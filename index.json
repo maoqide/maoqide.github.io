@@ -53,7 +53,7 @@
 	"title": "Collection 1",
 	"tags": [],
 	"description": "",
-	"content": " Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。\nhttps://www.infoq.cn/article/analyse-mesos-part-04\n备用链接\n goroutine 调度器解析。\nhttps://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/\n备用链接\n 一致性哈希算法。\nhttps://segmentfault.com/a/1190000013533592\n备用链接\n Kubernetes调度详解。\nhttp://dockone.io/article/2885\n备用链接\nhttps://cizixs.com/2017/07/19/kubernetes-scheduler-source-code-analysis/\n备用链接\n  "
+	"content": " Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。\nhttps://www.infoq.cn/article/analyse-mesos-part-04\n备用链接\n Kubernetes调度详解。\nhttp://dockone.io/article/2885\n备用链接\nhttps://cizixs.com/2017/07/19/kubernetes-scheduler-source-code-analysis/\n备用链接\n Istio 调用链埋点/tracing: 使用 istio 做调用链跟踪依旧需要修改一定业务代码，微服务间请求时需要配合在请求头上传递 sidecar 生成的 Trace 相关信息，才能将调用关联到同一个 trace 上，否则每次请求都会形成新的割裂的 Trace 信息。\nhttps://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt\n备用链接\n  "
 },
 {
 	"uri": "/algorithm/",
@@ -110,6 +110,13 @@
 	"tags": [],
 	"description": "",
 	"content": " Maoqide learning.\nrecord.\ncollect.\n"
+},
+{
+	"uri": "/collection/clooection-2/",
+	"title": "",
+	"tags": [],
+	"description": "",
+	"content": " goroutine 调度器解析。\nhttps://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/\n备用链接\n Golang for range性能分析及优化: for range 会有元素拷贝操作，造成性能方面的影响。\ngolang for range\n备用链接\n 一致性哈希算法。\nhttps://segmentfault.com/a/1190000013533592\n备用链接\n  "
 },
 {
 	"uri": "/categories/",
