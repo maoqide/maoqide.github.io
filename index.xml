@@ -63,6 +63,15 @@ https://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt
     </item>
     
     <item>
+      <title>Controller Manager</title>
+      <link>/cloud/controller-manager/</link>
+      <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>
+      
+      <guid>/cloud/controller-manager/</guid>
+      <description>&lt;p&gt;k8s controller-manager 源码阅读笔记&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Goroutine 的管理</title>
       <link>/golang/goroutine/</link>
       <pubDate>Fri, 28 Dec 2018 16:29:32 +0800</pubDate>

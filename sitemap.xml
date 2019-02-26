@@ -58,6 +58,11 @@
   </url>
   
   <url>
+    <loc>/cloud/controller-manager/</loc>
+    <lastmod>2019-02-23T16:52:30+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/golang/goroutine/</loc>
     <lastmod>2018-12-28T16:29:32+08:00</lastmod>
   </url>
