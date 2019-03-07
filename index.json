@@ -60,7 +60,7 @@
 	"title": "Collection 1",
 	"tags": [],
 	"description": "",
-	"content": " Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。\nhttps://www.infoq.cn/article/analyse-mesos-part-04\n备用链接\n Kubernetes调度详解。\nhttp://dockone.io/article/2885\n备用链接\nhttps://cizixs.com/2017/07/19/kubernetes-scheduler-source-code-analysis/\n备用链接\n Istio 调用链埋点/tracing: 使用 istio 做调用链跟踪依旧需要修改一定业务代码，微服务间请求时需要配合在请求头上传递 sidecar 生成的 Trace 相关信息，才能将调用关联到同一个 trace 上，否则每次请求都会形成新的割裂的 Trace 信息。\nhttps://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt\n备用链接\n  "
+	"content": " Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。\nhttps://www.infoq.cn/article/analyse-mesos-part-04\n备用链接\n Kubernetes调度详解。\nhttp://dockone.io/article/2885\n备用链接\nhttps://cizixs.com/2017/07/19/kubernetes-scheduler-source-code-analysis/\n备用链接\n Istio 调用链埋点/tracing: 使用 istio 做调用链跟踪依旧需要修改一定业务代码，微服务间请求时需要配合在请求头上传递 sidecar 生成的 Trace 相关信息，才能将调用关联到同一个 trace 上，否则每次请求都会形成新的割裂的 Trace 信息。\nhttps://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt\n备用链接\n kubernetes informer 解析。\nhttps://blog.csdn.net/weixin_42663840/article/details/81699303\n  "
 },
 {
 	"uri": "/algorithm/",
