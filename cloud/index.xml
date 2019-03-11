@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>Kube Scheduler</title>
+      <link>/cloud/kube-scheduler/</link>
+      <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
+      
+      <guid>/cloud/kube-scheduler/</guid>
+      <description>NewSchedulerCommand() runCommand() opts.Config()	// create client &amp;amp; informer func Run(cc schedulerserverconfig.CompletedConfig, stopCh &amp;lt;-chan struct{}) error {} run := func(ctx context.Context) {} sched.Run() // Run begins watching and scheduling. It waits for cache to be synced, then starts a goroutine and returns immediately. func (sched *Scheduler) Run() {} go wait.Until(sched.scheduleOne, 0, sched.config.StopEverything) // scheduleOne does the entire scheduling workflow for a single pod. func (sched *Scheduler) scheduleOne() {} pod := sched.config.NextPod() sched.</description>
+    </item>
+    
+    <item>
       <title>Controller Manager</title>
       <link>/cloud/controller-manager/</link>
       <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>

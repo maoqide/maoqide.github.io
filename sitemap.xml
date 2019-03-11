@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/cloud/kube-scheduler/</loc>
+    <lastmod>2019-03-07T20:00:30+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/collection/collection-2/</loc>
     <lastmod>2019-02-20T10:51:58+08:00</lastmod>
   </url>
@@ -89,7 +94,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2019-02-20T10:51:58+08:00</lastmod>
+    <lastmod>2019-03-07T20:00:30+08:00</lastmod>
   </url>
   
   <url>
