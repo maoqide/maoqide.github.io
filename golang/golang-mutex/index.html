@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
 <link rel="icon" href="/images/favicon.png" type="image/x-icon" />
-    <title>将网站部署在 Kubernetes 上 :: Maoqide</title>
+    <title>Golang Mutex :: Maoqide</title>
 
     
     <link href="/css/nucleus.css?1552401051" rel="stylesheet">
@@ -45,7 +45,7 @@
     </style>
     
   </head>
-  <body class="" data-url="/notes/publish-your-site-on-k8s/">
+  <body class="" data-url="/golang/golang-mutex/">
     <nav id="sidebar" class="showVisitedLinks">
 
 
@@ -91,7 +91,7 @@
   
     
     <li data-nav-id="/golang/" title="Golang" class="dd-item 
-        
+        parent
         
         
         ">
@@ -117,7 +117,7 @@
  
   
     
-      <li data-nav-id="/golang/golang-mutex/" title="Golang Mutex" class="dd-item ">
+      <li data-nav-id="/golang/golang-mutex/" title="Golang Mutex" class="dd-item active">
         <a href="/golang/golang-mutex/">
         Golang Mutex
         <i class="fas fa-check read-icon"></i>
@@ -487,7 +487,7 @@
   
     
     <li data-nav-id="/notes/" title="Notes" class="dd-item 
-        parent
+        
         
         
         ">
@@ -516,8 +516,8 @@
   
     
     <li data-nav-id="/notes/publish-your-site-on-k8s/" title="将网站部署在 Kubernetes 上" class="dd-item 
-        parent
-        active
+        
+        
         
         ">
       <a href="/notes/publish-your-site-on-k8s/">
@@ -645,7 +645,7 @@
                   <span class="links">
                  
                  
-                   将网站部署在 Kubernetes 上 
+                   Golang Mutex 
                  
                   </span>
                 </div>
@@ -656,17 +656,11 @@
 <ul>
 <li>
 <ul>
-<li><a href="#kubernetes-环境">Kubernetes 环境</a></li>
-<li><a href="#网站">网站</a></li>
-<li><a href="#容器化">容器化</a></li>
-<li><a href="#部署">部署</a>
+<li><a href="#sync-mutex">sync.Mutex</a></li>
+<li><a href="#sync-rwmutex">sync.RWMutex</a>
 <ul>
-<li><a href="#准备">准备</a></li>
-<li><a href="#创建-deployment-service">创建 Deployment &amp; Service</a></li>
-<li><a href="#创建-ingress-controller">创建 ingress-controller</a></li>
-<li><a href="#创建-ingress">创建 Ingress</a></li>
-<li><a href="#配置域名">配置域名</a></li>
-<li><a href="#附件">附件</a></li>
+<li><a href="#lock-unlock">Lock()/Unlock()</a></li>
+<li><a href="#rlock-runlock">RLock()/RUnlock()</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -682,7 +676,7 @@
         
         <div id="body-inner">
           
-            <h1>将网站部署在 Kubernetes 上</h1>
+            <h1>Golang Mutex</h1>
           
 
         
@@ -690,413 +684,51 @@
 
 
 
-<h2 id="kubernetes-环境">Kubernetes 环境</h2>
+<p>golang 的<code>sync</code>包中有两种锁，互斥锁<code>sync.Mutex</code> 和读写锁<code>sync.RWMutex</code>。</p>
 
-<p>之前在 <a href="https://maoqide.live:30091/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/">阿里云主机搭建-k8s-集群</a> 这篇文章介绍了如何在阿里云环境快速搭建一个 Kubernetes 环境，按照文章的步骤，可以快速搭建一个可用的 Kubernetes 集群。</p>
-
-<h2 id="网站">网站</h2>
-
-<p>同样在 <a href="https://maoqide.live:30091/notes/build-blog-with-hugo/">Build Blog With Hugo</a> 这边文章中，介绍了怎么使用 hugo 快速搭建一个自己的个人博客。</p>
-
-<h2 id="容器化">容器化</h2>
-
-<p>我的项目 <a href="https://github.com/maoqide/hugo-docs">hugo-dcos</a> 包含了容器化一个 hugo 网站项目所需的一些脚本和 Dockerfile, 可以参考本项目自行容器化自己的项目。<br />
-项目使用了<a href="https://github.com/adnanh/webhook">webhook</a>接收 github 的通知，并在github上配置项目<a href="https://github.com/maoqide/maoqide.github.io">maoqide.github.io</a>的 Webhooks, 当本项目有更新时，会调用 webhook 服务触发操作，拉取最新的代码。</p>
-
-<h2 id="部署">部署</h2>
-
-<p>本文介绍如何将自己的个人博客通过 Kubernetes 发布到公网，让大家可以访问。<br />
-&gt; 当然，最简单的发布方法是通过 <a href="https://pages.github.com/">Github Pages</a>, 直接将 hugo 生成的 publish 文件夹上传到自己 github 的命名为 your-username.github.io 的仓库下，即可以通过 <a href="https://your-username.github.io">https://your-username.github.io</a> 访问到自己的网站。</p>
-
-<h3 id="准备">准备</h3>
+<h2 id="sync-mutex">sync.Mutex</h2>
 
 <ul>
-<li>域名</li>
-<li>云服务器</li>
+<li>Mutex 为互斥锁，<code>Lock()</code> 加锁，<code>Unlock()</code> 解锁<br /></li>
+<li>使用 <code>Lock()</code> 加锁后，在使用<code>Unlock()</code>解锁前便不能再次对其进行加锁，否则会导致死锁<br /></li>
+<li>在<code>Lock()</code>前使用<code>Unlock()</code>会导致 panic 异常<br /></li>
+<li>适用于读写不确定场景，即读写次数没有明显的区别，并且只允许只有一个读或者写的场景<br /></li>
 </ul>
 
-<h3 id="创建-deployment-service">创建 Deployment &amp; Service</h3>
+<h2 id="sync-rwmutex">sync.RWMutex</h2>
 
-<p>首先创建 Deployment 和 Service。</p>
+<ul>
+<li>RWMutex 是单写多读锁，可以加多个读锁或者一个写锁<br /></li>
+<li>读锁占用的情况下会阻止写，不会阻止读，多个 goroutine 可以同时获取读锁<br /></li>
+<li>写锁会阻止其他 goroutine（无论读和写）进来，整个锁由该 goroutine 独占<br /></li>
+<li>适用于读多写少的场景<br /></li>
+</ul>
 
-<pre><code class="language-yaml">apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysite
-spec:
-  selector:
-    matchLabels:
-      app: site
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: site
-    spec:
-      containers:
-      - name: mysite
-        image: maoqide/site:v1.1
-        env:
-        - name: GITHUB_HOOK_SECRET
-          value: MY_SECRET
-        ports:
-        - containerPort: 80
-        - containerPort: 9000
-        livenessProbe:
-          httpGet:
-          # scheme: HTTPS
-            path: /
-            port: 80
-          initialDelaySeconds: 15
-          timeoutSeconds: 1
+<h3 id="lock-unlock">Lock()/Unlock()</h3>
 
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: mysite
-spec:
-  selector:
-    app: site
-  ports:
-  - name: nginx
-    protocol: TCP
-    port: 80
-    targetPort: 80
-  - name: webhook
-    protocol: TCP
-    port: 9000
-    targetPort: 9000
+<ul>
+<li><code>Lock()</code> 加写锁，<code>Unlock()</code> 解写锁<br /></li>
+<li>写锁权限高于读锁，有写锁时优先加写锁<br /></li>
+<li>在 <code>Lock()</code> 之前使用 <code>Unlock()</code> 会导致 panic 异常<br /></li>
+</ul>
 
+<h3 id="rlock-runlock">RLock()/RUnlock()</h3>
 
-</code></pre>
+<ul>
+<li><code>RLock()</code> 加读锁，<code>RUnlock()</code> 解读锁<br /></li>
+<li><code>RLock()</code> 加读锁时，如果存在写锁，则无法加读锁；当只有读锁或者没有锁时，可以加读锁，读锁可以加多个<br /></li>
+<li><code>RUnlock()</code> 解读锁，<code>RUnlock()</code> 撤销单次 <code>RLock()</code> 调用，对于其他同时存在的读锁没有作用<br /></li>
 
-<h3 id="创建-ingress-controller">创建 ingress-controller</h3>
+<li><p>不能在没有读锁的情况下调用<code>RUnlock()</code>，<code>RUnlock()</code>不得多于<code>RLock()</code>，否则会导致 panic 异常</p>
 
-<p>为了能够从外部访问，还需要创建 Ingress。<br />
-这里使用nginx ingress，首先要创建 nginx-ingress-controller。</p>
-
-<pre><code class="language-yaml">kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: nginx-configuration
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-
----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: tcp-services
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-
----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: udp-services
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: nginx-ingress-serviceaccount
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  name: nginx-ingress-clusterrole
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-rules:
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-      - endpoints
-      - nodes
-      - pods
-      - secrets
-    verbs:
-      - list
-      - watch
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - nodes
-    verbs:
-      - get
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - services
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - &quot;extensions&quot;
-    resources:
-      - ingresses
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - events
-    verbs:
-      - create
-      - patch
-  - apiGroups:
-      - &quot;extensions&quot;
-    resources:
-      - ingresses/status
-    verbs:
-      - update
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  name: nginx-ingress-role
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-rules:
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-      - pods
-      - secrets
-      - namespaces
-    verbs:
-      - get
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-    resourceNames:
-      # Defaults to &quot;&lt;election-id&gt;-&lt;ingress-class&gt;&quot;
-      # Here: &quot;&lt;ingress-controller-leader&gt;-&lt;nginx&gt;&quot;
-      # This has to be adapted if you change either parameter
-      # when launching the nginx-ingress-controller.
-      - &quot;ingress-controller-leader-nginx&quot;
-    verbs:
-      - get
-      - update
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - configmaps
-    verbs:
-      - create
-  - apiGroups:
-      - &quot;&quot;
-    resources:
-      - endpoints
-    verbs:
-      - get
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  name: nginx-ingress-role-nisa-binding
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: nginx-ingress-role
-subjects:
-  - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: nginx-ingress-clusterrole-nisa-binding
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: nginx-ingress-clusterrole
-subjects:
-  - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
-    namespace: default
-
----
-
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: nginx-ingress-controller
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: ingress-nginx
-      app.kubernetes.io/part-of: ingress-nginx
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: ingress-nginx
-        app.kubernetes.io/part-of: ingress-nginx
-      annotations:
-        prometheus.io/port: &quot;10254&quot;
-        prometheus.io/scrape: &quot;true&quot;
-    spec:
-      serviceAccountName: nginx-ingress-serviceaccount
-      containers:
-        - name: nginx-ingress-controller
-          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.21.0
-          args:
-            - /nginx-ingress-controller
-            - --configmap=$(POD_NAMESPACE)/nginx-configuration
-            - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
-            - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
-            - --publish-service=$(POD_NAMESPACE)/ingress-nginx
-            - --annotations-prefix=nginx.ingress.kubernetes.io
-          securityContext:
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - NET_BIND_SERVICE
-            # www-data -&gt; 33
-            runAsUser: 33
-          env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-          ports:
-            - name: http
-              containerPort: 80
-            - name: https
-              containerPort: 443
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: 10254
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
-          readinessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: 10254
-              scheme: HTTP
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
-
----
-</code></pre>
-
-<p>以上 yaml 创建了一个 nginx-ingress-controller 的 Deployment，并赋给 Deployment 下的 Pod 对 Ingress 等集群内资源的 API 访问权限。</p>
-
-<p>接着要为 nginx-ingress-controller 创建 Node port 类型的 Service，让我们可以通过云服务器的公网地址访问到 ingress:</p>
-
-<pre><code class="language-yaml">apiVersion: v1
-kind: Service
-metadata:
-  name: ingress-nginx
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-spec:
-  type: NodePort
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-      protocol: TCP
-    - name: https
-      port: 443
-      targetPort: 443
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-
----
-</code></pre>
-
-<h3 id="创建-ingress">创建 Ingress</h3>
-
-<p>创建 Ingress 策略。</p>
-
-<pre><code class="language-yaml">apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: site-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: &quot;false&quot;
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /_hook
-        backend:
-          serviceName: mysite
-          servicePort: 9000
-      - path: /
-        backend:
-          serviceName: mysite
-          servicePort: 80
-
-</code></pre>
-
-<h3 id="配置域名">配置域名</h3>
-
-<p>上述步骤完成，已经可以通过云服务器公网IP= <a href="https://IP:ingress_svc-port">https://IP:ingress_svc-port</a> 访问网站了。<br />
-为了访问方便，还可以给站点配置一个域名，直接在阿里云购买一个域名，然后通过绑定一个 A 类型的域名解析，解析到阿里云公网IP，就可以通过域名加端口访问了。<br />
-如果不想访问的时候加上端口，还需要再配置一个 隐性URL 的域名解析（需要先将域名备案）。</p>
-
-<h3 id="附件">附件</h3>
-
-<p>以下是上面用到的 yaml 文件：<br />
-- <a href="./mysite.yaml">site-deployment</a><br />
-- <a href="./nginx_ingress.yaml">nginx-ingress-controller</a><br />
-- <a href="./ingress_svc.yaml">ingress-svc</a><br />
-- <a href="./ingress.yaml">ingress</a></p>
+<p>参考：<a href="https://blog.csdn.net/chenbaoke/article/details/41957725">https://blog.csdn.net/chenbaoke/article/details/41957725</a></p></li>
+</ul>
 
 
 <footer class=" footline" >
 	
 </footer>
+
 
         
         </div> 
@@ -1129,8 +761,58 @@ spec:
             
                 
                     
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
                         
                         
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
                     
                 
                 
@@ -1185,54 +867,6 @@ spec:
 
                     
                     
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
                         
                     
                     
@@ -1271,38 +905,6 @@ spec:
                     
                     
 
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
                     
                         
             
@@ -1384,30 +986,10 @@ spec:
             
         
                     
-            
-        
-                    
                         
             
             
                 
-                    
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
                     
                 
                 
@@ -1425,8 +1007,55 @@ spec:
             
                 
                     
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
                         
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
                         
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
                     
                 
                 
@@ -1494,3 +1123,4 @@ spec:
 
   </body>
 </html>
+

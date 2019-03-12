@@ -1,5 +1,12 @@
 [
 {
+	"uri": "/golang/golang-mutex/",
+	"title": "Golang Mutex",
+	"tags": [],
+	"description": "",
+	"content": " golang 的sync包中有两种锁，互斥锁sync.Mutex 和读写锁sync.RWMutex。\nsync.Mutex  Mutex 为互斥锁，Lock() 加锁，Unlock() 解锁\n 使用 Lock() 加锁后，在使用Unlock()解锁前便不能再次对其进行加锁，否则会导致死锁\n 在Lock()前使用Unlock()会导致 panic 异常\n 适用于读写不确定场景，即读写次数没有明显的区别，并且只允许只有一个读或者写的场景\n  sync.RWMutex  RWMutex 是单写多读锁，可以加多个读锁或者一个写锁\n 读锁占用的情况下会阻止写，不会阻止读，多个 goroutine 可以同时获取读锁\n 写锁会阻止其他 goroutine（无论读和写）进来，整个锁由该 goroutine 独占\n 适用于读多写少的场景\n  Lock()/Unlock()  Lock() 加写锁，Unlock() 解写锁\n 写锁权限高于读锁，有写锁时优先加写锁\n 在 Lock() 之前使用 Unlock() 会导致 panic 异常\n  RLock()/RUnlock()  RLock() 加读锁，RUnlock() 解读锁\n RLock() 加读锁时，如果存在写锁，则无法加读锁；当只有读锁或者没有锁时，可以加读锁，读锁可以加多个\n RUnlock() 解读锁，RUnlock() 撤销单次 RLock() 调用，对于其他同时存在的读锁没有作用\n 不能在没有读锁的情况下调用RUnlock()，RUnlock()不得多于RLock()，否则会导致 panic 异常\n参考：https://blog.csdn.net/chenbaoke/article/details/41957725\n  "
+},
+{
 	"uri": "/cloud/kube-scheduler/",
 	"title": "Kube Scheduler",
 	"tags": [],
