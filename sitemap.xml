@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/cloud/sample-controller/</loc>
+    <lastmod>2019-03-18T12:53:41+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/golang/golang-mutex/</loc>
     <lastmod>2019-03-11T16:35:20+08:00</lastmod>
   </url>
