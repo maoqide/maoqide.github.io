@@ -8,6 +8,11 @@
   </url>
   
   <url>
+    <loc>/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</loc>
+    <lastmod>2019-03-16T21:34:46+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/golang/golang-mutex/</loc>
     <lastmod>2019-03-11T16:35:20+08:00</lastmod>
   </url>
@@ -104,7 +109,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2019-03-11T16:35:20+08:00</lastmod>
+    <lastmod>2019-03-16T21:34:46+08:00</lastmod>
   </url>
   
   <url>
