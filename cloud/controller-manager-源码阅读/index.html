@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
 <link rel="icon" href="/images/favicon.png" type="image/x-icon" />
-    <title>Notes :: Maoqide</title>
+    <title>Controller Manager 源码阅读 :: Maoqide</title>
 
     
     <link href="/css/nucleus.css?1554096931" rel="stylesheet">
@@ -45,7 +45,7 @@
     </style>
     
   </head>
-  <body class="" data-url="/notes/">
+  <body class="" data-url="/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
     <nav id="sidebar" class="showVisitedLinks">
 
 
@@ -297,7 +297,7 @@
   
     
     <li data-nav-id="/cloud/" title="Cloud" class="dd-item 
-        
+        parent
         
         
         ">
@@ -441,7 +441,7 @@
  
   
     
-      <li data-nav-id="/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" title="Controller Manager 源码阅读" class="dd-item ">
+      <li data-nav-id="/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" title="Controller Manager 源码阅读" class="dd-item active">
         <a href="/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
         Controller Manager 源码阅读
         <i class="fas fa-check read-icon"></i>
@@ -532,8 +532,8 @@
   
     
     <li data-nav-id="/notes/" title="Notes" class="dd-item 
-        parent
-        active
+        
+        
         
         ">
       <a href="/notes/">
@@ -690,14 +690,28 @@
                   <span class="links">
                  
                  
-                   Notes 
+                   Controller Manager 源码阅读 
                  
                   </span>
                 </div>
                 
                     <div class="progress">
     <div class="wrapper">
-
+<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#代码结构">代码结构</a></li>
+<li><a href="#cmd-run">cmd.Run</a></li>
+<li><a href="#s-config-knowncontrollers-controllersdisabledbydefault-list">s.Config(KnownControllers(), ControllersDisabledByDefault.List())</a></li>
+<li><a href="#run-c-complete-wait-neverstop">Run(c.Complete(), wait.NeverStop)</a></li>
+<li><a href="#controllers">controllers</a>
+<ul>
+<li><a href="#replicasetcontroller">replicasetcontroller</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
     </div>
 </div>
 
@@ -709,17 +723,275 @@
         
         <div id="body-inner">
           
-            <h1>Notes</h1>
+            <h1>Controller Manager 源码阅读</h1>
           
 
         
 
 
+<p>k8s controller-manager 源码阅读笔记</p>
 
+<h2 id="代码结构">代码结构</h2>
+
+<pre><code>本部分用于记录 kube-controller-manager 代码整体结构及关键方法，便于到源码中查找，个人阅读记录，读者可跳过。本文所有代码均基于 kubernetes release-1.13。        
+</code></pre>
+
+<pre><code class="language-golang">// cmd/kube-controller-manager/controller-manager.go
+	main()
+		command := app.NewControllerManagerCommand()
+
+// cmd/kube-controller-manager/app/controllermanager.go
+	NewControllerManagerCommand()
+		/*
+		**	指定 port，所有默认 port 在 pkg/master/ports/ports.go 这个文件中
+		**	将默认配置传入 Options，设置每个 controller 基础配置（证书，同步间隔...）
+		**	设置 gcIgnoredResources
+		**	var ignoredResources = map[schema.GroupResource]struct{}{
+		**		{Group: &quot;&quot;, Resource: &quot;events&quot;}: {},
+		**	}
+		*/
+		NewKubeControllerManagerOptions()		// creates a new KubeControllerManagerOptions with a default config.
+		cmd := &amp;cobra.Command{
+			// ...
+
+			Run: func (cmd *cobra.Command, args []string) {}
+				//...
+
+				s.Config(KnownControllers(), ControllersDisabledByDefault.List())
+				// ControllersDisabledByDefault = sets.NewString(&quot;bootstrapsigner&quot;, &quot;tokencleaner&quot;,)
+					s.Validate(allControllers, disabledByDefaultControllers)	// validate all controllers options and config
+					client, err := clientset.NewForConfig(restclient.AddUserAgent(kubeconfig, KubeControllerManagerUserAgent))
+					leaderElectionClient := clientset.NewForConfigOrDie(restclient.AddUserAgent(&amp;config, &quot;leader-election&quot;))
+					// an EventRecorder can be used to send events to this EventBroadcaster
+					// with the event source set to the given event source.
+					eventRecorder := createRecorder(client, KubeControllerManagerUserAgent)
+						func createRecorder(kubeClient clientset.Interface, userAgent string) record.EventRecorder {}
+							eventBroadcaster.StartRecordingToSink(&amp;v1core.EventSinkImpl{Interface: kubeClient.CoreV1().Events(&quot;&quot;)})
+							return eventBroadcaster.NewRecorder(clientgokubescheme.Scheme, v1.EventSource{Component: userAgent})
+					c := &amp;kubecontrollerconfig.Config{
+						Client:               client,
+						Kubeconfig:           kubeconfig,
+						EventRecorder:        eventRecorder,
+						LeaderElectionClient: leaderElectionClient,
+					}				
+				KnownControllers()
+					// NewControllerInitializers is a public map of named controller groups (you can start more than one in an init func)
+					// paired to their InitFunc. 
+					NewControllerInitializers(loopMode ControllerLoopMode) map[string]InitFunc {}
+						controllers[&quot;endpoint&quot;] = startEndpointController
+						controllers[&quot;replicationcontroller&quot;] = startReplicationController
+						controllers[&quot;podgc&quot;] = startPodGCController
+						controllers[&quot;resourcequota&quot;] = startResourceQuotaController
+						controllers[&quot;namespace&quot;] = startNamespaceController
+						controllers[&quot;serviceaccount&quot;] = startServiceAccountController
+						controllers[&quot;garbagecollector&quot;] = startGarbageCollectorController
+						controllers[&quot;daemonset&quot;] = startDaemonSetController
+						controllers[&quot;job&quot;] = startJobController
+						controllers[&quot;deployment&quot;] = startDeploymentController
+						controllers[&quot;replicaset&quot;] = startReplicaSetController
+						controllers[&quot;horizontalpodautoscaling&quot;] = startHPAController
+						controllers[&quot;disruption&quot;] = startDisruptionController
+						controllers[&quot;statefulset&quot;] = startStatefulSetController
+						controllers[&quot;cronjob&quot;] = startCronJobController
+						controllers[&quot;csrsigning&quot;] = startCSRSigningController
+						controllers[&quot;csrapproving&quot;] = startCSRApprovingController
+						controllers[&quot;csrcleaner&quot;] = startCSRCleanerController
+						controllers[&quot;ttl&quot;] = startTTLController
+						controllers[&quot;bootstrapsigner&quot;] = startBootstrapSignerController
+						controllers[&quot;tokencleaner&quot;] = startTokenCleanerController
+						controllers[&quot;nodeipam&quot;] = startNodeIpamController
+						controllers[&quot;nodelifecycle&quot;] = startNodeLifecycleController
+						controllers[&quot;persistentvolume-binder&quot;] = startPersistentVolumeBinderController
+						controllers[&quot;attachdetach&quot;] = startAttachDetachController
+						controllers[&quot;persistentvolume-expander&quot;] = startVolumeExpandController
+						controllers[&quot;clusterrole-aggregation&quot;] = startClusterRoleAggregrationController
+						controllers[&quot;pvc-protection&quot;] = startPVCProtectionController
+						controllers[&quot;pv-protection&quot;] = startPVProtectionController
+						controllers[&quot;ttl-after-finished&quot;] = startTTLAfterFinishedController
+						controllers[&quot;root-ca-cert-publisher&quot;] = startRootCACertPublisher
+				Run(c.Complete(), wait.NeverStop)
+					configz.New(ConfigzName)	// ConfigzName=&quot;kubecontrollermanager.config.k8s.io&quot;
+					// Start the controller manager HTTP server. insecure as example.
+					unsecuredMux = genericcontrollermanager.NewBaseHandler(&amp;c.ComponentConfig.Generic.Debugging, checks...)
+					insecureSuperuserAuthn := server.AuthenticationInfo{Authenticator: &amp;server.InsecureSuperuser{}}
+					handler := genericcontrollermanager.BuildHandlerChain(unsecuredMux, nil, &amp;insecureSuperuserAuthn)
+					InsecureServing.Serve(handler, 0, stopCh)
+						RunServer(insecureServer, s.Listener, shutdownTimeout, stopCh)
+					run := func(ctx context.Context) {}
+						rootClientBuilder := controller.SimpleControllerClientBuilder{
+							ClientConfig: c.Kubeconfig,
+						}
+						controllerContext, err := CreateControllerContext(c, rootClientBuilder, clientBuilder, ctx.Done())
+						// CreateControllerContext creates a context struct containing references to resources needed by the
+						// controllers such as the cloud provider and clientBuilder. rootClientBuilder is only used for
+						// the shared-informers client and token controller.
+						func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clientBuilder controller.ControllerClientBuilder, stop &lt;-chan struct{}) (ControllerContext, error) {}
+							versionedClient := rootClientBuilder.ClientOrDie(&quot;shared-informers&quot;)
+							sharedInformers := informers.NewSharedInformerFactory(versionedClient, ResyncPeriod(s)())
+							
+							// If apiserver is not running we should wait for some time and fail only then. This is particularly
+							// important when we start apiserver and controller manager at the same time.
+							genericcontrollermanager.WaitForAPIServer(versionedClient, 10*time.Second)
+							// returns the supported resources for all groups and versions, by request &quot;/apis/.......&quot;
+							availableResources, err := GetAvailableResources(rootClientBuilder)
+							ctx := ControllerContext{
+								ClientBuilder:      clientBuilder,
+								InformerFactory:    sharedInformers,
+								ComponentConfig:    s.ComponentConfig,
+								RESTMapper:         restMapper,
+								AvailableResources: availableResources,
+								Cloud:              cloud,
+								LoopMode:           loopMode,
+								Stop:               stop,
+								InformersStarted:   make(chan struct{}),
+								ResyncPeriod:       ResyncPeriod(s),
+							}
+
+						// serviceAccountTokenControllerStarter is special because it must run first to set up permissions for other controllers.
+						// It cannot use the &quot;normal&quot; client builder, so it tracks its own. It must also avoid being included in the &quot;normal&quot;
+						// init map so that it can always run first.
+						saTokenControllerInitFunc := serviceAccountTokenControllerStarter{rootClientBuilder: rootClientBuilder}.startServiceAccountTokenController
+						startServiceAccountTokenController() {}
+							// 获取相关证书
+							// ...
+
+							controller, err := serviceaccountcontroller.NewTokensController(
+								ctx.InformerFactory.Core().V1().ServiceAccounts(),
+								ctx.InformerFactory.Core().V1().Secrets(),
+								c.rootClientBuilder.ClientOrDie(&quot;tokens-controller&quot;),
+								serviceaccountcontroller.TokensControllerOptions{
+									TokenGenerator: tokenGenerator,
+									RootCA:         rootCA,
+								},
+							)
+							NewTokensController() {}	// watch queueServiceAccountSync event 和 queueSecretSync event
+
+						StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux)
+							startSATokenController(ctx)	// 先启动 SATokenController
+							for controllerName, initFn := range controllers {
+								IsControllerEnabled	// 判断是否启用 controller
+								// Jitter returns a time.Duration between duration and duration + maxFactor * duration.
+								// This allows clients to avoid converging on periodic behavior. If maxFactor
+								// is 0.0, a suggested default value will be chosen.
+								time.Sleep(wait.Jitter(ctx.ComponentConfig.Generic.ControllerStartInterval.Duration, ControllerStartJitter))
+								debugHandler, started, err := initFn(ctx)
+								// 
+								if debugHandler != nil &amp;&amp; unsecuredMux != nil {
+									basePath := &quot;/debug/controllers/&quot; + controllerName
+									unsecuredMux.UnlistedHandle(basePath, http.StripPrefix(basePath, debugHandler))
+									unsecuredMux.UnlistedHandlePrefix(basePath+&quot;/&quot;, http.StripPrefix(basePath, debugHandler))
+								}
+							}
+						controllerContext.InformerFactory.Start(controllerContext.Stop)
+
+						// InformersStarted is closed after all of the controllers have been initialized and are running.  After this point it is safe,
+						// for an individual controller to start the shared informers. Before it is closed, they should not.
+						close(controllerContext.InformersStarted)	// !!!!!
+				
+					// leader 选举，通过获取锁成为 leader
+					leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig{
+						Lock:          rl,
+						// ... ...
+						Callbacks: leaderelection.LeaderCallbacks{
+							OnStartedLeading: run,
+							OnStoppedLeading: func() {
+								klog.Fatalf(&quot;leaderelection lost&quot;)
+							},
+						},
+						WatchDog: electionChecker,
+						Name:     &quot;kube-controller-manager&quot;,
+					})
+		}
+</code></pre>
+
+<h2 id="cmd-run">cmd.Run</h2>
+
+<p>目前的 kubernetes 组件全都采用 <a href="https://github.com/spf13/cobra">cobra</a> 构建。核心的启动流程都在生成的 <code>cobra.Command</code> 实例 <code>cmd</code> 的 <code>Run()</code> 方法中。<br />
+<code>Run</code> 方法执行了两个方法，<code>s.Config(KnownControllers(), ControllersDisabledByDefault.List())</code>, <code>Run(c.Complete(), wait.NeverStop)</code>。</p>
+
+<h2 id="s-config-knowncontrollers-controllersdisabledbydefault-list">s.Config(KnownControllers(), ControllersDisabledByDefault.List())</h2>
+
+<p><code>KnownControllers()</code> 方法调用了 <code>NewControllerInitializers()</code>, 生成一个 <code>map[string]InitFunc{}</code> 的map，保存了 controller 和对应的启动方法的映射。<code>s.Config</code> 方法返回了 controller-manager 的配置，首先对所有 controllers 进行 validate，然后会构建一个 k8s clientset 和 一个 <code>EventRecorder</code> 对象，具体事件记录的方式，会在后面分析。</p>
+
+<pre><code class="language-golang">// EventRecorder knows how to record events on behalf of an EventSource.
+// an EventRecorder can be used to send events to this EventBroadcaster
+// with the event source set to the given event source.
+type EventRecorder interface {
+	// Event constructs an event from the given information and puts it in the queue for sending.
+	// The resulting event will be created in the same namespace as the reference object.
+	Event(object runtime.Object, eventtype, reason, message string)
+
+	// Eventf is just like Event, but with Sprintf for the message field.
+	Eventf(object runtime.Object, eventtype, reason, messageFmt string, args ...interface{})
+
+	// PastEventf is just like Eventf, but with an option to specify the event's 'timestamp' field.
+	PastEventf(object runtime.Object, timestamp metav1.Time, eventtype, reason, messageFmt string, args ...interface{})
+
+	// AnnotatedEventf is just like eventf, but with annotations attached
+	AnnotatedEventf(object runtime.Object, annotations map[string]string, eventtype, reason, messageFmt string, args ...interface{})
+}
+</code></pre>
+
+<h2 id="run-c-complete-wait-neverstop">Run(c.Complete(), wait.NeverStop)</h2>
+
+<p>首先<code>configz.New(ConfigzName)</code>生成 controller-manager 的配置对象，用名称<code>kubecontrollermanager.config.k8s.io</code>注册到注册到路由<code>/configz</code>上，可以直接通过 controller-manager 的地址访问到。接着，会新建一个 BaseHandler 实例并启动 HTTP server，用来注册 controller manager 的 <code>/metric</code> 和 <code>/healthz</code> 接口。接下来，定义了一个内部方法<code>run()</code>, 启动 controller-manager 的主要操作，都在这个方法中完成。<br />
+<code>run()</code>方法首先创建一个<code>ControllerContext</code>, 结构体如下，主要包含 controllers 所需要资源的引用，如 kubernetes 的 clientset 和informer。AvailableResources 由<code>GetAvailableResources</code>方法获取，通过 apiserver 的<code>/api/...</code>接口获取集群支持的所有 group 和 version 资源。然后开始启动 controllers，在启动其他 controller 前，一定先启动 SATokenController，因为它必须先为其他 controller 创建所需的 token 授权，所以启动<code>SATokenController</code>的方法独立于启动其他 controller 的循环之外，作为最先启动的一个。<code>startServiceAccountTokenController</code> watch 了<code>ServiceAccount</code>和<code>secret</code>的增删改事件，并同步本地的 queue 缓存。接下来才会调用<code>StartControllers</code>方法依次调用其他 controller 的 <code>InitFunc</code> 启动 controllers。最后启动 <code>controllerContext</code> 的 InformerFactory 并执行<code>close(controllerContext.InformersStarted)</code>。这里的<code>controllerContext.InformersStarted</code>是<code>chan struct{}</code>类型，当这个 channel 被关闭了，代表所有 controllers 都被初始化并运行起来了，独立的 controller 应该在他关闭后再启动 sharedInformer。</p>
+
+<pre><code class="language-golang">type ControllerContext struct {
+	// ClientBuilder will provide a client for this controller to use
+	ClientBuilder controller.ControllerClientBuilder
+
+	// InformerFactory gives access to informers for the controller.
+	InformerFactory informers.SharedInformerFactory
+
+	// ComponentConfig provides access to init options for a given controller
+	ComponentConfig kubectrlmgrconfig.KubeControllerManagerConfiguration
+
+	// DeferredDiscoveryRESTMapper is a RESTMapper that will defer
+	// initialization of the RESTMapper until the first mapping is
+	// requested.
+	RESTMapper *restmapper.DeferredDiscoveryRESTMapper
+
+	// AvailableResources is a map listing currently available resources
+	AvailableResources map[schema.GroupVersionResource]bool
+
+	// Cloud is the cloud provider interface for the controllers to use.
+	// It must be initialized and ready to use.
+	Cloud cloudprovider.Interface
+
+	// Control for which control loops to be run
+	// IncludeCloudLoops is for a kube-controller-manager running all loops
+	// ExternalLoops is for a kube-controller-manager running with a cloud-controller-manager
+	LoopMode ControllerLoopMode
+
+	// Stop is the stop channel
+	Stop &lt;-chan struct{}
+
+	// InformersStarted is closed after all of the controllers have been initialized and are running.  After this point it is safe,
+	// for an individual controller to start the shared informers. Before it is closed, they should not.
+	InformersStarted chan struct{}
+
+	// ResyncPeriod generates a duration each time it is invoked; this is so that
+	// multiple controllers don't get into lock-step and all hammer the apiserver
+	// with list requests simultaneously.
+	ResyncPeriod func() time.Duration
+}
+</code></pre>
+
+<p>最后，会执行<code>leaderelection.RunOrDie</code>方法不断尝试获取或更新(<code>tryAcquireOrRenew</code>) leader lease，成功获取到的即为 leader，并执行上面的<code>run()</code>方法。实际上就是去获取一个锁并有一定有效期，当一个 contoller-manager 实例获取到锁并且超出了有效期，那么这个实例就会成为leader，成为 leader 的实例仍然会不断执行<code>tryAcquireOrRenew</code>来更新获取时间<code>AcquireTime</code>以延长有效期。(leader 选举的逻辑在 k8s.io\client-go\tools\leaderelection\leaderelection.go)</p>
+
+<h2 id="controllers">controllers</h2>
+
+<p>上面就是 controller-manager 的整体启动流程和代码结构。接下来会具体分析几个核心的 controller。</p>
+
+<h3 id="replicasetcontroller">replicasetcontroller</h3>
+
+<p>kubernetes\pkg\controller\replicaset\replica_set.go</p>
 
 <footer class=" footline" >
 	
 </footer>
+
 
         
         </div> 
@@ -885,6 +1157,7 @@
             
                 
                     
+                    
                 
                 
 
@@ -899,6 +1172,9 @@
             
             
                 
+                    
+                        
+                        
                     
                 
                 
@@ -980,6 +1256,26 @@
             
                 
                     
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
                 
                 
 
@@ -1023,22 +1319,6 @@
             
         
                     
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
             
         
                     
@@ -1047,7 +1327,6 @@
             
                 
                     
-                    
                 
                 
 
@@ -1062,9 +1341,6 @@
             
             
                 
-                    
-                        
-                        
                     
                 
                 
@@ -1148,3 +1424,4 @@
 
   </body>
 </html>
+

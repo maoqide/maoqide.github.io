@@ -49,11 +49,11 @@ sync.Mutex  Mutex 为互斥锁，Lock() 加锁，Unlock() 解锁
     </item>
     
     <item>
-      <title>Kube Scheduler</title>
-      <link>/cloud/kube-scheduler/</link>
+      <title>Kube Scheduler 源码阅读</title>
+      <link>/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
       
-      <guid>/cloud/kube-scheduler/</guid>
+      <guid>/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>NewSchedulerCommand() runCommand() opts.Config()	// create client &amp;amp; informer func Run(cc schedulerserverconfig.CompletedConfig, stopCh &amp;lt;-chan struct{}) error {} run := func(ctx context.Context) {} sched.Run() // Run begins watching and scheduling. It waits for cache to be synced, then starts a goroutine and returns immediately. func (sched *Scheduler) Run() {} go wait.Until(sched.scheduleOne, 0, sched.config.StopEverything) // scheduleOne does the entire scheduling workflow for a single pod. func (sched *Scheduler) scheduleOne() {} pod := sched.config.NextPod() sched.</description>
     </item>
     
@@ -71,6 +71,9 @@ golang for range
 备用链接
  一致性哈希算法。
 https://segmentfault.com/a/1190000013533592
+备用链接
+ ETCD的一些使用场景及原理分析。 https://infoq.cn/article/etcd-interpretation-application-scenario-implement-principle 备用链接
+ ETCD Raft 算法解析。 https://draveness.me/etcd-introduction
 备用链接
   </description>
     </item>
@@ -111,11 +114,11 @@ https://blog.csdn.net/weixin_42663840/article/details/81699303
     </item>
     
     <item>
-      <title>Controller Manager</title>
-      <link>/cloud/controller-manager/</link>
+      <title>Controller Manager 源码阅读</title>
+      <link>/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>
       
-      <guid>/cloud/controller-manager/</guid>
+      <guid>/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s controller-manager 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
@@ -144,11 +147,11 @@ https://blog.csdn.net/weixin_42663840/article/details/81699303
     </item>
     
     <item>
-      <title>Apiserver</title>
-      <link>/cloud/apiserver/</link>
+      <title>Apiserver 源码阅读</title>
+      <link>/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 19:46:06 +0800</pubDate>
       
-      <guid>/cloud/apiserver/</guid>
+      <guid>/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s apiserver 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
