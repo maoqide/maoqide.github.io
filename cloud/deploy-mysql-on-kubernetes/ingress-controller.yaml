@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     run: haproxy-ingress
-  name: haproxy-ingress-20.26.38.123-30080
+  name: haproxy-ingress-192.168.0.1-3306
   namespace: mysql2
 spec:
   replicas: 1
@@ -42,7 +42,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.namespace
-        image: 20.26.28.56/kubernetes/haproxy-ingress
+        image: jcmoraisjr/haproxy-ingress
         name: haproxy-ingress
         ports:
         - containerPort: 3306
