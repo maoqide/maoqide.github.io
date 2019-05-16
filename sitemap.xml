@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/cloud/deploy-mysql-on-kubernetes/</loc>
+    <lastmod>2019-05-16T14:06:37+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/cloud/sample-controller/</loc>
     <lastmod>2019-03-18T12:53:41+08:00</lastmod>
   </url>
