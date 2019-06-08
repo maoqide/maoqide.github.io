@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Container Network</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Container Network">
+    <meta name="twitter:description" content="容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Container Network">
+  <meta property="og:description" content="容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。
+">
+  <meta property="og:url" content="/post/cloud/container-network/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.51">
+
+
+<link rel="canonical" href="/post/cloud/container-network/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Container Network</h1>
+      <p class="post-meta">@Maoqide · Jan 22, 2019 · 2 min read</p>
+    </header>
+    <article class="post-content"><p>容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。</p>
+
+<p><em>参考极客时间 <a href="https://time.geekbang.org/column/article/65287">https://time.geekbang.org/column/article/65287</a></em></p>
+
+<h2 id="同主机">同主机</h2>
+
+<p><strong>Veth Pair</strong></p>
+
+<p><img src="/media/posts/cloud/container-network/container-network-1.jpg" alt="" /></p>
+
+<p>如上图，同主机容器，通过容器启动时创建的一对 Veth Pair 设备进行外部通信，Veth Pair 设备一端插在宿主机 <code>docker0</code>网桥上，一端是容器内的<code>eth0</code>网卡, 在宿主机上执行<code>brctl show docker0</code>可以查看连到<code>docker0</code>网桥上的设备。<br />
+容器内默认的路由表：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">bash-4.3# route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         <span style="color:#ae81ff">172</span>.17.0.1      <span style="color:#ae81ff">0</span>.0.0.0         UG    <span style="color:#ae81ff">0</span>      <span style="color:#ae81ff">0</span>        <span style="color:#ae81ff">0</span> eth0
+<span style="color:#ae81ff">172</span>.17.0.0      *               <span style="color:#ae81ff">255</span>.255.0.0     U     <span style="color:#ae81ff">0</span>      <span style="color:#ae81ff">0</span>        <span style="color:#ae81ff">0</span> eth0</code></pre></div>
+<p>当同一主机上的容器 container1 需要和 container2 通信时，根据路由规则，container1 通过 eth0 网卡发往 container2 地址，两容器 IP 处于同一网段，container1 通过 ARP 协议获得 container2 MAC 地址，就可以将消息发送出去。</p>
+
+<h2 id="跨主机">跨主机</h2>
+
+<h3 id="flannel">Flannel</h3>
+
+<ul>
+<li>UDP<br /></li>
+<li>VXLAN<br /></li>
+<li>host-gw<br /></li>
+</ul>
+
+<h4 id="udp">UDP</h4>
+
+<p>UDP 模式的是性能最差的方式，目前已弃用。(因为在通信过程中要进行多次用户态到内核态的切换)<br />
+<img src="/media/posts/cloud/container-network/container-network-flannel-udp.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
+
+<p>如上图，flannel 会在每台宿主机上创建一系列的路由规则，一个 TUN 设备 flannel0(TUN 设备是一种工作在三层的虚拟网络设备，可以在内核和用户应用程序间传递IP包)，以及启动 flanneld 进程，监听 8285 端口。<br />
+flannel 还会为 flannel 网络内的每台主机分配一个 subnet，容器会从所在宿主机的 subnet 中获取 IP。subnet 和 宿主机的对应关系保存在 etcd 中。<br />
+当 node1 上的容器 container1 发送数据给同一 flannel 网络内节点 node2 上的容器 container2 时，因为两容器 IP 不在同一网段，首先会通过容器网关进入 docker0 网桥到达宿主机，然后又根据 flannel 创建的路由规则进入到 flannel0，并由 flannel0 转给 flanneld 进程， flannel 会根据目的容器 container2 的 IP 匹配到它对应的 subnet(100.96.2.0/24)，并从 etcd 中通过 subnet 获取到对应宿主机 node2 的 IP，这样，node1 上的 flanneld 进程就可以将数据发送给 node2上 的 flanneld 进程，进而将数据发送到目的容器。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ ip route
+default via <span style="color:#ae81ff">10</span>.168.0.1 dev eth0
+<span style="color:#75715e"># 非本机 subnet 下的 flannel 网络范围内的地址默认匹配到 flannel0</span>
+<span style="color:#ae81ff">100</span>.96.0.0/16 dev flannel0  proto kernel  scope link  src <span style="color:#ae81ff">100</span>.96.1.0
+<span style="color:#75715e"># 本机 subnet 下的地址匹配到 docker0</span>
+<span style="color:#ae81ff">100</span>.96.1.0/24 dev docker0  proto kernel  scope link  src <span style="color:#ae81ff">100</span>.96.1.1
+<span style="color:#ae81ff">10</span>.168.0.0/24 dev eth0  proto kernel  scope link  src <span style="color:#ae81ff">10</span>.168.0.2</code></pre></div>
+<p><strong>UDP模式下，docker0 网桥的地址范围必须是 flannel 为宿主机分配的子网。</strong></p>
+
+<h4 id="vxlan">VXLAN</h4>
+
+<p>VXLAN 模式封包解包都是在内核态中进行，所以和 UDP 模式相比性能较好。
+<img src="/media/posts/cloud/container-network/container-network-flannel-vxlan.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
+
+<p>vxlan 模式下，flannel 会在每台宿主机上创建路由规则，一个 VTEP(虚拟隧道端点) 设备 flannel.1。在通信过程中，封包解包操作直接由 VTEP 在内核态完成，而不用 flanneld 进行处理，这些 VTEP 间组成一个虚拟的二层网络，通过二层数据帧进行通信。<br />
+当 node1 上的容器 container1 发送数据给同一 flannel 网络内节点 node2 上的容器 container2 时，同样先通过 docker0 到达宿主机 node1，然后会被转发到本机 VTEP 设备 flannel.1 进行处理；当一个节点加入 flannel 后，其他所有节点的 flanneld 进程都会在本地添加一条路由规则，即发往目的节点对应网段的数据包，都要经过 flannel.1 最终发往目的节点的 VTEP 设备的 IP 地址。根据这条规则，node1 的 flannel.1 设备收到数据包后，就要获 node2 的 VTEP 设备的 MAC 地址，将数据包封装成二层数据帧。为了可以获取 VTEP 的 MAC 地址，flanneld 进程会在新的节点加入后，在所有节点添加一条 ARP 记录，记录新节点 IP 对应的 MAC 地址，这样，Linux 内核就可以通过 ARP 记录直接获取到目的节点的 VTEP 设备的 MAC 地址并封装成数据帧(内部数据帧)，为了能够在宿主机网络传输，Linux 内核会再将此数据帧加上一个 VXLAN 头封装成外部数据帧。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+...
+<span style="color:#75715e"># flannel 当 node2 启动，其他所有节点会添加如下规则，即发往 10.1.16.0/24 网段的数据包，</span>
+<span style="color:#75715e"># 都要经过 flannel.1, 且最终发往的网关地址为 10.1.16.0, 即 node2 上的 VTEP 设备 IP 地址。</span>
+<span style="color:#ae81ff">10</span>.1.16.0       <span style="color:#ae81ff">10</span>.1.16.0       <span style="color:#ae81ff">255</span>.255.255.0   UG    <span style="color:#ae81ff">0</span>      <span style="color:#ae81ff">0</span>        <span style="color:#ae81ff">0</span> flannel.1</code></pre></div>
+<p>为了数据包能从 node1 的 flannel.1 设备发送到 node2 的flannel.1 设备上，还是需要借助宿主机网络从 node1 的 eth0 网卡发出到 node2 的 eth0 网卡。如何知道目的 VTEP 设备的宿主机地址呢? 此时 flannel.1 设备充当网桥的角色，在二层网络进行 UDP 包的转发。并由 flanneld 负责维护 falnnel.1 对应的 FDB 信息，通过 FDB 记录查询网桥转发的规则，这样就找到了 UDP 包要被发往的宿主机地址，接下来就可以通过正常的发包流程将数据发出去了。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 在 Node 1 上，使用“目的 VTEP 设备”的 MAC 地址进行查询</span>
+$ bridge fdb show flannel.1 | grep 5e:f8:4f:00:e3:37
+5e:f8:4f:00:e3:37 dev flannel.1 dst <span style="color:#ae81ff">10</span>.168.0.3 self permanent</code></pre></div>
+<p><img src="/media/posts/cloud/container-network/flannel-vxlan.jpg" alt="" /></p>
+
+<h4 id="host-gw">host-gw</h4>
+
+<p>host-gw 模式下，flanneld 在每台宿主机上创建路由规则，将每个 flannel 子网的下一跳，设置成该子网对应的宿主机的 IP 地址。也就是说，这台宿主机会充当这条容器通信路径中的*网关*。Flannel 子网和主机的信息，都保存在 ETCD 中，由 flanneld 监听 ETCD 中的数据变化，并实时更新路由表。<br />
+<img src="/media/posts/cloud/container-network/container-network-flannel-host-gateway.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
+
+<p>host-gw 模式要求宿主机直接二层连通。</p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
+        
+          <li><a href="/tags/container-network"><span class="tag">Container-Network</span></a></li>
+        
+          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+        
+          <li><a href="/tags/docker"><span class="tag">Docker</span></a></li>
+        
+          <li><a href="/tags/flannel"><span class="tag">Flannel</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.This post was published <strong>137</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>

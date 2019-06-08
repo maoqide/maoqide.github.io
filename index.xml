@@ -6,161 +6,196 @@
     <description>Recent content on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 16 Mar 2019 21:34:46 +0800</lastBuildDate>
+    <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
+    <lastBuildDate>Sat, 08 Jun 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>About</title>
+      <link>/about/</link>
+      <pubDate>Sat, 08 Jun 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/about/</guid>
+      <description>A Programmer.
+A Gopher.
+Working on Cloud Native.
+Keep Learning.
+Vultr.com 推广链接
+https://www.vultr.com/?ref=8128045</description>
+    </item>
+    
+    <item>
+      <title>Deploy Mysql on Kubernetes</title>
+      <link>/post/cloud/deploy-mysql-on-kubernetes/</link>
+      <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
+      
+      <guid>/post/cloud/deploy-mysql-on-kubernetes/</guid>
+      <description>&lt;p&gt;本文通过 &lt;a href=&#34;https://github.com/oracle/mysql-operator&#34;&gt;mysql-operator&lt;/a&gt; 在kubernetes集群部署高可用的mysql statefulset。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Sample Controller</title>
+      <link>/post/cloud/sample-controller/</link>
+      <pubDate>Mon, 18 Mar 2019 12:53:41 +0800</pubDate>
+      
+      <guid>/post/cloud/sample-controller/</guid>
+      <description>&lt;p&gt;自己构建 sample-controller.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Building an Operator for Kubernetes With the Sample Controller</title>
-      <link>/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
+      <link>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
       <pubDate>Sat, 16 Mar 2019 21:34:46 +0800</pubDate>
       
-      <guid>/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
-      <description>An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.  Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。
-Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。
-[译] https://itnext.io/building-an-operator-for-kubernetes-with-the-sample-controller-b4204be9ad56
-The sample-controller 创建示例的 operator 程序需要用到的第一个工具是 sample-controller, 可以在 https://github.com/kubernetes/sample-controller 找到。
-这个项目实现了一个简单的 Foo 类型的 operator, 当创建一个自定义类型的对象 foo，operator 会创建一个 以几个公开的 docker 镜像和特定的副本数创建一个 Deployment。
-要安装和编译它，需要确认你的 GOPATH，然后执行:</description>
+      <guid>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
+      <description>&lt;pre&gt;&lt;code&gt;An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。&lt;br /&gt;
+Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Golang Mutex</title>
-      <link>/golang/golang-mutex/</link>
+      <link>/post/golang/golang-mutex/</link>
       <pubDate>Mon, 11 Mar 2019 16:35:20 +0800</pubDate>
       
-      <guid>/golang/golang-mutex/</guid>
-      <description>golang 的sync包中有两种锁，互斥锁sync.Mutex 和读写锁sync.RWMutex。
-sync.Mutex  Mutex 为互斥锁，Lock() 加锁，Unlock() 解锁
- 使用 Lock() 加锁后，在使用Unlock()解锁前便不能再次对其进行加锁，否则会导致死锁
- 在Lock()前使用Unlock()会导致 panic 异常
- 适用于读写不确定场景，即读写次数没有明显的区别，并且只允许只有一个读或者写的场景
-  sync.RWMutex  RWMutex 是单写多读锁，可以加多个读锁或者一个写锁
- 读锁占用的情况下会阻止写，不会阻止读，多个 goroutine 可以同时获取读锁
- 写锁会阻止其他 goroutine（无论读和写）进来，整个锁由该 goroutine 独占
- 适用于读多写少的场景
-  Lock()/Unlock()  Lock() 加写锁，Unlock() 解写锁
- 写锁权限高于读锁，有写锁时优先加写锁
- 在 Lock() 之前使用 Unlock() 会导致 panic 异常
-  RLock()/RUnlock()  RLock() 加读锁，RUnlock() 解读锁
- RLock() 加读锁时，如果存在写锁，则无法加读锁；当只有读锁或者没有锁时，可以加读锁，读锁可以加多个
- RUnlock() 解读锁，RUnlock() 撤销单次 RLock() 调用，对于其他同时存在的读锁没有作用</description>
+      <guid>/post/golang/golang-mutex/</guid>
+      <description>&lt;p&gt;golang 的&lt;code&gt;sync&lt;/code&gt;包中有两种锁，互斥锁&lt;code&gt;sync.Mutex&lt;/code&gt; 和读写锁&lt;code&gt;sync.RWMutex&lt;/code&gt;。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Kube Scheduler 源码阅读</title>
-      <link>/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
       
-      <guid>/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
-      <description>NewSchedulerCommand() runCommand() opts.Config()	// create client &amp;amp; informer func Run(cc schedulerserverconfig.CompletedConfig, stopCh &amp;lt;-chan struct{}) error {} run := func(ctx context.Context) {} sched.Run() // Run begins watching and scheduling. It waits for cache to be synced, then starts a goroutine and returns immediately. func (sched *Scheduler) Run() {} go wait.Until(sched.scheduleOne, 0, sched.config.StopEverything) // scheduleOne does the entire scheduling workflow for a single pod. func (sched *Scheduler) scheduleOne() {} pod := sched.config.NextPod() sched.</description>
-    </item>
-    
-    <item>
-      <title>Collection 2</title>
-      <link>/collection/collection-2/</link>
-      <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
-      
-      <guid>/collection/collection-2/</guid>
-      <description> goroutine 调度器解析。
-https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/
-备用链接
- Golang for range性能分析及优化: for range 会有元素拷贝操作，造成性能方面的影响。
-golang for range
-备用链接
- 一致性哈希算法。
-https://segmentfault.com/a/1190000013533592
-备用链接
- ETCD的一些使用场景及原理分析。 https://infoq.cn/article/etcd-interpretation-application-scenario-implement-principle 备用链接
- ETCD Raft 算法解析。 https://draveness.me/etcd-introduction
-备用链接
-  </description>
-    </item>
-    
-    <item>
-      <title>Build Blog With Hugo</title>
-      <link>/notes/build-blog-with-hugo/</link>
-      <pubDate>Tue, 04 Dec 2018 18:37:11 +0800</pubDate>
-      
-      <guid>/notes/build-blog-with-hugo/</guid>
-      <description>documentations https://gohugo.io/getting-started/usage/ https://learn.netlify.com/en/
-setup  install hugo following offical install guide.
-download packages from Hugo Release and put executale file hugo in PATH.
- execute hugo new site sitename, To create a new site. directory structure will like this:
-. ├── archetypes ├── assets ├── config.toml ├── content ├── data ├── layouts ├── static └── themes  download theme from github. unzip the archive and copy files to you site dir, overwriting directory and files of the same name.</description>
-    </item>
-    
-    <item>
-      <title>Collection 1</title>
-      <link>/collection/collection-1/</link>
-      <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
-      
-      <guid>/collection/collection-1/</guid>
-      <description> Mesos 的资源分配，解释 mesos 的二级调度和资源邀约机制，并详细介绍了保证资源分配公平的DRF算法（主导资源公平算法 Dominant Resource Fairness）。
-https://www.infoq.cn/article/analyse-mesos-part-04
-备用链接
- Kubernetes调度详解。
-http://dockone.io/article/2885
-备用链接
-https://cizixs.com/2017/07/19/kubernetes-scheduler-source-code-analysis/
-备用链接
- Istio 调用链埋点/tracing: 使用 istio 做调用链跟踪依旧需要修改一定业务代码，微服务间请求时需要配合在请求头上传递 sidecar 生成的 Trace 相关信息，才能将调用关联到同一个 trace 上，否则每次请求都会形成新的割裂的 Trace 信息。
-https://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt
-备用链接
- kubernetes informer 解析。
-https://blog.csdn.net/weixin_42663840/article/details/81699303
-  </description>
+      <guid>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <description>&lt;p&gt;k8s kube-scheduler 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Controller Manager 源码阅读</title>
-      <link>/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>
       
-      <guid>/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s controller-manager 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
+      <title>Awesome Post Collection 2</title>
+      <link>/post/awesome-post/collection-2/</link>
+      <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
+      
+      <guid>/post/awesome-post/collection-2/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;goroutine 调度器。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Golang &lt;code&gt;for range&lt;/code&gt;性能分析及优化。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;一致性哈希算法。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;ETCD的一些使用场景及原理分析。&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Container Network</title>
+      <link>/post/cloud/container-network/</link>
+      <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
+      
+      <guid>/post/cloud/container-network/</guid>
+      <description>&lt;p&gt;容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Docker 原理</title>
+      <link>/post/cloud/docker-%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Thu, 17 Jan 2019 14:08:37 +0800</pubDate>
+      
+      <guid>/post/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;Namespace&lt;/li&gt;
+&lt;li&gt;Cgroup&lt;/li&gt;
+&lt;li&gt;UnionFS&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>将网站部署在 Kubernetes 上</title>
+      <link>/post/notes/publish-your-site-on-k8s/</link>
+      <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
+      
+      <guid>/post/notes/publish-your-site-on-k8s/</guid>
+      <description>&lt;p&gt;将自己的博客网站发布到自己的 Kubernetes 集群上。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Goroutine 的管理</title>
-      <link>/golang/goroutine/</link>
+      <link>/post/golang/goroutine/</link>
       <pubDate>Fri, 28 Dec 2018 16:29:32 +0800</pubDate>
       
-      <guid>/golang/goroutine/</guid>
-      <description>goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 pprof 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。
-几点原则 go-best-practices-concurrency
-在 github上的 go-best-practices 项目中，提到了几点最佳实践，这里记录下。
-不要和 goroutine 失去联系  Don&amp;rsquo;t loose contact with your goroutines
- 如何避免? 使用make(chan struct{})/sync.WaitGroup/context.Context或select。
-你可能需要这样：
-1. 当必要的时候可以*中断*创建的 goroutine。
-2. 等待直到产生的所有 goroutine 都完成了。
-中断(Interruption)
-可以用以下方式实现：
-1. 共享一个无缓冲的空结构体通道（make（chan struct {}）），由 goroutine 的创建者发出关闭信号以关闭。
-2. 一个可取消的context.Context。
-3. 确保你的 goroutine 使用select来不时检查他们的信号，而不会无限期地阻塞住。
-等待 goroutine 完成(Waiting for goroutines to finish)
-实现的最简单方法是使用sync.WaitGroup。在创建 goroutine 之前，请确保调用了wg.Add(1)。在运行 goroutine 之后，但在它 return 之前，请确保wg.Done()。这种场景下，defer是很好的选择。
-不要用 WaitGroup 来计数多种类型的 goroutine  Don&amp;rsquo;t use wait groups to count more than one type of goroutine</description>
+      <guid>/post/golang/goroutine/</guid>
+      <description>&lt;p&gt;goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 &lt;a href=&#34;https://golang.org/pkg/net/http/pprof/&#34;&gt;pprof&lt;/a&gt; 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Basic Data Structure</title>
+      <link>/post/algorithm/basic-data-structure/</link>
+      <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
+      
+      <guid>/post/algorithm/basic-data-structure/</guid>
+      <description>&lt;p&gt;基础的数据结构和一些基本操作，及其 golang 语言的实现。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Build Blog With Hugo</title>
+      <link>/post/notes/build-blog-with-hugo/</link>
+      <pubDate>Tue, 04 Dec 2018 18:37:11 +0800</pubDate>
+      
+      <guid>/post/notes/build-blog-with-hugo/</guid>
+      <description>&lt;p&gt;how to build your own blog using hugo.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Awesome Post Collection 1</title>
+      <link>/post/awesome-post/collection-1/</link>
+      <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
+      
+      <guid>/post/awesome-post/collection-1/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;Mesos 的资源分配。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Kubernetes调度详解。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Istio 调用链埋点/tracing。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;kubernetes informer 解析。&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
     </item>
     
     <item>
       <title>Apiserver 源码阅读</title>
-      <link>/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 19:46:06 +0800</pubDate>
       
-      <guid>/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s apiserver 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
+      <title>Kubelet</title>
+      <link>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <pubDate>Wed, 21 Nov 2018 18:48:01 +0800</pubDate>
+      
+      <guid>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <description>&lt;p&gt;Kubelet 源码阅读笔记&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>阿里云主机搭建 K8S 集群</title>
-      <link>/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/</link>
+      <link>/post/cloud/deploy-kubernetes-on-aliyun/</link>
       <pubDate>Wed, 14 Nov 2018 14:31:38 +0800</pubDate>
       
-      <guid>/cloud/%E9%98%BF%E9%87%8C%E4%BA%91%E4%B8%BB%E6%9C%BA%E6%90%AD%E5%BB%BA-k8s-%E9%9B%86%E7%BE%A4/</guid>
+      <guid>/post/cloud/deploy-kubernetes-on-aliyun/</guid>
       <description>&lt;p&gt;通过阿里云ECS实例搭建K8S集群&lt;/p&gt;</description>
     </item>
     

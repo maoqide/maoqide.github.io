@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kubernetes Operator on Maoqide</title>
+    <link>/tags/kubernetes-operator/</link>
+    <description>Recent content in Kubernetes Operator on Maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
+    <lastBuildDate>Thu, 16 May 2019 14:06:37 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/kubernetes-operator/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Deploy Mysql on Kubernetes</title>
+      <link>/post/cloud/deploy-mysql-on-kubernetes/</link>
+      <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
+      
+      <guid>/post/cloud/deploy-mysql-on-kubernetes/</guid>
+      <description>&lt;p&gt;本文通过 &lt;a href=&#34;https://github.com/oracle/mysql-operator&#34;&gt;mysql-operator&lt;/a&gt; 在kubernetes集群部署高可用的mysql statefulset。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Sample Controller</title>
+      <link>/post/cloud/sample-controller/</link>
+      <pubDate>Mon, 18 Mar 2019 12:53:41 +0800</pubDate>
+      
+      <guid>/post/cloud/sample-controller/</guid>
+      <description>&lt;p&gt;自己构建 sample-controller.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Building an Operator for Kubernetes With the Sample Controller</title>
+      <link>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
+      <pubDate>Sat, 16 Mar 2019 21:34:46 +0800</pubDate>
+      
+      <guid>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
+      <description>&lt;pre&gt;&lt;code&gt;An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。&lt;br /&gt;
+Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

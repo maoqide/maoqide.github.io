@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Apiserver 源码阅读</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="k8s apiserver 源码阅读笔记
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Apiserver 源码阅读">
+    <meta name="twitter:description" content="k8s apiserver 源码阅读笔记
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Apiserver 源码阅读">
+  <meta property="og:description" content="k8s apiserver 源码阅读笔记
+">
+  <meta property="og:url" content="/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.51">
+
+
+<link rel="canonical" href="/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Apiserver 源码阅读</h1>
+      <p class="post-meta">@Maoqide · Nov 21, 2018 · 20 min read</p>
+    </header>
+    <article class="post-content"><p>k8s apiserver 源码阅读笔记</p>
+
+<h2 id="代码结构">代码结构</h2>
+
+<pre><code>本部分用于记录 apiserver 代码整体结构及关键方法，便于到源码中查找，个人阅读记录，读者可跳过。本文所有代码均基于 kubernetes 1.9.6。
+</code></pre>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">Run</span>()
+	<span style="color:#a6e22e">CreateServerChain</span>()
+		<span style="color:#a6e22e">CreateNodeDialer</span>()	<span style="color:#75715e">//ssh 连接
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">CreateKubeAPIServerConfig</span>()	<span style="color:#75715e">//
+</span><span style="color:#75715e"></span>			<span style="color:#a6e22e">defaultOptions</span>()
+				<span style="color:#a6e22e">DefaultAdvertiseAddress</span>()
+				<span style="color:#a6e22e">DefaultServiceIPRange</span>()
+				<span style="color:#a6e22e">MaybeDefaultWithSelfSignedCerts</span>()
+				<span style="color:#a6e22e">ApplyAuthorization</span>()
+				<span style="color:#a6e22e">IsValidServiceAccountKeyFile</span>()
+			<span style="color:#a6e22e">Validate</span>() <span style="color:#75715e">//validate options
+</span><span style="color:#75715e"></span>			<span style="color:#a6e22e">BuildGenericConfig</span>()	<span style="color:#75715e">//takes the master server options and produces the genericapiserver.Config associated with it
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">genericConfig</span>
+				<span style="color:#a6e22e">genericConfig</span>.<span style="color:#a6e22e">OpenAPIConfig</span> <span style="color:#75715e">//config swagger
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">BuildStorageFactory</span>()		<span style="color:#75715e">//constructs the storage factory
+</span><span style="color:#75715e"></span>
+					<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewStorageFactory</span>(<span style="color:#a6e22e">storageConfig</span> <span style="color:#a6e22e">storagebackend</span>.<span style="color:#a6e22e">Config</span>, <span style="color:#a6e22e">defaultMediaType</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">serializer</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">StorageSerializer</span>,
+						<span style="color:#a6e22e">defaultResourceEncoding</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">serverstorage</span>.<span style="color:#a6e22e">DefaultResourceEncodingConfig</span>, <span style="color:#a6e22e">storageEncodingOverrides</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersion</span>, <span style="color:#a6e22e">resourceEncodingOverrides</span> []<span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersionResource</span>,
+						<span style="color:#a6e22e">defaultAPIResourceConfig</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">serverstorage</span>.<span style="color:#a6e22e">ResourceConfig</span>, <span style="color:#a6e22e">resourceConfigOverrides</span> <span style="color:#a6e22e">utilflag</span>.<span style="color:#a6e22e">ConfigurationMap</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">serverstorage</span>.<span style="color:#a6e22e">DefaultStorageFactory</span>, <span style="color:#66d9ef">error</span>)
+
+						<span style="color:#75715e">// storageConfig -&gt; ETCD配置
+</span><span style="color:#75715e"></span>						<span style="color:#75715e">// defaultAPIResourceConfig -&gt;
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">DefaultAPIResourceConfigSource</span>() <span style="color:#f92672">*</span><span style="color:#a6e22e">serverstorage</span>.<span style="color:#a6e22e">ResourceConfig</span>
+							<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ResourceConfig</span> <span style="color:#66d9ef">struct</span> {
+								<span style="color:#a6e22e">GroupVersionResourceConfigs</span> <span style="color:#66d9ef">map</span>[<span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersion</span>]<span style="color:#f92672">*</span><span style="color:#a6e22e">GroupVersionResourceConfig</span>
+							}
+							<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">o</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">ResourceConfig</span>) <span style="color:#a6e22e">EnableVersions</span>(<span style="color:#a6e22e">versions</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersion</span>)		<span style="color:#75715e">//Enable GroupVersion
+</span><span style="color:#75715e"></span>							<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">o</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">ResourceConfig</span>) <span style="color:#a6e22e">EnableResources</span>(<span style="color:#a6e22e">resources</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersionResource</span>)    <span style="color:#75715e">//daemonsets,deployments,ingresses,networkpolicies,replicasets,podsecuritypolicies
+</span><span style="color:#75715e"></span>
+							<span style="color:#75715e">// Specifies the overrides for various API group versions.
+</span><span style="color:#75715e"></span>							<span style="color:#75715e">// This can be used to enable/disable entire group versions or specific resources.
+</span><span style="color:#75715e"></span>							<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">GroupVersionResourceConfig</span> <span style="color:#66d9ef">struct</span> {
+								<span style="color:#75715e">// Whether to enable or disable this entire group version.  This dominates any enablement check.
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// Enable=true means the group version is enabled, and EnabledResources/DisabledResources are considered.
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// Enable=false means the group version is disabled, and EnabledResources/DisabledResources are not considered.
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">Enable</span> <span style="color:#66d9ef">bool</span>
+
+								<span style="color:#75715e">// DisabledResources lists the resources that are specifically disabled for a group/version
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// DisabledResources trumps EnabledResources
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">DisabledResources</span> <span style="color:#a6e22e">sets</span>.<span style="color:#a6e22e">String</span>
+
+								<span style="color:#75715e">// EnabledResources lists the resources that should be enabled by default.  This is a little
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// unusual, but we need it for compatibility with old code for now.  An empty set means
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// enable all, a non-empty set means that all other resources are disabled.
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">EnabledResources</span> <span style="color:#a6e22e">sets</span>.<span style="color:#a6e22e">String</span>
+							}
+					<span style="color:#a6e22e">EtcdServersOverrides</span> <span style="color:#75715e">//override etcd配置
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">client</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">internalclientset</span>.<span style="color:#a6e22e">NewForConfig</span>(<span style="color:#a6e22e">genericConfig</span>.<span style="color:#a6e22e">LoopbackClientConfig</span>) <span style="color:#75715e">// new a loopback client
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">sharedInformers</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">informers</span>.<span style="color:#a6e22e">NewSharedInformerFactory</span>(<span style="color:#a6e22e">client</span>, <span style="color:#ae81ff">10</span><span style="color:#f92672">*</span><span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Minute</span>)	
+					<span style="color:#75715e">// SharedInformerFactory provides shared informers for resources in all known API group versions.
+</span><span style="color:#75715e"></span>					<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">SharedInformerFactory</span> <span style="color:#66d9ef">interface</span> {
+						<span style="color:#a6e22e">internalinterfaces</span>.<span style="color:#a6e22e">SharedInformerFactory</span>
+						<span style="color:#a6e22e">ForResource</span>(<span style="color:#a6e22e">resource</span> <span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersionResource</span>) (<span style="color:#a6e22e">GenericInformer</span>, <span style="color:#66d9ef">error</span>)
+						<span style="color:#a6e22e">WaitForCacheSync</span>(<span style="color:#a6e22e">stopCh</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">map</span>[<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">Type</span>]<span style="color:#66d9ef">bool</span>
+
+						<span style="color:#a6e22e">Admissionregistration</span>() <span style="color:#a6e22e">admissionregistration</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Apps</span>() <span style="color:#a6e22e">apps</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Autoscaling</span>() <span style="color:#a6e22e">autoscaling</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Batch</span>() <span style="color:#a6e22e">batch</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Certificates</span>() <span style="color:#a6e22e">certificates</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Core</span>() <span style="color:#a6e22e">core</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Extensions</span>() <span style="color:#a6e22e">extensions</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Networking</span>() <span style="color:#a6e22e">networking</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Policy</span>() <span style="color:#a6e22e">policy</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Rbac</span>() <span style="color:#a6e22e">rbac</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Scheduling</span>() <span style="color:#a6e22e">scheduling</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Settings</span>() <span style="color:#a6e22e">settings</span>.<span style="color:#a6e22e">Interface</span>
+						<span style="color:#a6e22e">Storage</span>() <span style="color:#a6e22e">storage</span>.<span style="color:#a6e22e">Interface</span>
+					}
+				<span style="color:#a6e22e">serviceResolver</span>
+					<span style="color:#75715e">// A ServiceResolver knows how to get a URL given a service.
+</span><span style="color:#75715e"></span>					<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ServiceResolver</span> <span style="color:#66d9ef">interface</span> {
+						<span style="color:#a6e22e">ResolveEndpoint</span>(<span style="color:#a6e22e">namespace</span>, <span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">URL</span>, <span style="color:#66d9ef">error</span>)
+					}
+
+			<span style="color:#a6e22e">DefaultServiceIPRange</span>()
+			<span style="color:#a6e22e">BuildStorageFactory</span>()
+			<span style="color:#a6e22e">readCAorNil</span>()	<span style="color:#75715e">//auth CA
+</span><span style="color:#75715e"></span>
+			<span style="color:#a6e22e">config</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">master</span>.<span style="color:#a6e22e">Config</span>{}
+				<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Config</span> <span style="color:#66d9ef">struct</span> {
+					<span style="color:#a6e22e">GenericConfig</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">Config</span>
+					<span style="color:#a6e22e">ExtraConfig</span>   <span style="color:#a6e22e">ExtraConfig</span>
+				}
+		<span style="color:#a6e22e">createAPIExtensionsConfig</span>()
+		<span style="color:#a6e22e">createAPIExtensionsServer</span>() <span style="color:#75715e">// apiextensions-apiserver\pkg\apiserver\apiserver.go New() is the function for CustomResourceDefinitions to register router handler on GenericAPIServer
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">CreateKubeAPIServer</span>() <span style="color:#75715e">// creates and wires a workable kube-apiserver,
+</span><span style="color:#75715e"></span>			<span style="color:#75715e">// returns a new instance of Master from the given config
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#a6e22e">completedConfig</span>) <span style="color:#a6e22e">New</span>(<span style="color:#a6e22e">delegationTarget</span> <span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">DelegationTarget</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">Master</span>, <span style="color:#66d9ef">error</span>){} <span style="color:#75715e">// goproject\src\k8s.io\kubernetes\pkg\master\master.go
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">New</span>(<span style="color:#e6db74">&#34;kube-apiserver&#34;</span>, <span style="color:#a6e22e">delegationTarget</span>)	<span style="color:#75715e">// creates a new server which logically combines the handling chain with the passed server   !! important
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">apiServerHandler</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">NewAPIServerHandler</span>(<span style="color:#a6e22e">name</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Serializer</span>, <span style="color:#a6e22e">handlerChainBuilder</span>, <span style="color:#a6e22e">delegationTarget</span>.<span style="color:#a6e22e">UnprotectedHandler</span>())
+						<span style="color:#75715e">// k8s.io\apiserver\pkg\server\handler.go construct gorestfulContainer and add default handler(NotFoundHandler, RecoverHandler, ServiceErrorHandler)
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewAPIServerHandler</span>(<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">contextMapper</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">s</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">NegotiatedSerializer</span>, <span style="color:#a6e22e">handlerChainBuilder</span> <span style="color:#a6e22e">HandlerChainBuilderFn</span>, <span style="color:#a6e22e">notFoundHandler</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">APIServerHandler</span> {}
+							<span style="color:#a6e22e">director</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">director</span>{<span style="color:#f92672">...</span>}
+								<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">director</span> <span style="color:#66d9ef">struct</span> {
+									<span style="color:#a6e22e">name</span>               <span style="color:#66d9ef">string</span>
+									<span style="color:#a6e22e">goRestfulContainer</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">Container</span>
+									<span style="color:#a6e22e">nonGoRestfulMux</span>    <span style="color:#f92672">*</span><span style="color:#a6e22e">mux</span>.<span style="color:#a6e22e">PathRecorderMux</span>
+								}
+								<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">d</span> <span style="color:#a6e22e">director</span>) <span style="color:#a6e22e">ServeHTTP</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">req</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {}
+					<span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">GenericAPIServer</span>{}	<span style="color:#75715e">// k8s.io\apiserver\pkg\server\genericapiserver.go type GenericAPIServer
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">add</span> <span style="color:#a6e22e">PostStartHooks</span> <span style="color:#f92672">&amp;</span> <span style="color:#a6e22e">PreShutdownHooks</span>
+					<span style="color:#a6e22e">AddPostStartHook</span>(<span style="color:#a6e22e">PostStartHookFunc</span>)	<span style="color:#75715e">//	{c.SharedInformerFactory.Start(context.StopCh)}
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">add</span> <span style="color:#a6e22e">healthzChecks</span>
+					<span style="color:#a6e22e">installAPI</span>(<span style="color:#a6e22e">s</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Config</span>)		<span style="color:#75715e">// install utils routes like SwaggerUI, Profiling, Metrics
+</span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span> () <span style="color:#a6e22e">routes</span>.<span style="color:#a6e22e">DefaultMetrics</span>{}.<span style="color:#a6e22e">Install</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Handler</span>.<span style="color:#a6e22e">NonGoRestfulMux</span>)
+				<span style="color:#66d9ef">if</span> () <span style="color:#a6e22e">routes</span>.<span style="color:#a6e22e">Logs</span>{}.<span style="color:#a6e22e">Install</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Handler</span>.<span style="color:#a6e22e">GoRestfulContainer</span>)
+				<span style="color:#a6e22e">m</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Master</span>{ <span style="color:#a6e22e">GenericAPIServer</span>: <span style="color:#a6e22e">s</span>, }
+				<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">InstallLegacyAPI</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">c</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>, <span style="color:#a6e22e">legacyRESTStorageProvider</span>)	<span style="color:#75715e">// k8s.io\kubernetes\pkg\master\master.go, install core api routes, !!!!important 
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">NewLegacyRESTStorage</span>() <span style="color:#f92672">-</span>&gt; <span style="color:#75715e">//定义如下 返回 LegacyRESTStorage和APIGroupInfo, Storage保存了具体资源对象的结构，如 PodStrorage
+</span><span style="color:#75715e"></span>						<span style="color:#75715e">// LegacyRESTStorage returns stateful information about particular instances of REST storage to master.go for wiring controllers
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#a6e22e">LegacyRESTStorageProvider</span>) <span style="color:#a6e22e">NewLegacyRESTStorage</span>(<span style="color:#a6e22e">restOptionsGetter</span> <span style="color:#a6e22e">generic</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>) (<span style="color:#a6e22e">LegacyRESTStorage</span>, <span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">APIGroupInfo</span>, <span style="color:#66d9ef">error</span>) {} <span style="color:#75715e">// k8s.io\kubernetes\pkg\registry\core\rest\storage_core.go
+</span><span style="color:#75715e"></span>							<span style="color:#75715e">// Info about an API group.
+</span><span style="color:#75715e"></span>							<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">APIGroupInfo</span> <span style="color:#66d9ef">struct</span> {
+								<span style="color:#a6e22e">GroupMeta</span> <span style="color:#a6e22e">apimachinery</span>.<span style="color:#a6e22e">GroupMeta</span>
+								<span style="color:#75715e">// Info about the resources in this group. Its a map from version to resource to the storage.
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">VersionedResourcesStorageMap</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">Storage</span>	<span style="color:#75715e">// !!! important!!!!
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// OptionsExternalVersion controls the APIVersion used for common objects in the
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// schema like api.Status, api.DeleteOptions, and metav1.ListOptions. Other implementors may
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// define a version &#34;v1beta1&#34; but want to use the Kubernetes &#34;v1&#34; internal objects.
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// If nil, defaults to groupMeta.GroupVersion.
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// TODO: Remove this when https://github.com/kubernetes/kubernetes/issues/19018 is fixed.
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">OptionsExternalVersion</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersion</span>
+								<span style="color:#75715e">// MetaGroupVersion defaults to &#34;meta.k8s.io/v1&#34; and is the scheme group version used to decode
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// common API implementations like ListOptions. Future changes will allow this to vary by group
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// version (for when the inevitable meta/v2 group emerges).
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">MetaGroupVersion</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersion</span>
+
+								<span style="color:#75715e">// Scheme includes all of the types used by this group and how to convert between them (or
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// to convert objects from outside of this group that are accepted in this API).
+</span><span style="color:#75715e"></span>								<span style="color:#75715e">// TODO: replace with interfaces
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">Scheme</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">Scheme</span>
+								<span style="color:#75715e">// NegotiatedSerializer controls how this group encodes and decodes data
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">NegotiatedSerializer</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">NegotiatedSerializer</span>
+								<span style="color:#75715e">// ParameterCodec performs conversions for query parameters passed to API calls
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">ParameterCodec</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">ParameterCodec</span>
+							}
+							<span style="color:#a6e22e">restStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">LegacyRESTStorage</span>{}
+							<span style="color:#75715e">// NewREST for basic resources
+</span><span style="color:#75715e"></span>							<span style="color:#a6e22e">podTemplateStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">podtemplatestore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">eventStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">eventstore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>, uint64(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">EventTTL</span>.<span style="color:#a6e22e">Seconds</span>()))
+							<span style="color:#a6e22e">limitRangeStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">limitrangestore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">resourceQuotaStorage</span>, <span style="color:#a6e22e">resourceQuotaStatusStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">resourcequotastore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">secretStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">secretstore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">serviceAccountStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">serviceaccountstore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">persistentVolumeStorage</span>, <span style="color:#a6e22e">persistentVolumeStatusStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pvstore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">persistentVolumeClaimStorage</span>, <span style="color:#a6e22e">persistentVolumeClaimStatusStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pvcstore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">configMapStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">configmapstore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">namespaceStorage</span>, <span style="color:#a6e22e">namespaceStatusStorage</span>, <span style="color:#a6e22e">namespaceFinalizeStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">namespacestore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+		
+							<span style="color:#a6e22e">endpointsStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">endpointsstore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">endpointRegistry</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">endpoint</span>.<span style="color:#a6e22e">NewRegistry</span>(<span style="color:#a6e22e">endpointsStorage</span>)
+							<span style="color:#a6e22e">podStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">podstore</span>.<span style="color:#a6e22e">NewStorage</span>()
+							<span style="color:#a6e22e">serviceRESTStorage</span>, <span style="color:#a6e22e">serviceStatusStorage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">servicestore</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+							<span style="color:#a6e22e">serviceRegistry</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">NewRegistry</span>(<span style="color:#a6e22e">serviceRESTStorage</span>)
+
+							<span style="color:#a6e22e">restStorageMap</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">Storage</span>{
+								<span style="color:#e6db74">&#34;pods&#34;</span>:             <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Pod</span>,
+								<span style="color:#e6db74">&#34;pods/attach&#34;</span>:      <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Attach</span>,
+								<span style="color:#75715e">// ...............
+</span><span style="color:#75715e"></span>								<span style="color:#e6db74">&#34;configMaps&#34;</span>:                    <span style="color:#a6e22e">configMapStorage</span>,
+								<span style="color:#e6db74">&#34;componentStatuses&#34;</span>: <span style="color:#a6e22e">componentstatus</span>.<span style="color:#a6e22e">NewStorage</span>(<span style="color:#a6e22e">componentStatusStorage</span>{<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">StorageFactory</span>}.<span style="color:#a6e22e">serversToValidate</span>),
+							}
+							<span style="color:#a6e22e">apiGroupInfo</span>.<span style="color:#a6e22e">VersionedResourcesStorageMap</span>[<span style="color:#e6db74">&#34;v1&#34;</span>] = <span style="color:#a6e22e">restStorageMap</span> <span style="color:#75715e">// set APIGroupInfo.VersionedResourcesStorageMap to return, !!!!!
+</span><span style="color:#75715e"></span>					
+					<span style="color:#75715e">// construct BootstrapController and add hook
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">NewBootstrapController</span>()	<span style="color:#75715e">// a controller for watching the core capabilities of the master
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">AddPostStartHookOrDie</span>() 	<span style="color:#75715e">// { controller.start() }
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">AddPreShutdownHookOrDie</span>()   <span style="color:#75715e">// { controller.stop() }
+</span><span style="color:#75715e"></span>
+					<span style="color:#a6e22e">InstallLegacyAPIGroup</span>()
+						<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">GenericAPIServer</span>) <span style="color:#a6e22e">InstallLegacyAPIGroup</span>(<span style="color:#a6e22e">apiPrefix</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">apiGroupInfo</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">APIGroupInfo</span>) <span style="color:#66d9ef">error</span> {}
+							<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">legacyAPIGroupPrefixes</span>.<span style="color:#a6e22e">Has</span>(<span style="color:#a6e22e">apiPrefix</span>)
+							<span style="color:#a6e22e">installAPIResources</span>()	<span style="color:#75715e">// a private method for installing the REST storage backing each api groupversionresource
+</span><span style="color:#75715e"></span>								<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">apiGroupInfo</span>.<span style="color:#a6e22e">GroupMeta</span>.<span style="color:#a6e22e">GroupVersions</span> {
+									<span style="color:#75715e">// get rest.Storage from apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version]
+</span><span style="color:#75715e"></span>									<span style="color:#a6e22e">apiGroupVersion</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">getAPIGroupVersion</span>(<span style="color:#a6e22e">apiGroupInfo</span>, <span style="color:#a6e22e">groupVersion</span>, <span style="color:#a6e22e">apiPrefix</span>)
+									<span style="color:#75715e">// InstallREST registers the REST handlers (storage, watch, proxy and redirect) into a restful Container
+</span><span style="color:#75715e"></span>									<span style="color:#a6e22e">apiGroupVersion</span>.<span style="color:#a6e22e">InstallREST</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Handler</span>.<span style="color:#a6e22e">GoRestfulContainer</span>)
+										<span style="color:#a6e22e">installer</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">APIInstaller</span>{ <span style="color:#a6e22e">group</span>: <span style="color:#a6e22e">g</span>,<span style="color:#f92672">...</span>}
+										<span style="color:#a6e22e">installer</span>.<span style="color:#a6e22e">Install</span>()
+											<span style="color:#75715e">// Install handlers for API resources. k8s.io\apiserver\pkg\endpoints\installer.go
+</span><span style="color:#75715e"></span>											<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">a</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">APIInstaller</span>) <span style="color:#a6e22e">Install</span>() ([]<span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">APIResource</span>, <span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">WebService</span>, []<span style="color:#66d9ef">error</span>) {}
+												<span style="color:#a6e22e">paths</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">string</span>, len(<span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Storage</span>))
+												<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">paths</span>(<span style="color:#a6e22e">storages</span>) {
+													<span style="color:#a6e22e">apiResource</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">registerResourceHandlers</span>(<span style="color:#a6e22e">path</span>, <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Storage</span>[<span style="color:#a6e22e">path</span>], <span style="color:#a6e22e">ws</span>, <span style="color:#a6e22e">proxyHandler</span>)	
+														<span style="color:#75715e">// !!important(700+ lines...), function to actually add route to go-restful. k8s.io\apiserver\pkg\endpoints\installer.go
+</span><span style="color:#75715e"></span>														<span style="color:#75715e">// kubernetes把所有对资源对象的操作接口封装到一个action对象中，在 registerResourceHandlers 方法中，
+</span><span style="color:#75715e"></span>														<span style="color:#75715e">// 根据如 storage.(rest.Getter)的方法，获取 what verbs are supported by the storage, used to know what verbs we support per path，
+</span><span style="color:#75715e"></span>														<span style="color:#75715e">// 根据scope: RESTScopeNameRoot(Handle non-namespace scoped resources like nodes) 或 RESTScopeNameNamespace(Handler for standard REST verbs (GET, PUT, POST and DELETE))
+</span><span style="color:#75715e"></span>														<span style="color:#75715e">// 将 action append 到一个 actions 切片中(不同 scope ，path前缀不同)
+</span><span style="color:#75715e"></span>														<span style="color:#75715e">// 最后遍历actions，根据不同的action.Verb，注册到go-restful的 restful.WebService中，并将此对象支持的Verbs将入到apiResource.Verbs中并返回apiResource对象。
+</span><span style="color:#75715e"></span>														<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">a</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">APIInstaller</span>) <span style="color:#a6e22e">registerResourceHandlers</span>(<span style="color:#a6e22e">path</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">storage</span> <span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">Storage</span>, <span style="color:#a6e22e">ws</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">WebService</span>, <span style="color:#a6e22e">proxyHandler</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">APIResource</span>, <span style="color:#66d9ef">error</span>) {}
+															<span style="color:#75715e">// Struct capturing information about an action (&#34;GET&#34;, &#34;POST&#34;, &#34;WATCH&#34;, &#34;PROXY&#34;, etc).
+</span><span style="color:#75715e"></span>															<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">action</span> <span style="color:#66d9ef">struct</span> {
+																<span style="color:#a6e22e">Verb</span>          <span style="color:#66d9ef">string</span>               <span style="color:#75715e">// Verb identifying the action (&#34;GET&#34;, &#34;POST&#34;, &#34;WATCH&#34;, &#34;PROXY&#34;, etc).
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Path</span>          <span style="color:#66d9ef">string</span>               <span style="color:#75715e">// The path of the action
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Params</span>        []<span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">Parameter</span> <span style="color:#75715e">// List of parameters associated with the action.
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Namer</span>         <span style="color:#a6e22e">handlers</span>.<span style="color:#a6e22e">ScopeNamer</span>
+																<span style="color:#a6e22e">AllNamespaces</span> <span style="color:#66d9ef">bool</span> <span style="color:#75715e">// true iff the action is namespaced but works on aggregate result for all namespaces
+</span><span style="color:#75715e"></span>															}
+															<span style="color:#75715e">// APIResource specifies the name of a resource and whether it is namespaced.
+</span><span style="color:#75715e"></span>															<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">APIResource</span> <span style="color:#66d9ef">struct</span> {
+																<span style="color:#75715e">// name is the plural name of the resource.
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Name</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;name&#34; protobuf:&#34;bytes,1,opt,name=name&#34;`</span>
+																<span style="color:#75715e">// singularName is the singular name of the resource.  This allows clients to handle plural and singular opaquely.
+</span><span style="color:#75715e"></span>																<span style="color:#75715e">// The singularName is more correct for reporting status on a single item and both singular and plural are allowed
+</span><span style="color:#75715e"></span>																<span style="color:#75715e">// from the kubectl CLI interface.
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">SingularName</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;singularName&#34; protobuf:&#34;bytes,6,opt,name=singularName&#34;`</span>
+																<span style="color:#75715e">// namespaced indicates if a resource is namespaced or not.
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Namespaced</span> <span style="color:#66d9ef">bool</span> <span style="color:#e6db74">`json:&#34;namespaced&#34; protobuf:&#34;varint,2,opt,name=namespaced&#34;`</span>
+																<span style="color:#75715e">// group is the preferred group of the resource.  Empty implies the group of the containing resource list.
+</span><span style="color:#75715e"></span>																<span style="color:#75715e">// For subresources, this may have a different value, for example: Scale&#34;.
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Group</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;group,omitempty&#34; protobuf:&#34;bytes,8,opt,name=group&#34;`</span>
+																<span style="color:#75715e">// version is the preferred version of the resource.  Empty implies the version of the containing resource list
+</span><span style="color:#75715e"></span>																<span style="color:#75715e">// For subresources, this may have a different value, for example: v1 (while inside a v1beta1 version of the core resource&#39;s group)&#34;.
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;version,omitempty&#34; protobuf:&#34;bytes,9,opt,name=version&#34;`</span>
+																<span style="color:#75715e">// kind is the kind for the resource (e.g. &#39;Foo&#39; is the kind for a resource &#39;foo&#39;)
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Kind</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;kind&#34; protobuf:&#34;bytes,3,opt,name=kind&#34;`</span>
+																<span style="color:#75715e">// verbs is a list of supported kube verbs (this includes get, list, watch, create,
+</span><span style="color:#75715e"></span>																<span style="color:#75715e">// update, patch, delete, deletecollection, and proxy)
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Verbs</span> <span style="color:#a6e22e">Verbs</span> <span style="color:#e6db74">`json:&#34;verbs&#34; protobuf:&#34;bytes,4,opt,name=verbs&#34;`</span>
+																<span style="color:#75715e">// shortNames is a list of suggested short names of the resource.
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">ShortNames</span> []<span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;shortNames,omitempty&#34; protobuf:&#34;bytes,5,rep,name=shortNames&#34;`</span>
+																<span style="color:#75715e">// categories is a list of the grouped resources this resource belongs to (e.g. &#39;all&#39;)
+</span><span style="color:#75715e"></span>																<span style="color:#a6e22e">Categories</span> []<span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;categories,omitempty&#34; protobuf:&#34;bytes,7,rep,name=categories&#34;`</span>
+															}
+													<span style="color:#a6e22e">apiResources</span> = append(<span style="color:#a6e22e">apiResources</span>, <span style="color:#f92672">*</span><span style="color:#a6e22e">apiResource</span>)
+												}
+								}
+				<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">InstallAPIs</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">ExtraConfig</span>.<span style="color:#a6e22e">APIResourceConfigSource</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>, <span style="color:#a6e22e">restStorageProviders</span><span style="color:#f92672">...</span>)	<span style="color:#75715e">// InstallAPIs will install the APIs for the restStorageProviders if they are enabled.
+</span><span style="color:#75715e"></span>					<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">restStorageProviders</span> {
+						<span style="color:#a6e22e">apiGroupsInfo</span> = append(<span style="color:#a6e22e">apiGroupsInfo</span>, <span style="color:#a6e22e">apiGroupInfo</span>)
+					}
+					<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">apiGroupsInfo</span> {
+						<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">InstallAPIGroup</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">apiGroupsInfo</span>[<span style="color:#a6e22e">i</span>])
+							<span style="color:#75715e">// installAPIResources is a private method for installing the REST storage backing each api groupversionresource, k8s.io\apiserver\pkg\server\genericapiserver.go
+</span><span style="color:#75715e"></span>							<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">GenericAPIServer</span>) <span style="color:#a6e22e">installAPIResources</span>(<span style="color:#a6e22e">apiPrefix</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">apiGroupInfo</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">APIGroupInfo</span>) <span style="color:#66d9ef">error</span> {}
+								<span style="color:#75715e">// ！！InstallREST registers the REST handlers (storage, watch, proxy and redirect) into a restful Container, k8s.io\apiserver\pkg\endpoints\groupversion.go
+</span><span style="color:#75715e"></span>								<span style="color:#a6e22e">apiGroupVersion</span>.<span style="color:#a6e22e">InstallREST</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Handler</span>.<span style="color:#a6e22e">GoRestfulContainer</span>
+					}
+				<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">installTunneler</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">ExtraConfig</span>.<span style="color:#a6e22e">Tunneler</span>, <span style="color:#a6e22e">corev1client</span>.<span style="color:#a6e22e">NewForConfigOrDie</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">LoopbackClientConfig</span>).<span style="color:#a6e22e">Nodes</span>())
+				<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">AddPostStartHookOrDie</span>(<span style="color:#e6db74">&#34;ca-registration&#34;</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">ExtraConfig</span>.<span style="color:#a6e22e">ClientCARegistrationHook</span>.<span style="color:#a6e22e">PostStartHook</span>)
+			<span style="color:#a6e22e">AddPostStartHook</span>()		<span style="color:#75715e">// addfunc {sharedInformers.Start(context.StopCh)}
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// openapi swagger
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// this wires up openapi
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">kubeAPIServer</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">PrepareRun</span>()
+		<span style="color:#75715e">// This will wire up openapi for extension api server
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">apiExtensionsServer</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">PrepareRun</span>()
+		<span style="color:#a6e22e">aggregatorConfig</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">createAggregatorConfig</span>(<span style="color:#f92672">*</span><span style="color:#a6e22e">kubeAPIServerConfig</span>.<span style="color:#a6e22e">GenericConfig</span>, <span style="color:#a6e22e">runOptions</span>, <span style="color:#a6e22e">versionedInformers</span>, <span style="color:#a6e22e">serviceResolver</span>, <span style="color:#a6e22e">proxyTransport</span>)
+		<span style="color:#a6e22e">aggregatorServer</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">createAggregatorServer</span>(<span style="color:#a6e22e">aggregatorConfig</span>, <span style="color:#a6e22e">kubeAPIServer</span>.<span style="color:#a6e22e">GenericAPIServer</span>, <span style="color:#a6e22e">apiExtensionsServer</span>.<span style="color:#a6e22e">Informers</span>)
+			<span style="color:#a6e22e">aggregatorServer</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">aggregatorConfig</span>.<span style="color:#a6e22e">Complete</span>().<span style="color:#a6e22e">NewWithDelegate</span>(<span style="color:#a6e22e">delegateAPIServer</span>)
+				<span style="color:#a6e22e">genericServer</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">New</span>(<span style="color:#e6db74">&#34;kube-aggregator&#34;</span>, <span style="color:#a6e22e">delegationTarget</span>) <span style="color:#75715e">// ----same function with called in CreateKubeAPIServer-&gt;New() (91)
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">apiregistrationClient</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">internalclientset</span>.<span style="color:#a6e22e">NewForConfig</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">LoopbackClientConfig</span>)
+					<span style="color:#a6e22e">configShallowCopy</span>.<span style="color:#a6e22e">RateLimiter</span> = <span style="color:#a6e22e">flowcontrol</span>.<span style="color:#a6e22e">NewTokenBucketRateLimiter</span>(<span style="color:#a6e22e">configShallowCopy</span>.<span style="color:#a6e22e">QPS</span>, <span style="color:#a6e22e">configShallowCopy</span>.<span style="color:#a6e22e">Burst</span>)
+					<span style="color:#a6e22e">cs</span>.<span style="color:#a6e22e">apiregistration</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">apiregistrationinternalversion</span>.<span style="color:#a6e22e">NewForConfig</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">configShallowCopy</span>)
+					<span style="color:#a6e22e">cs</span>.<span style="color:#a6e22e">DiscoveryClient</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">discovery</span>.<span style="color:#a6e22e">NewDiscoveryClientForConfig</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">configShallowCopy</span>)
+					<span style="color:#a6e22e">informerFactory</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">informers</span>.<span style="color:#a6e22e">NewSharedInformerFactory</span>(<span style="color:#a6e22e">apiregistrationClient</span>,<span style="color:#ae81ff">5</span><span style="color:#f92672">*</span><span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Minute</span>,)
+					<span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">APIAggregator</span>{}	<span style="color:#75715e">// APIAggregator contains state for a Kubernetes cluster master/api server.
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">v1beta1storage</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">Storage</span>{}
+					<span style="color:#a6e22e">apiServiceREST</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">apiservicestorage</span>.<span style="color:#a6e22e">NewREST</span>(<span style="color:#a6e22e">Scheme</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>)
+					<span style="color:#a6e22e">v1beta1storage</span>[<span style="color:#e6db74">&#34;apiservices&#34;</span>] = <span style="color:#a6e22e">apiServiceREST</span>
+					<span style="color:#a6e22e">v1beta1storage</span>[<span style="color:#e6db74">&#34;apiservices/status&#34;</span>] = <span style="color:#a6e22e">apiservicestorage</span>.<span style="color:#a6e22e">NewStatusREST</span>(<span style="color:#a6e22e">Scheme</span>, <span style="color:#a6e22e">apiServiceREST</span>)
+					<span style="color:#75715e">// rest implements a RESTStorage for API services against etcd
+</span><span style="color:#75715e"></span>					<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">REST</span> <span style="color:#66d9ef">struct</span> {
+						<span style="color:#f92672">*</span><span style="color:#a6e22e">genericregistry</span>.<span style="color:#a6e22e">Store</span>
+					}
+					<span style="color:#a6e22e">apiGroupInfo</span>.<span style="color:#a6e22e">VersionedResourcesStorageMap</span>[<span style="color:#e6db74">&#34;v1beta1&#34;</span>] = <span style="color:#a6e22e">v1beta1storage</span>
+					<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">InstallAPIGroup</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">apiGroupInfo</span>)		<span style="color:#75715e">// ----same function with called in CreateKubeAPIServer-&gt;New()-&gt;InstallAPIs() (237)
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">Handler</span>.<span style="color:#a6e22e">NonGoRestfulMux</span>.<span style="color:#a6e22e">Handle</span>(<span style="color:#e6db74">&#34;/apis&#34;</span>, <span style="color:#a6e22e">apisHandler</span>)
+					<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">Handler</span>.<span style="color:#a6e22e">NonGoRestfulMux</span>.<span style="color:#a6e22e">UnlistedHandle</span>(<span style="color:#e6db74">&#34;/apis/&#34;</span>, <span style="color:#a6e22e">apisHandler</span>)
+					<span style="color:#a6e22e">apiserviceRegistrationController</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">NewAPIServiceRegistrationController</span>(<span style="color:#a6e22e">informerFactory</span>.<span style="color:#a6e22e">Apiregistration</span>().<span style="color:#a6e22e">InternalVersion</span>().<span style="color:#a6e22e">APIServices</span>(), <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">SharedInformerFactory</span>.<span style="color:#a6e22e">Core</span>().<span style="color:#a6e22e">V1</span>().<span style="color:#a6e22e">Services</span>(), <span style="color:#a6e22e">s</span>) <span style="color:#75715e">// add event handler to informer
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">AddPostStartHook</span>(<span style="color:#e6db74">&#34;start-kube-aggregator-informers&#34;</span>)
+					<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">AddPostStartHook</span>(<span style="color:#e6db74">&#34;apiservice-registration-controller&#34;</span>)
+					<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">AddPostStartHook</span>(<span style="color:#e6db74">&#34;apiservice-status-available-controller&#34;</span>)
+					<span style="color:#75715e">// BuildAndRegisterAggregator registered OpenAPI aggregator handler. 
+</span><span style="color:#75715e"></span>					<span style="color:#a6e22e">openAPIAggregator</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">openapicontroller</span>.<span style="color:#a6e22e">BuildAndRegisterAggregator</span>()
+			<span style="color:#75715e">// create controllers for auto-registration
+</span><span style="color:#75715e"></span>			<span style="color:#a6e22e">apiRegistrationClient</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">apiregistrationclient</span>.<span style="color:#a6e22e">NewForConfig</span>(<span style="color:#a6e22e">aggregatorConfig</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">LoopbackClientConfig</span>)
+			<span style="color:#f92672">//</span> <span style="color:#f92672">......</span></code></pre></div>
+<h2 id="app-run">app.Run</h2>
+
+<p>kubernetes所有组件的入口，基本上都是在<code>$GOPATH\k8s.io\kubernetes\cmd\xxx(组件名称)</code>下面的main文件中。
+apiserver对应的路径为<code>$GOPATH\k8s.io\kubernetes\cmd\kube-apiserver\apiserver.go</code>，main函数中通过<code>app.Run(s, stopCh)</code>方法，执行具体逻辑。
+具体Run方法，定义在<code>$GOPATH\k8s.io\kubernetes\cmd\kube-apiserver\app\server.go</code>中。</p>
+
+<p>apiserver的<code>app.Run()</code>，主要通过 <code>CreateServerChain()</code> 方法，创建出一个<code>*genericapiserver.GenericAPIServer</code>实例。<br />
+在<code>GenericAPIServer</code>中，包含的主要结构体有</p>
+
+<ul>
+<li><code>*APIServerHandler</code>(<em>Handler holds the handlers being used by this API server</em>)<br /></li>
+<li><code>DelegationTarget</code>(<em>delegationTarget is the next delegate in the chain or nil</em>)<br />
+其中最重要的是<code>APIServerHandler</code>这个结构体，它包含了go-restful中的<code>*restful.Container</code>结构体，后面注册API时用到的<code>InstallAPIs()</code>方法，最终也是将路由注册到这个Container中，定义如下:
+<code>golang
+// APIServerHandlers holds the different http.Handlers used by the API server.
+// This includes the full handler chain, the director (which chooses between gorestful and nonGoRestful,
+// the gorestful handler (used for the API) which falls through to the nonGoRestful handler on unregistered paths,
+// and the nonGoRestful handler (which can contain a fallthrough of its own)
+// FullHandlerChain -&gt; Director -&gt; {GoRestfulContainer,NonGoRestfulMux} based on inspection of registered web services
+type APIServerHandler struct {
+	// FullHandlerChain is the one that is eventually served with.  It should include the full filter
+	// chain and then call the Director.
+	FullHandlerChain http.Handler
+	// The registered APIs.  InstallAPIs uses this.  Other servers probably shouldn't access this directly.
+	GoRestfulContainer *restful.Container
+	// NonGoRestfulMux is the final HTTP handler in the chain.
+	// It comes after all filters and the API handling
+	// This is where other servers can attach handler to various parts of the chain.
+	NonGoRestfulMux *mux.PathRecorderMux
+	// Other servers should only use this opaquely to delegate to an API server.
+	Director http.Handler
+}
+</code>
+<code>DelegationTarget</code>(<em>DelegationTarget is an interface which allows for composition of API servers with top level handling that works as expected.</em>)是一个<code>interface</code>，是构成方法名<code>CreateServerChain</code>中ServerChain的结构，结构体内定义了<code>NextDelegate()</code>方法，返回chain中的下一个<code>DelegationTarget</code>，由它串起了多个api servers。(为什么会有多个api server从后面代码中可以看到。)<br /></li>
+</ul>
+
+<h2 id="createserverchain">CreateServerChain</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// CreateServerChain creates the apiservers connected via delegation.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">CreateServerChain</span>(<span style="color:#a6e22e">runOptions</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">options</span>.<span style="color:#a6e22e">ServerRunOptions</span>, <span style="color:#a6e22e">stopCh</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) (<span style="color:#f92672">*</span><span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">GenericAPIServer</span>, <span style="color:#66d9ef">error</span>) {}</code></pre></div>
+<p><code>CreateServerChain()</code>方法中，先后执行了<code>CreateNodeDialer</code>, <code>CreateKubeAPIServerConfig</code>, <code>createAPIExtensionsConfig</code>, <code>createAPIExtensionsServer</code>, <code>CreateKubeAPIServer</code>, <code>createAggregatorConfig</code>, <code>createAggregatorServer</code>几个方法，根据方法名可以看出启动apiserver的流程。</p>
+
+<ul>
+<li><p><code>CreateNodeDialer</code>(<em>CreateNodeDialer creates the dialer infrastructure to connect to the nodes</em>), add SSH Key, 返回一个<code>tunneler.Tunneler</code>, 可以通过创建到node节点的SSH连接。</p></li>
+
+<li><p><code>CreateKubeAPIServerConfig</code>(<em>creates all the resources for running the API server, but runs none of them</em>), 创建出所有apiserver所需的配置和资源，包括配置的Validate，命令行参数解析，openapi/swagger配置，StorageFactory,clientset, informer, serviceResolver 等资源的创建。</p></li>
+
+<li><p><code>createAPIExtensionsConfig</code>, 传入由上一步生成的配置<code>*kubeAPIServerConfig.GenericConfig</code>和 informer, 通过<code>apiextensionscmd.NewCRDRESTOptionsGetter(etcdOptions)</code>初始化<code>ExtraConfig.CRDRESTOptionsGetter</code>并创建 apiextensionsConfig 返回。</p></li>
+
+<li><p><code>createAPIExtensionsServer</code>, 通过上一步生成的<code>apiExtensionsConfig</code>，通过一个<code>genericapiserver.EmptyDelegate</code>创建 apiExtensionsServer。返回 apiserver 的是一个<code>apiextensionsapiserver.CustomResourceDefinitions</code>结构体。其中生成 CustomResourceDefinitions 结构体的 New() 方法，真正将 CRD 接口添加到<code>apiGroupInfo.VersionedResourcesStorageMap</code>中，并注册到 go-resetful 的 webService，同时会通过<code>AddPostStartHook</code>添加启动后hook，启动informer(事件监听)和<code>crdController</code>, <code>namingController</code>, <code>finalizingController</code>三个 Controler 监听 CRD Resource 的变化。</p></li>
+
+<li><p><code>CreateKubeAPIServer</code>(<em>creates and wires a workable kube-apiserver</em>), 通过以上几步生成的 apiserver 配置，通过<code>createAPIExtensionsServer</code>生成的<code>DelegationTarget</code>创建 apiserver 实例(<em>master.Master</em>)。这个过程中会 install kubernetes 的 core api 并 启动 BootStrapController(<em>a controller for watching the core capabilities of the master</em>),  install nodeTunneler 并添加<code>ca-registration</code>的 PostStartHook。</p></li>
+
+<li><p><code>createAggregatorConfig</code>, 通过上面生成的 apiserver 配置生成 AggregatorConfig。(代码中只是浅拷贝一份<code>kubeAPIServerConfig.GenericConfig</code>并添加了 Proxy 相关的 ExtraConfig 到返回的<code>*aggregatorapiserver.Config</code>结构体中。)</p></li>
+
+<li><p><code>createAggregatorServer</code>, 生成 AggregatorServer(*Aggregator for Kubernetes-style API servers: dynamic registration, discovery summarization, secure proxy
+*)。这个过程中，会启动<code>apiserviceRegistrationController</code>, <code>availableController</code> 去监听 api service 资源，完成 api service 的发现和注册。</p></li>
+</ul>
+
+<p>这里解释一下 aggregator, 这是 kubernetes 为了增强 apiserver 的扩展性，方便用户开发自己的 api服务而开发的机制。它允许k8s的开发人员编写一个自己的服务，可以把这个服务注册到k8s的api里面，这样，就像k8s自己的api一样，你的服务只要运行在k8s集群里面，k8s 的Aggregate通过service名称就可以转发到你写的service里面去了。<br />
+&gt;Aggregated（聚合的）API server是为了将原来的API server这个巨石（monolithic）应用给拆分成，为了方便用户开发自己的API server集成进来，而不用直接修改kubernetes官方仓库的代码，这样一来也能将API server解耦，方便用户使用实验特性。这些API server可以跟core API server无缝衔接，使用kubectl也可以管理它们。</p>
+
+<p>到这里， apiserver的启动就基本完成了。<br />
+下面主要分析下以上几个流程中<code>CreateKubeAPIServerConfig</code>和<code>CreateKubeAPIServer</code>两个方法，这也是创建出核心的apiserver 和真正执行k8s core api 注册的过程。</p>
+
+<h2 id="createkubeapiserverconfig">CreateKubeAPIServerConfig</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">kubeAPIServerConfig</span>, <span style="color:#a6e22e">sharedInformers</span>, <span style="color:#a6e22e">versionedInformers</span>, <span style="color:#a6e22e">insecureServingOptions</span>, <span style="color:#a6e22e">serviceResolver</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">CreateKubeAPIServerConfig</span>(<span style="color:#a6e22e">runOptions</span>, <span style="color:#a6e22e">nodeTunneler</span>, <span style="color:#a6e22e">proxyTransport</span>)
+
+<span style="color:#75715e">// CreateKubeAPIServerConfig creates all the resources for running the API server, but runs none of them
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">CreateKubeAPIServerConfig</span>(<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">options</span>.<span style="color:#a6e22e">ServerRunOptions</span>, <span style="color:#a6e22e">nodeTunneler</span> <span style="color:#a6e22e">tunneler</span>.<span style="color:#a6e22e">Tunneler</span>, <span style="color:#a6e22e">proxyTransport</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Transport</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">master</span>.<span style="color:#a6e22e">Config</span>, <span style="color:#a6e22e">informers</span>.<span style="color:#a6e22e">SharedInformerFactory</span>, <span style="color:#a6e22e">clientgoinformers</span>.<span style="color:#a6e22e">SharedInformerFactory</span>, <span style="color:#f92672">*</span><span style="color:#a6e22e">kubeserver</span>.<span style="color:#a6e22e">InsecureServingInfo</span>, <span style="color:#a6e22e">aggregatorapiserver</span>.<span style="color:#a6e22e">ServiceResolver</span>, <span style="color:#66d9ef">error</span>) {}</code></pre></div>
+<p>方法的注释是 创建为了运行API server所需的所有资源，但是不会运行。就是说，这个方法负责创建后面启动的apiserver所需的所有配置及相关类的初始化。通过返回参数看，这些资源至少包括apiserver的配置, <code>SharedInformerFactory</code>(<em>provides shared informers for resources in all known API group versions</em>), <code>InsecureServingInfo</code>(<em>is required to serve http.  HTTP does NOT include authentication or authorization.</em>), <code>ServiceResolver</code>(<em>knows how to get a URL given a service</em>)。</p>
+
+<h3 id="主要流程">主要流程</h3>
+
+<p>CreateKubeAPIServerConfig 首先是通过 <code>defaultOptions</code> 方法 在创建真正的 apiserver配置前将 options 中的参数以默认值补全，并对参数进行<code>Validate</code>, 然后通过<code>BuildGenericConfig</code>方法，根据 options 创建<code>*genericapiserver.Config</code>, 同时 <code>SharedInformer</code>和<code>ServiceResolver</code>都是在这个方法中创建的。
+<code>BuildGenericConfig</code>方法中调用了很多<code>ApplyTo</code>方法，作用是将 options 中的各项配置参数解析到生成的config中, 在这个方法中还创建了<code>[]admission.PluginInitializer</code>。<br />
+在这之后还有一个重要的方法是<code>BuildStorageFactory</code>，创建StorageFactory的时候需要传入 etcd 相关的配置。<code>Storage</code>是apiserver中一个很重要的概念，通过它执行对具体资源对象的操作，如对 POD 的 CRUD 等操作就是通过 <code>PodStorage</code>对象进行并连接到后端的 etcd 的。（同时 Storage 也是和 对应资源对象的 API 对应，后面installAPI的时候也是通过 Storage 来注册 API 路由的。）<br />
+最后，配置默认的ServiceIPRange 和 获取 CA 证书等配置，将上面创建的配置注入一个<code>&amp;master.Config</code>实例并返回。</p>
+
+<h3 id="serviceresolver">ServiceResolver</h3>
+
+<p>ServiceResolver的定义及创建方法如下，通过 SharedInformer 的 lister 方法监听 kubernetes Service 资源的变化，实现获取 Service 的 URL 的功能。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">serviceResolver</span> = <span style="color:#a6e22e">aggregatorapiserver</span>.<span style="color:#a6e22e">NewClusterIPServiceResolver</span>(
+			<span style="color:#a6e22e">versionedInformers</span>.<span style="color:#a6e22e">Core</span>().<span style="color:#a6e22e">V1</span>().<span style="color:#a6e22e">Services</span>().<span style="color:#a6e22e">Lister</span>(),
+		)
+
+<span style="color:#75715e">// A ServiceResolver knows how to get a URL given a service.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ServiceResolver</span> <span style="color:#66d9ef">interface</span> {
+	<span style="color:#a6e22e">ResolveEndpoint</span>(<span style="color:#a6e22e">namespace</span>, <span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">URL</span>, <span style="color:#66d9ef">error</span>)
+}</code></pre></div>
+<h3 id="sharedinformer">SharedInformer</h3>
+
+<p>CreateKubeAPIServerConfig 返回两个<code>SharedInformerFactory</code>, 实际上结构体的定义完全相同，区别是定义在不同的包内，<code>informers.SharedInformerFactory</code>定义在 kubernetes 内部的pkg下，而<code>clientgoinformers.SharedInformerFactory</code>定义在 client-go 中，因此创建的时候，前者是通过<code>internalclientset</code>创建出的clientset创建，而后者是通过client-go的clientset创建，用来创建两者的配置是完全相同的。(第一次阅读，比较疑惑为什么需要两个clientset。猜测是一个用来内部通信，一个是用来外部通信。后面有时间的话，会再具体研究下。)<br />
+<code>SharedInformerFactory</code>定义如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// SharedInformerFactory provides shared informers for resources in all known
+</span><span style="color:#75715e">// API group versions.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">SharedInformerFactory</span> <span style="color:#66d9ef">interface</span> {
+	<span style="color:#a6e22e">internalinterfaces</span>.<span style="color:#a6e22e">SharedInformerFactory</span>
+	<span style="color:#a6e22e">ForResource</span>(<span style="color:#a6e22e">resource</span> <span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersionResource</span>) (<span style="color:#a6e22e">GenericInformer</span>, <span style="color:#66d9ef">error</span>)
+	<span style="color:#a6e22e">WaitForCacheSync</span>(<span style="color:#a6e22e">stopCh</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">map</span>[<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">Type</span>]<span style="color:#66d9ef">bool</span>
+
+	<span style="color:#a6e22e">Admissionregistration</span>() <span style="color:#a6e22e">admissionregistration</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Apps</span>() <span style="color:#a6e22e">apps</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Autoscaling</span>() <span style="color:#a6e22e">autoscaling</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Batch</span>() <span style="color:#a6e22e">batch</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Certificates</span>() <span style="color:#a6e22e">certificates</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Core</span>() <span style="color:#a6e22e">core</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Extensions</span>() <span style="color:#a6e22e">extensions</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Networking</span>() <span style="color:#a6e22e">networking</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Policy</span>() <span style="color:#a6e22e">policy</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Rbac</span>() <span style="color:#a6e22e">rbac</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Scheduling</span>() <span style="color:#a6e22e">scheduling</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Settings</span>() <span style="color:#a6e22e">settings</span>.<span style="color:#a6e22e">Interface</span>
+	<span style="color:#a6e22e">Storage</span>() <span style="color:#a6e22e">storage</span>.<span style="color:#a6e22e">Interface</span>
+}</code></pre></div>
+<p>SharedInformerFactory为所有API group versions提供shared informers, shared informer又是什么呢？定义如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// SharedInformer has a shared data cache and is capable of distributing notifications for changes
+</span><span style="color:#75715e">// to the cache to multiple listeners who registered via AddEventHandler. If you use this, there is
+</span><span style="color:#75715e">// one behavior change compared to a standard Informer.  When you receive a notification, the cache
+</span><span style="color:#75715e">// will be AT LEAST as fresh as the notification, but it MAY be more fresh.  You should NOT depend
+</span><span style="color:#75715e">// on the contents of the cache exactly matching the notification you&#39;ve received in handler
+</span><span style="color:#75715e">// functions.  If there was a create, followed by a delete, the cache may NOT have your item.  This
+</span><span style="color:#75715e">// has advantages over the broadcaster since it allows us to share a common cache across many
+</span><span style="color:#75715e">// controllers. Extending the broadcaster would have required us keep duplicate caches for each
+</span><span style="color:#75715e">// watch.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">SharedInformer</span> <span style="color:#66d9ef">interface</span> {
+	<span style="color:#75715e">// AddEventHandler adds an event handler to the shared informer using the shared informer&#39;s resync
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// period.  Events to a single handler are delivered sequentially, but there is no coordination
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// between different handlers.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">AddEventHandler</span>(<span style="color:#a6e22e">handler</span> <span style="color:#a6e22e">ResourceEventHandler</span>)
+	<span style="color:#75715e">// AddEventHandlerWithResyncPeriod adds an event handler to the shared informer using the
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// specified resync period.  Events to a single handler are delivered sequentially, but there is
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// no coordination between different handlers.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">AddEventHandlerWithResyncPeriod</span>(<span style="color:#a6e22e">handler</span> <span style="color:#a6e22e">ResourceEventHandler</span>, <span style="color:#a6e22e">resyncPeriod</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Duration</span>)
+	<span style="color:#75715e">// GetStore returns the Store.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">GetStore</span>() <span style="color:#a6e22e">Store</span>
+	<span style="color:#75715e">// GetController gives back a synthetic interface that &#34;votes&#34; to start the informer
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">GetController</span>() <span style="color:#a6e22e">Controller</span>
+	<span style="color:#75715e">// Run starts the shared informer, which will be stopped when stopCh is closed.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">Run</span>(<span style="color:#a6e22e">stopCh</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{})
+	<span style="color:#75715e">// HasSynced returns true if the shared informer&#39;s store has synced.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">HasSynced</span>() <span style="color:#66d9ef">bool</span>
+	<span style="color:#75715e">// LastSyncResourceVersion is the resource version observed when last synced with the underlying
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// store. The value returned is not synchronized with access to the underlying store and is not
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// thread-safe.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">LastSyncResourceVersion</span>() <span style="color:#66d9ef">string</span>
+}</code></pre></div>
+<p>可以通过先两篇文章了解下SharedInformer,
+<a href="https://blog.csdn.net/weixin_42663840/article/details/81699303">https://blog.csdn.net/weixin_42663840/article/details/81699303</a><br />
+<a href="https://www.kubernetes.org.cn/2693.html">https://www.kubernetes.org.cn/2693.html</a><br />
+简单来说，SharedInformer 有一个共享数据的cache, 并能够将 cache 的变化分发给多个 listener, 这些 listener 都是通过 <code>AddEventHandler</code> 方法注册到 SharedInformer。Informer 在初始化的时，先调用 Kubernetes List API 到 ETCD获得某种 resource 的全部 Object，缓存在内存中; 然后，调用 Watch API 去 watch 这种 resource，去维护这份缓存; 最后，Informer 就不再调用 Kubernetes 的任何 API。</p>
+
+<h2 id="createkubeapiserver">CreateKubeAPIServer</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">kubeAPIServer</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">CreateKubeAPIServer</span>(<span style="color:#a6e22e">kubeAPIServerConfig</span>, <span style="color:#a6e22e">apiExtensionsServer</span>.<span style="color:#a6e22e">GenericAPIServer</span>, <span style="color:#a6e22e">sharedInformers</span>, <span style="color:#a6e22e">versionedInformers</span>)
+
+<span style="color:#75715e">// CreateKubeAPIServer creates and wires a workable kube-apiserver
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">CreateKubeAPIServer</span>(<span style="color:#a6e22e">kubeAPIServerConfig</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">master</span>.<span style="color:#a6e22e">Config</span>, <span style="color:#a6e22e">delegateAPIServer</span> <span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">DelegationTarget</span>, <span style="color:#a6e22e">sharedInformers</span> <span style="color:#a6e22e">informers</span>.<span style="color:#a6e22e">SharedInformerFactory</span>, <span style="color:#a6e22e">versionedInformers</span> <span style="color:#a6e22e">clientgoinformers</span>.<span style="color:#a6e22e">SharedInformerFactory</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">master</span>.<span style="color:#a6e22e">Master</span>, <span style="color:#66d9ef">error</span>) {}</code></pre></div>
+<p>方法的注释 创建并装配一个可工作的 kube-apiserver, 到这里，一个真正可运行的apiserver实例就创建完成了。可以看到返回的 APIServer 类型是<code>*master.Master</code>，传入的就是之前CreateKubeAPIServer返回的配置和资源，加上delegateAPIServer。这是kubernetes组合多个 apiserver 的机制。</p>
+
+<h3 id="主要流程-1">主要流程</h3>
+
+<p>生成 kubeAPIServer 的是<code>kubeAPIServerConfig.Complete(versionedInformers).New(delegateAPIServer)</code>方法。在这个方法中，又调用了<code>c.GenericConfig.New(&quot;kube-apiserver&quot;, delegationTarget)</code>创建一个APIServer，并生成 Handler chain 和传入的<code>delegateAPIServer</code>组合起来；接着会新建<code>*master.Master</code>实例 <code>m</code>，并将<code>c.GenericConfig.New</code> 返回的 APIServer 赋值给 <code>m.GenericAPIServer</code>, 这个<code>m</code>也是<code>CreateKubeAPIServer</code>方法最终要返回的 APISever 实例。最后要做的就是执行<code>m.InstallLegacyAPI</code>, <code>m.InstallAPIs</code>注册 API 接口，添加 PostStartHook 然后将<code>m</code>返回。</p>
+
+<h3 id="c-genericconfig-new">c.GenericConfig.New</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// New creates a new server which logically combines the handling chain with the passed server.
+</span><span style="color:#75715e">// name is used to differentiate for logging.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#a6e22e">completedConfig</span>) <span style="color:#a6e22e">New</span>(<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">delegationTarget</span> <span style="color:#a6e22e">DelegationTarget</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">GenericAPIServer</span>, <span style="color:#66d9ef">error</span>) {}</code></pre></div>
+<p>首先通过<code>apiServerHandler := NewAPIServerHandler(name, c.RequestContextMapper, c.Serializer, handlerChainBuilder, delegationTarget.UnprotectedHandler())</code>创建出一个<code>APIServerHandler</code>实例，结构体定义上面已经贴过了。<br />
+NewAPIServerHandler 方法中，创建了<code>nonGoRestfulMux</code>和<code>gorestfulContainer</code>, 并给<code>gorestfulContainer</code>添加了几个默认Handler(NotFoundHandler, RecoverHandler, ServiceErrorHandler), 再这两者注入到一个 director 实例中，director 有一个 <code>ServeHTTP</code>, 用来最终启动 http 服务, 最后将director 赋值给 <code>APIServerHandler.Director</code>, 通过调用<code>c.BuildHandlerChainFunc(director, c.Config)</code>装饰<code>director</code>并赋值给<code>APIServerHandler.FullHandlerChain</code>最后返回。<br />
+接着创建一个<code>GenericAPIServer</code>实例<code>s</code>，并将 NewAPIServerHandler 方法中返回的<code>apiServerHandler</code>赋值给<code>s.Handler</code>和<code>s.listedPathProvider</code>, 将传入的<code>delegationTarget</code>(即delegated apiserver) 中配置的 Hooks 和 HealthzCheckers 传递<code>s</code>, 并合并<code>s</code>和<code>delegationTarget</code>的 listedPathProvider(<em>an interface for providing paths that should be reported at /</em>), 最后执行<code>installAPI(s, c.Config)</code>安装 API 并返回<code>s</code>。</p>
+
+<h4 id="director">director</h4>
+
+<p>如下是<code>BuildHandlerChainFunc</code>和<code>*master.Config</code>中默认的方法，可以看到是不断追加 handler 方法到 Handler 中。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// BuildHandlerChainFunc allows you to build custom handler chains by decorating the apiHandler.
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">BuildHandlerChainFunc</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">apiHandler</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span>, <span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Config</span>) (<span style="color:#a6e22e">secure</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span>)
+
+<span style="color:#75715e">// default BuildHandlerChainFunc
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">DefaultBuildHandlerChain</span>(<span style="color:#a6e22e">apiHandler</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span>, <span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Config</span>) <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span> {
+	<span style="color:#a6e22e">handler</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">WithAuthorization</span>(<span style="color:#a6e22e">apiHandler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Authorizer</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Serializer</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericfilters</span>.<span style="color:#a6e22e">WithMaxInFlightLimit</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">MaxRequestsInFlight</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">MaxMutatingRequestsInFlight</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">LongRunningFunc</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">WithImpersonation</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Authorizer</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Serializer</span>)
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">utilfeature</span>.<span style="color:#a6e22e">DefaultFeatureGate</span>.<span style="color:#a6e22e">Enabled</span>(<span style="color:#a6e22e">features</span>.<span style="color:#a6e22e">AdvancedAuditing</span>) {
+		<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">WithAudit</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">AuditBackend</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">AuditPolicyChecker</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">LongRunningFunc</span>)
+	} <span style="color:#66d9ef">else</span> {
+		<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">WithLegacyAudit</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">LegacyAuditWriter</span>)
+	}
+	<span style="color:#a6e22e">failedHandler</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">Unauthorized</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Serializer</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">SupportsBasicAuth</span>)
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">utilfeature</span>.<span style="color:#a6e22e">DefaultFeatureGate</span>.<span style="color:#a6e22e">Enabled</span>(<span style="color:#a6e22e">features</span>.<span style="color:#a6e22e">AdvancedAuditing</span>) {
+		<span style="color:#a6e22e">failedHandler</span> = <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">WithFailedAuthenticationAudit</span>(<span style="color:#a6e22e">failedHandler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">AuditBackend</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">AuditPolicyChecker</span>)
+	}
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">WithAuthentication</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Authenticator</span>, <span style="color:#a6e22e">failedHandler</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericfilters</span>.<span style="color:#a6e22e">WithCORS</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">CorsAllowedOriginList</span>, <span style="color:#66d9ef">nil</span>, <span style="color:#66d9ef">nil</span>, <span style="color:#66d9ef">nil</span>, <span style="color:#e6db74">&#34;true&#34;</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericfilters</span>.<span style="color:#a6e22e">WithTimeoutForNonLongRunningRequests</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">LongRunningFunc</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestTimeout</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericfilters</span>.<span style="color:#a6e22e">WithWaitGroup</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">LongRunningFunc</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">HandlerChainWaitGroup</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericapifilters</span>.<span style="color:#a6e22e">WithRequestInfo</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestInfoResolver</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">apirequest</span>.<span style="color:#a6e22e">WithRequestContext</span>(<span style="color:#a6e22e">handler</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">RequestContextMapper</span>)
+	<span style="color:#a6e22e">handler</span> = <span style="color:#a6e22e">genericfilters</span>.<span style="color:#a6e22e">WithPanicRecovery</span>(<span style="color:#a6e22e">handler</span>)
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">handler</span>
+}</code></pre></div>
+<p>如下是<code>director</code>的定义及<code>ServeHTTP</code>方法，先匹配 path 是否是gorestful中的路径，是的话通过<code>goRestfulContainer.Dispatch(w, req)</code>分发到对应 handler 处理请求，不匹配的话就通过<code>nonGoRestfulMux</code>分发处理。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">director</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">name</span>               <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">goRestfulContainer</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">Container</span>
+	<span style="color:#a6e22e">nonGoRestfulMux</span>    <span style="color:#f92672">*</span><span style="color:#a6e22e">mux</span>.<span style="color:#a6e22e">PathRecorderMux</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">d</span> <span style="color:#a6e22e">director</span>) <span style="color:#a6e22e">ServeHTTP</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">req</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+	<span style="color:#a6e22e">path</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">URL</span>.<span style="color:#a6e22e">Path</span>
+
+	<span style="color:#75715e">// check to see if our webservices want to claim this path
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">ws</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">goRestfulContainer</span>.<span style="color:#a6e22e">RegisteredWebServices</span>() {
+		<span style="color:#66d9ef">switch</span> {
+		<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">ws</span>.<span style="color:#a6e22e">RootPath</span>() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;/apis&#34;</span>:
+			<span style="color:#75715e">// if we are exactly /apis or /apis/, then we need special handling in loop.
+</span><span style="color:#75715e"></span>			<span style="color:#75715e">// normally these are passed to the nonGoRestfulMux, but if discovery is enabled, it will go directly.
+</span><span style="color:#75715e"></span>			<span style="color:#75715e">// We can&#39;t rely on a prefix match since /apis matches everything (see the big comment on Director above)
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">path</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;/apis&#34;</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">path</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;/apis/&#34;</span> {
+				<span style="color:#a6e22e">glog</span>.<span style="color:#a6e22e">V</span>(<span style="color:#ae81ff">5</span>).<span style="color:#a6e22e">Infof</span>(<span style="color:#e6db74">&#34;%v: %v %q satisfied by gorestful with webservice %v&#34;</span>, <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">name</span>, <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">Method</span>, <span style="color:#a6e22e">path</span>, <span style="color:#a6e22e">ws</span>.<span style="color:#a6e22e">RootPath</span>())
+				<span style="color:#75715e">// don&#39;t use servemux here because gorestful servemuxes get messed up when removing webservices
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// TODO fix gorestful, remove TPRs, or stop using gorestful
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">goRestfulContainer</span>.<span style="color:#a6e22e">Dispatch</span>(<span style="color:#a6e22e">w</span>, <span style="color:#a6e22e">req</span>)
+				<span style="color:#66d9ef">return</span>
+			}
+
+		<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">HasPrefix</span>(<span style="color:#a6e22e">path</span>, <span style="color:#a6e22e">ws</span>.<span style="color:#a6e22e">RootPath</span>()):
+			<span style="color:#75715e">// ensure an exact match or a path boundary match
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">path</span>) <span style="color:#f92672">==</span> len(<span style="color:#a6e22e">ws</span>.<span style="color:#a6e22e">RootPath</span>()) <span style="color:#f92672">||</span> <span style="color:#a6e22e">path</span>[len(<span style="color:#a6e22e">ws</span>.<span style="color:#a6e22e">RootPath</span>())] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;/&#39;</span> {
+				<span style="color:#a6e22e">glog</span>.<span style="color:#a6e22e">V</span>(<span style="color:#ae81ff">5</span>).<span style="color:#a6e22e">Infof</span>(<span style="color:#e6db74">&#34;%v: %v %q satisfied by gorestful with webservice %v&#34;</span>, <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">name</span>, <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">Method</span>, <span style="color:#a6e22e">path</span>, <span style="color:#a6e22e">ws</span>.<span style="color:#a6e22e">RootPath</span>())
+				<span style="color:#75715e">// don&#39;t use servemux here because gorestful servemuxes get messed up when removing webservices
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// TODO fix gorestful, remove TPRs, or stop using gorestful
+</span><span style="color:#75715e"></span>				<span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">goRestfulContainer</span>.<span style="color:#a6e22e">Dispatch</span>(<span style="color:#a6e22e">w</span>, <span style="color:#a6e22e">req</span>)
+				<span style="color:#66d9ef">return</span>
+			}
+		}
+	}
+
+	<span style="color:#75715e">// if we didn&#39;t find a match, then we just skip gorestful altogether
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">glog</span>.<span style="color:#a6e22e">V</span>(<span style="color:#ae81ff">5</span>).<span style="color:#a6e22e">Infof</span>(<span style="color:#e6db74">&#34;%v: %v %q satisfied by nonGoRestful&#34;</span>, <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">name</span>, <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">Method</span>, <span style="color:#a6e22e">path</span>)
+	<span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">nonGoRestfulMux</span>.<span style="color:#a6e22e">ServeHTTP</span>(<span style="color:#a6e22e">w</span>, <span style="color:#a6e22e">req</span>)
+}</code></pre></div>
+<h4 id="listedpathprovider">ListedPathProvider</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// ListedPathProvider is an interface for providing paths that should be reported at /.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ListedPathProvider</span> <span style="color:#66d9ef">interface</span> {
+	<span style="color:#75715e">// ListedPaths is an alphabetically sorted list of paths to be reported at /.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">ListedPaths</span>() []<span style="color:#66d9ef">string</span>
+}</code></pre></div>
+<h4 id="installapi">installAPI</h4>
+
+<p>这里的 installAPI 方法如下，只根据配置安装了 Index, SwaggerUI, Profiling, Metrics 等 API 到 <code>NonGoRestfulMux</code>, Version(<code>/version</code>) 到 <code>GoRestfulContainer</code>, 核心的 API 还没有安装。</p>
+
+<h3 id="m-installlegacyapi">m.InstallLegacyAPI</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">InstallLegacyAPI</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">c</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>, <span style="color:#a6e22e">legacyRESTStorageProvider</span>)
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Master</span>) <span style="color:#a6e22e">InstallLegacyAPI</span>(<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">completedConfig</span>, <span style="color:#a6e22e">restOptionsGetter</span> <span style="color:#a6e22e">generic</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>, <span style="color:#a6e22e">legacyRESTStorageProvider</span> <span style="color:#a6e22e">corerest</span>.<span style="color:#a6e22e">LegacyRESTStorageProvider</span>) {}</code></pre></div>
+<p>用于注册<code>/api</code>下的 API, 即core api。首先调用<code>legacyRESTStorageProvider.NewLegacyRESTStorage</code>创建<code>legacyRESTStorage</code>, 如果配置中<code>EnableCoreControllers</code>为<code>True</code>的话，创建<code>BootStrapController</code>并在 <code>m</code>的 PostStartHook 和 dPostStartHook 中添加启动和停止。最后执行<code>m.GenericAPIServer.InstallLegacyAPIGroup</code>安装 LegacyAPIGroup。</p>
+
+<h4 id="newlegacyreststorage">NewLegacyRESTStorage</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">legacyRESTStorage</span>, <span style="color:#a6e22e">apiGroupInfo</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">legacyRESTStorageProvider</span>.<span style="color:#a6e22e">NewLegacyRESTStorage</span>(<span style="color:#a6e22e">restOptionsGetter</span>)
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#a6e22e">LegacyRESTStorageProvider</span>) <span style="color:#a6e22e">NewLegacyRESTStorage</span>(<span style="color:#a6e22e">restOptionsGetter</span> <span style="color:#a6e22e">generic</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>) (<span style="color:#a6e22e">LegacyRESTStorage</span>, <span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">APIGroupInfo</span>, <span style="color:#66d9ef">error</span>) {}</code></pre></div>
+<p>这个方法返回两个结构体，<code>LegacyRESTStorage</code>和<code>genericapiserver.APIGroupInfo</code>, 其中最重要的是 APIGroupInfo。APIGroupInfo 中，有一个<code>VersionedResourcesStorageMap</code>, 是API 版本到 Storage 资源的 map 关系，保存了不同版本的所有 Storage。下面贴出了两个结构体的定义。
+首先会初始化一个 APIGroupInfo 实例<code>apiGroupInfo</code>, 接着会调用不同 Storage 资源的<code>NewREST</code>方法创建 Storage, 如: <code>eventStorage</code>, <code>configMapStorage</code>, <code>namespaceStorage</code>, <code>serviceRESTStorage</code>, <code>podStorage</code>等。<code>NewREST</code>方法返回一个 REST 结构体, 而 REST 结构体中，保存了<code>*genericregistry.Store</code>, 这个 Store 结构体提供了对应资源的 CRUD 等操作的方法，所有对资源的操作通过 Store 来访问到后端的 ETCD。其中 pod, node 和 service 对应的操作比较多，涉及 Status 的存储和更新, 所以 Storage 创建过程也较为复杂。尤其是 pod, 不仅涉及到本身和状态的存储和更新，还涉及到日志 proxy 等操作，所以单独封装了一个 PodStorage 结构体，其中包含了多种不同的 Store, 例如涉及到日志的<code>LogREST</code>需要传入 KubeletConnectionInfo, 涉及到 proxy 的 ProxyREST 需要传入 ProxyTransport等，每种 Store 都提供了对应资源的操作方法，如获取日志，建立连接等。这部分代码在<code>k8s.io\kubernetes\pkg\registry\core\rest\storage_core.go</code>, 有关 Pod 和 Service 的 Storage 创建及不同 Storage 对应的方法可以看一下。<br />
+最后，所有 Storage 创建完后，会构建一个<code>restStorageMap</code>(具体内容会在下面贴出)，这个 map 最后会赋给<code>apiGroupInfo.VersionedResourcesStorageMap[&quot;v1&quot;]</code>, 即 core API v1版本的所有资源都可以在这个 map 资源中找到。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// LegacyRESTStorage returns stateful information about particular instances of REST storage to
+</span><span style="color:#75715e">// master.go for wiring controllers.
+</span><span style="color:#75715e">// TODO remove this by running the controller as a poststarthook
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">LegacyRESTStorage</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">ServiceClusterIPAllocator</span> <span style="color:#a6e22e">rangeallocation</span>.<span style="color:#a6e22e">RangeRegistry</span>
+	<span style="color:#a6e22e">ServiceNodePortAllocator</span>  <span style="color:#a6e22e">rangeallocation</span>.<span style="color:#a6e22e">RangeRegistry</span>
+}
+
+<span style="color:#75715e">// Info about an API group.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">APIGroupInfo</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">GroupMeta</span> <span style="color:#a6e22e">apimachinery</span>.<span style="color:#a6e22e">GroupMeta</span>
+	<span style="color:#75715e">// Info about the resources in this group. Its a map from version to resource to the storage.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">VersionedResourcesStorageMap</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">Storage</span>
+	<span style="color:#75715e">// OptionsExternalVersion controls the APIVersion used for common objects in the
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// schema like api.Status, api.DeleteOptions, and metav1.ListOptions. Other implementors may
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// define a version &#34;v1beta1&#34; but want to use the Kubernetes &#34;v1&#34; internal objects.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// If nil, defaults to groupMeta.GroupVersion.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// TODO: Remove this when https://github.com/kubernetes/kubernetes/issues/19018 is fixed.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">OptionsExternalVersion</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersion</span>
+	<span style="color:#75715e">// MetaGroupVersion defaults to &#34;meta.k8s.io/v1&#34; and is the scheme group version used to decode
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// common API implementations like ListOptions. Future changes will allow this to vary by group
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// version (for when the inevitable meta/v2 group emerges).
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">MetaGroupVersion</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupVersion</span>
+
+	<span style="color:#75715e">// Scheme includes all of the types used by this group and how to convert between them (or
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// to convert objects from outside of this group that are accepted in this API).
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// TODO: replace with interfaces
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">Scheme</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">Scheme</span>
+	<span style="color:#75715e">// NegotiatedSerializer controls how this group encodes and decodes data
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">NegotiatedSerializer</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">NegotiatedSerializer</span>
+	<span style="color:#75715e">// ParameterCodec performs conversions for query parameters passed to API calls
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">ParameterCodec</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">ParameterCodec</span>
+}</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// restStorageMap
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">restStorageMap</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">Storage</span>{
+	<span style="color:#e6db74">&#34;pods&#34;</span>:             <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Pod</span>,
+	<span style="color:#e6db74">&#34;pods/attach&#34;</span>:      <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Attach</span>,
+	<span style="color:#e6db74">&#34;pods/status&#34;</span>:      <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Status</span>,
+	<span style="color:#e6db74">&#34;pods/log&#34;</span>:         <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Log</span>,
+	<span style="color:#e6db74">&#34;pods/exec&#34;</span>:        <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Exec</span>,
+	<span style="color:#e6db74">&#34;pods/portforward&#34;</span>: <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">PortForward</span>,
+	<span style="color:#e6db74">&#34;pods/proxy&#34;</span>:       <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Proxy</span>,
+	<span style="color:#e6db74">&#34;pods/binding&#34;</span>:     <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Binding</span>,
+	<span style="color:#e6db74">&#34;bindings&#34;</span>:         <span style="color:#a6e22e">podStorage</span>.<span style="color:#a6e22e">Binding</span>,
+	<span style="color:#e6db74">&#34;podTemplates&#34;</span>: <span style="color:#a6e22e">podTemplateStorage</span>,
+	<span style="color:#e6db74">&#34;replicationControllers&#34;</span>:        <span style="color:#a6e22e">controllerStorage</span>.<span style="color:#a6e22e">Controller</span>,
+	<span style="color:#e6db74">&#34;replicationControllers/status&#34;</span>: <span style="color:#a6e22e">controllerStorage</span>.<span style="color:#a6e22e">Status</span>,
+	<span style="color:#e6db74">&#34;services&#34;</span>:        <span style="color:#a6e22e">serviceRest</span>.<span style="color:#a6e22e">Service</span>,
+	<span style="color:#e6db74">&#34;services/proxy&#34;</span>:  <span style="color:#a6e22e">serviceRest</span>.<span style="color:#a6e22e">Proxy</span>,
+	<span style="color:#e6db74">&#34;services/status&#34;</span>: <span style="color:#a6e22e">serviceStatusStorage</span>,
+	<span style="color:#e6db74">&#34;endpoints&#34;</span>: <span style="color:#a6e22e">endpointsStorage</span>,
+	<span style="color:#e6db74">&#34;nodes&#34;</span>:        <span style="color:#a6e22e">nodeStorage</span>.<span style="color:#a6e22e">Node</span>,
+	<span style="color:#e6db74">&#34;nodes/status&#34;</span>: <span style="color:#a6e22e">nodeStorage</span>.<span style="color:#a6e22e">Status</span>,
+	<span style="color:#e6db74">&#34;nodes/proxy&#34;</span>:  <span style="color:#a6e22e">nodeStorage</span>.<span style="color:#a6e22e">Proxy</span>,
+	<span style="color:#e6db74">&#34;events&#34;</span>: <span style="color:#a6e22e">eventStorage</span>,
+	<span style="color:#e6db74">&#34;limitRanges&#34;</span>:                   <span style="color:#a6e22e">limitRangeStorage</span>,
+	<span style="color:#e6db74">&#34;resourceQuotas&#34;</span>:                <span style="color:#a6e22e">resourceQuotaStorage</span>,
+	<span style="color:#e6db74">&#34;resourceQuotas/status&#34;</span>:         <span style="color:#a6e22e">resourceQuotaStatusStorage</span>,
+	<span style="color:#e6db74">&#34;namespaces&#34;</span>:                    <span style="color:#a6e22e">namespaceStorage</span>,
+	<span style="color:#e6db74">&#34;namespaces/status&#34;</span>:             <span style="color:#a6e22e">namespaceStatusStorage</span>,
+	<span style="color:#e6db74">&#34;namespaces/finalize&#34;</span>:           <span style="color:#a6e22e">namespaceFinalizeStorage</span>,
+	<span style="color:#e6db74">&#34;secrets&#34;</span>:                       <span style="color:#a6e22e">secretStorage</span>,
+	<span style="color:#e6db74">&#34;serviceAccounts&#34;</span>:               <span style="color:#a6e22e">serviceAccountStorage</span>,
+	<span style="color:#e6db74">&#34;persistentVolumes&#34;</span>:             <span style="color:#a6e22e">persistentVolumeStorage</span>,
+	<span style="color:#e6db74">&#34;persistentVolumes/status&#34;</span>:      <span style="color:#a6e22e">persistentVolumeStatusStorage</span>,
+	<span style="color:#e6db74">&#34;persistentVolumeClaims&#34;</span>:        <span style="color:#a6e22e">persistentVolumeClaimStorage</span>,
+	<span style="color:#e6db74">&#34;persistentVolumeClaims/status&#34;</span>: <span style="color:#a6e22e">persistentVolumeClaimStatusStorage</span>,
+	<span style="color:#e6db74">&#34;configMaps&#34;</span>:                    <span style="color:#a6e22e">configMapStorage</span>,
+	<span style="color:#e6db74">&#34;componentStatuses&#34;</span>: <span style="color:#a6e22e">componentstatus</span>.<span style="color:#a6e22e">NewStorage</span>(<span style="color:#a6e22e">componentStatusStorage</span>{<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">StorageFactory</span>}.<span style="color:#a6e22e">serversToValidate</span>),
+}</code></pre></div>
+<h4 id="installlegacyapigroup">InstallLegacyAPIGroup</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">GenericAPIServer</span>.<span style="color:#a6e22e">InstallLegacyAPIGroup</span>(<span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">DefaultLegacyAPIPrefix</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">apiGroupInfo</span>)
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">GenericAPIServer</span>) <span style="color:#a6e22e">InstallLegacyAPIGroup</span>(<span style="color:#a6e22e">apiPrefix</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">apiGroupInfo</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">APIGroupInfo</span>) <span style="color:#66d9ef">error</span> {
+	<span style="color:#66d9ef">if</span> !<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">legacyAPIGroupPrefixes</span>.<span style="color:#a6e22e">Has</span>(<span style="color:#a6e22e">apiPrefix</span>) {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;%q is not in the allowed legacy API prefixes: %v&#34;</span>, <span style="color:#a6e22e">apiPrefix</span>, <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">legacyAPIGroupPrefixes</span>.<span style="color:#a6e22e">List</span>())
+	}
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">installAPIResources</span>(<span style="color:#a6e22e">apiPrefix</span>, <span style="color:#a6e22e">apiGroupInfo</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+	}
+
+	<span style="color:#75715e">// setup discovery
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">apiVersions</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">string</span>{}
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">groupVersion</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">apiGroupInfo</span>.<span style="color:#a6e22e">GroupMeta</span>.<span style="color:#a6e22e">GroupVersions</span> {
+		<span style="color:#a6e22e">apiVersions</span> = append(<span style="color:#a6e22e">apiVersions</span>, <span style="color:#a6e22e">groupVersion</span>.<span style="color:#a6e22e">Version</span>)
+	}
+	<span style="color:#75715e">// Install the version handler.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// Add a handler at /&lt;apiPrefix&gt; to enumerate the supported api versions.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Handler</span>.<span style="color:#a6e22e">GoRestfulContainer</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">discovery</span>.<span style="color:#a6e22e">NewLegacyRootAPIHandler</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">discoveryAddresses</span>, <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Serializer</span>, <span style="color:#a6e22e">apiPrefix</span>, <span style="color:#a6e22e">apiVersions</span>, <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">requestContextMapper</span>).<span style="color:#a6e22e">WebService</span>())
+	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}</code></pre></div>
+<p>整个方法如上，主要两步，首先调用 installAPIResources(<em>is a private method for installing the REST storage backing each api groupversionresource</em>) 安装 API。<br />
+installAPIResources 会遍历<code>apiGroupInfo</code>下的所有 groupVersion, 然后通过<code>s.getAPIGroupVersion</code>得到该 version 下所有的 Storage, 即上面<code>apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version]</code> map 中所对应的所有 Storage。并通过<code>InstallREST</code>注册到 REST API 的 Handler 中。InstallREST方法如下，在 <code>installer.Install()</code>方法中, 以上面的<code>restStorageMap</code>的 key 为 path, 将所有 Storage 通过<code>registerResourceHandlers</code>(<em>具体方法在 k8s.io\apiserver\pkg\endpoints\installer.go, 一个近700行的 swich-case 的方法，有兴趣可以看下。</em>)方法注册到 gorestful 的 WebService Route中，并返回一个<code>*metav1.APIResource</code>对象，Install 方法会返回所有 Storage 的生成的 APIResources 和注册到的 WebService。<br />
+接着获取 GroupVersions 中的所有版本并注册到 <code>GoRestfulContainer</code> 中(adds a service to return the supported api versions at the legacy /api), 返回可支持 API 版本。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// InstallREST registers the REST handlers (storage, watch, proxy and redirect) into a restful Container.
+</span><span style="color:#75715e">// It is expected that the provided path root prefix will serve all operations. Root MUST NOT end
+</span><span style="color:#75715e">// in a slash.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">g</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">APIGroupVersion</span>) <span style="color:#a6e22e">InstallREST</span>(<span style="color:#a6e22e">container</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">Container</span>) <span style="color:#66d9ef">error</span> {
+	<span style="color:#a6e22e">prefix</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">Join</span>(<span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">Root</span>, <span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">GroupVersion</span>.<span style="color:#a6e22e">Group</span>, <span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">GroupVersion</span>.<span style="color:#a6e22e">Version</span>)
+	<span style="color:#a6e22e">installer</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">APIInstaller</span>{
+		<span style="color:#a6e22e">group</span>:                        <span style="color:#a6e22e">g</span>,
+		<span style="color:#a6e22e">prefix</span>:                       <span style="color:#a6e22e">prefix</span>,
+		<span style="color:#a6e22e">minRequestTimeout</span>:            <span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">MinRequestTimeout</span>,
+		<span style="color:#a6e22e">enableAPIResponseCompression</span>: <span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">EnableAPIResponseCompression</span>,
+	}
+
+	<span style="color:#a6e22e">apiResources</span>, <span style="color:#a6e22e">ws</span>, <span style="color:#a6e22e">registrationErrors</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">installer</span>.<span style="color:#a6e22e">Install</span>()
+	<span style="color:#a6e22e">versionDiscoveryHandler</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">discovery</span>.<span style="color:#a6e22e">NewAPIVersionHandler</span>(<span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">Serializer</span>, <span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">GroupVersion</span>, <span style="color:#a6e22e">staticLister</span>{<span style="color:#a6e22e">apiResources</span>}, <span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">Context</span>)
+	<span style="color:#a6e22e">versionDiscoveryHandler</span>.<span style="color:#a6e22e">AddToWebService</span>(<span style="color:#a6e22e">ws</span>)
+	<span style="color:#a6e22e">container</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">ws</span>)
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">utilerrors</span>.<span style="color:#a6e22e">NewAggregate</span>(<span style="color:#a6e22e">registrationErrors</span>)
+}
+
+<span style="color:#75715e">// Install handlers for API resources.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">a</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">APIInstaller</span>) <span style="color:#a6e22e">Install</span>() ([]<span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">APIResource</span>, <span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">WebService</span>, []<span style="color:#66d9ef">error</span>) {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">apiResources</span> []<span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">APIResource</span>
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">errors</span> []<span style="color:#66d9ef">error</span>
+	<span style="color:#a6e22e">ws</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">newWebService</span>()
+
+	<span style="color:#a6e22e">proxyHandler</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">handlers</span>.<span style="color:#a6e22e">ProxyHandler</span>{
+		<span style="color:#a6e22e">Prefix</span>:     <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">prefix</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/proxy/&#34;</span>,
+		<span style="color:#a6e22e">Storage</span>:    <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Storage</span>,
+		<span style="color:#a6e22e">Serializer</span>: <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Serializer</span>,
+		<span style="color:#a6e22e">Mapper</span>:     <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Context</span>,
+	})
+
+	<span style="color:#75715e">// Register the paths in a deterministic (sorted) order to get a deterministic swagger spec.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">paths</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">string</span>, len(<span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Storage</span>))
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">i</span> <span style="color:#66d9ef">int</span> = <span style="color:#ae81ff">0</span>
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">path</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Storage</span> {
+		<span style="color:#a6e22e">paths</span>[<span style="color:#a6e22e">i</span>] = <span style="color:#a6e22e">path</span>
+		<span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>
+	}
+	<span style="color:#a6e22e">sort</span>.<span style="color:#a6e22e">Strings</span>(<span style="color:#a6e22e">paths</span>)
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">path</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">paths</span> {
+		<span style="color:#a6e22e">apiResource</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">registerResourceHandlers</span>(<span style="color:#a6e22e">path</span>, <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">group</span>.<span style="color:#a6e22e">Storage</span>[<span style="color:#a6e22e">path</span>], <span style="color:#a6e22e">ws</span>, <span style="color:#a6e22e">proxyHandler</span>)
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+			<span style="color:#a6e22e">errors</span> = append(<span style="color:#a6e22e">errors</span>, <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;error in registering resource: %s, %v&#34;</span>, <span style="color:#a6e22e">path</span>, <span style="color:#a6e22e">err</span>))
+		}
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">apiResource</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+			<span style="color:#a6e22e">apiResources</span> = append(<span style="color:#a6e22e">apiResources</span>, <span style="color:#f92672">*</span><span style="color:#a6e22e">apiResource</span>)
+		}
+	}
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">apiResources</span>, <span style="color:#a6e22e">ws</span>, <span style="color:#a6e22e">errors</span>
+}</code></pre></div>
+<h3 id="m-installapis">m.InstallAPIs</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">InstallAPIs</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">ExtraConfig</span>.<span style="color:#a6e22e">APIResourceConfigSource</span>, <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>, <span style="color:#a6e22e">restStorageProviders</span><span style="color:#f92672">...</span>)
+
+<span style="color:#75715e">// InstallAPIs will install the APIs for the restStorageProviders if they are enabled.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Master</span>) <span style="color:#a6e22e">InstallAPIs</span>(<span style="color:#a6e22e">apiResourceConfigSource</span> <span style="color:#a6e22e">serverstorage</span>.<span style="color:#a6e22e">APIResourceConfigSource</span>, <span style="color:#a6e22e">restOptionsGetter</span> <span style="color:#a6e22e">generic</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>, <span style="color:#a6e22e">restStorageProviders</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">RESTStorageProvider</span>) {}</code></pre></div>
+<p>用于注册<code>/apis</code>下的 API。在调用 InstallAPIs 之前，会创建<code>/apis</code>下 Storage 的 <code>RESTStorageProvider</code>, 该 interface 的定义及创建在下面代码片段<code>1</code>贴出。<br />
+每个 RESTStorageProvider, 都会有一个<code>NewRESTStorage</code>方法来创建对应资源的 Storage。调用 InstallAPIs 方法时，会将 restStorageProviders 列表传入。
+InstallAPIs 会遍历传入的 restStorageProviders 列表，并调用每个 restStorageProvider 的 <code>NewRESTStorage</code>。<br />
+<code>NewRESTStorage</code>方法, 会新建一个 APIGroupInfo, 然后针对 enable 的 API 版本, 调用 VXXStorage 获取对应版本的 ResourcesStorageMap 并存入 apiGroupInfo.VersionedResourcesStorageMap[VXX]中。用来获取 ResourcesStorageMap 的方法，和上面 InstallLegacyAPIGroup.NewLegacyRESTStorage 方法中一样，也是 <code>NewREST</code>, 具体逻辑也基本相同，返回一个 REST 结构体提供对资源的 CRUD 等操作。<br />
+<code>NewRESTStorage</code>方法最终返回的 apiGroupInfo, 会被放入一个 apiGroupsInfo 列表，最后会遍历这个列表并针对每一个 apiGroupInfo 执行 <code>m.GenericAPIServer.InstallAPIGroup(&amp;apiGroupsInfo[i])</code>, 这部分逻辑和 InstallLegacyAPIGroup 一样，通过调用 installAPIResources 将 API 注册到 GoRestfulContainer 中，详细的可以对照上面的 InstallLegacyAPIGroup 的分析参考源码。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// 代码片段 1
+</span><span style="color:#75715e">// RESTStorageProvider is a factory type for REST storage.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">RESTStorageProvider</span> <span style="color:#66d9ef">interface</span> {
+	<span style="color:#a6e22e">GroupName</span>() <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">NewRESTStorage</span>(<span style="color:#a6e22e">apiResourceConfigSource</span> <span style="color:#a6e22e">serverstorage</span>.<span style="color:#a6e22e">APIResourceConfigSource</span>, <span style="color:#a6e22e">restOptionsGetter</span> <span style="color:#a6e22e">generic</span>.<span style="color:#a6e22e">RESTOptionsGetter</span>) (<span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">APIGroupInfo</span>, <span style="color:#66d9ef">bool</span>)
+}
+
+<span style="color:#75715e">// The order here is preserved in discovery.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// If resources with identical names exist in more than one of these groups (e.g. &#34;deployments.apps&#34;&#34; and &#34;deployments.extensions&#34;),
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// the order of this list determines which group an unqualified resource name (e.g. &#34;deployments&#34;) should prefer.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// This priority order is used for local discovery, but it ends up aggregated in `k8s.io/kubernetes/cmd/kube-apiserver/app/aggregator.go
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// with specific priorities.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// TODO: describe the priority all the way down in the RESTStorageProviders and plumb it back through the various discovery
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// handlers that we have.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">restStorageProviders</span> <span style="color:#f92672">:=</span> []<span style="color:#a6e22e">RESTStorageProvider</span>{
+		<span style="color:#a6e22e">authenticationrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{<span style="color:#a6e22e">Authenticator</span>: <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">Authenticator</span>},
+		<span style="color:#a6e22e">authorizationrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{<span style="color:#a6e22e">Authorizer</span>: <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">Authorizer</span>, <span style="color:#a6e22e">RuleResolver</span>: <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">RuleResolver</span>},
+		<span style="color:#a6e22e">autoscalingrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">batchrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">certificatesrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">extensionsrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">networkingrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">policyrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">rbacrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{<span style="color:#a6e22e">Authorizer</span>: <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">GenericConfig</span>.<span style="color:#a6e22e">Authorizer</span>},
+		<span style="color:#a6e22e">schedulingrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">settingsrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">storagerest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#75715e">// keep apps after extensions so legacy clients resolve the extensions versions of shared resource names.
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// See https://github.com/kubernetes/kubernetes/issues/42392
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">appsrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">admissionregistrationrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{},
+		<span style="color:#a6e22e">eventsrest</span>.<span style="color:#a6e22e">RESTStorageProvider</span>{<span style="color:#a6e22e">TTL</span>: <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">ExtraConfig</span>.<span style="color:#a6e22e">EventTTL</span>},
+	}</code></pre></div></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
+        
+          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+        
+          <li><a href="/tags/source-code"><span class="tag">Source-Code</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.This post was published <strong>199</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>

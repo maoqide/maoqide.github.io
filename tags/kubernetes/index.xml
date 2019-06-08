@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kubernetes on Maoqide</title>
+    <link>/tags/kubernetes/</link>
+    <description>Recent content in Kubernetes on Maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
+    <lastBuildDate>Thu, 16 May 2019 14:06:37 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Deploy Mysql on Kubernetes</title>
+      <link>/post/cloud/deploy-mysql-on-kubernetes/</link>
+      <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
+      
+      <guid>/post/cloud/deploy-mysql-on-kubernetes/</guid>
+      <description>&lt;p&gt;本文通过 &lt;a href=&#34;https://github.com/oracle/mysql-operator&#34;&gt;mysql-operator&lt;/a&gt; 在kubernetes集群部署高可用的mysql statefulset。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Sample Controller</title>
+      <link>/post/cloud/sample-controller/</link>
+      <pubDate>Mon, 18 Mar 2019 12:53:41 +0800</pubDate>
+      
+      <guid>/post/cloud/sample-controller/</guid>
+      <description>&lt;p&gt;自己构建 sample-controller.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Building an Operator for Kubernetes With the Sample Controller</title>
+      <link>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
+      <pubDate>Sat, 16 Mar 2019 21:34:46 +0800</pubDate>
+      
+      <guid>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
+      <description>&lt;pre&gt;&lt;code&gt;An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。&lt;br /&gt;
+Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Kube Scheduler 源码阅读</title>
+      <link>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
+      
+      <guid>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <description>&lt;p&gt;k8s kube-scheduler 源码阅读笔记&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Controller Manager 源码阅读</title>
+      <link>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>
+      
+      <guid>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <description>&lt;p&gt;k8s controller-manager 源码阅读笔记&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Container Network</title>
+      <link>/post/cloud/container-network/</link>
+      <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
+      
+      <guid>/post/cloud/container-network/</guid>
+      <description>&lt;p&gt;容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>将网站部署在 Kubernetes 上</title>
+      <link>/post/notes/publish-your-site-on-k8s/</link>
+      <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
+      
+      <guid>/post/notes/publish-your-site-on-k8s/</guid>
+      <description>&lt;p&gt;将自己的博客网站发布到自己的 Kubernetes 集群上。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Awesome Post Collection 1</title>
+      <link>/post/awesome-post/collection-1/</link>
+      <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
+      
+      <guid>/post/awesome-post/collection-1/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;Mesos 的资源分配。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Kubernetes调度详解。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Istio 调用链埋点/tracing。&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;kubernetes informer 解析。&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Apiserver 源码阅读</title>
+      <link>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <pubDate>Wed, 21 Nov 2018 19:46:06 +0800</pubDate>
+      
+      <guid>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <description>&lt;p&gt;k8s apiserver 源码阅读笔记&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Kubelet</title>
+      <link>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <pubDate>Wed, 21 Nov 2018 18:48:01 +0800</pubDate>
+      
+      <guid>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <description>&lt;p&gt;Kubelet 源码阅读笔记&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>阿里云主机搭建 K8S 集群</title>
+      <link>/post/cloud/deploy-kubernetes-on-aliyun/</link>
+      <pubDate>Wed, 14 Nov 2018 14:31:38 +0800</pubDate>
+      
+      <guid>/post/cloud/deploy-kubernetes-on-aliyun/</guid>
+      <description>&lt;p&gt;通过阿里云ECS实例搭建K8S集群&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

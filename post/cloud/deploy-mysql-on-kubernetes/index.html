@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Deploy Mysql on Kubernetes</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="本文通过 mysql-operator 在kubernetes集群部署高可用的mysql statefulset。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Deploy Mysql on Kubernetes">
+    <meta name="twitter:description" content="本文通过 mysql-operator 在kubernetes集群部署高可用的mysql statefulset。
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Deploy Mysql on Kubernetes">
+  <meta property="og:description" content="本文通过 mysql-operator 在kubernetes集群部署高可用的mysql statefulset。
+">
+  <meta property="og:url" content="/post/cloud/deploy-mysql-on-kubernetes/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.51">
+
+
+<link rel="canonical" href="/post/cloud/deploy-mysql-on-kubernetes/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+
+
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Deploy Mysql on Kubernetes</h1>
+      <p class="post-meta">@Maoqide · May 16, 2019 · 5 min read</p>
+    </header>
+    <article class="post-content"><p>本文通过 <a href="https://github.com/oracle/mysql-operator">mysql-operator</a> 在kubernetes集群部署高可用的mysql statefulset。</p>
+
+<h2 id="环境准备">环境准备</h2>
+
+<p>本文使用的开源 operator 项目 <a href="https://github.com/oracle/mysql-operator">mysql-operator</a> 配死只支持 mysql 8.0.11 以上的版本，改了下代码，支持 5.7.0 以上版本，<a href="https://github.com/maoqide/mysql-operator">项目地址</a>，本文部署的是 mysql-5.7.26，使用的 dockerhub 上的镜像 mysql/mysql-server:5.7.26。</p>
+
+<h2 id="代码编译">代码编译</h2>
+
+<p>git clone 下载该项目，进入到代码目录，执行<code>sh hack/build.sh</code>，编译代码得到二进制文件 mysql-agent 和 mysql-operator，将二进制文件放入 <code>bin/linux_amd64</code>，执行<code>docker build -f docker/mysql-agent/Dockerfile -t $IMAGE_NAME_AGENT .</code>，<code>docker build -f docker/mysql-operator/Dockerfile -t $IMAGE_NAME_OPERATOR .</code>构建镜像，mysql-operator 生成的镜像为 operator 的镜像，mysql-agent 生成的是镜像，在创建mysql服务时，作为sidecar和mysql-server容器起在同一个pod中。</p>
+
+<h2 id="部署-operator">部署 operator</h2>
+
+<p>先根据 <a href="https://github.com/maoqide/mysql-operator/blob/master/docs/tutorial.md">文档</a> 部署 mysql-operator 的 Deployment，文档中是使用 helm 安装，不希望安装 helm 和 tiller 的话，可以只安装一个 helm 客户端，进入到代码目录，再执行<code>helm template --name mysql-operator mysql-operator</code>生成部署所需要的yaml文件，然后直接执行<code>kubectl apply -f mysql-operator.yaml</code>创建 operator。这个yaml创建了operator所需的CRD类型，operator 的 Deployment 和 operator 所需的 RBAC 权限等。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># change directory into mysql-operator</span>
+cd mysql-operator
+<span style="color:#75715e"># generate mysql-operator.yaml</span>
+helm template --name mysql-operator mysql-operator &gt; mysql-operator.yaml
+<span style="color:#75715e"># deploy on kubernetes</span>
+kubectl apply -f mysql-operator.yaml
+<span style="color:#75715e"># deployed.</span>
+<span style="color:#f92672">[</span>root@localhost<span style="color:#f92672">]</span>$ kubectl get deploy -n mysql-operator
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+mysql-operator   <span style="color:#ae81ff">1</span>/1     <span style="color:#ae81ff">1</span>            <span style="color:#ae81ff">1</span>           2d5h</code></pre></div>
+<h2 id="创建-mysql-集群">创建 mysql 集群</h2>
+
+<p>本文创建的集群为3节点的 mysql，一个节点为 master，二个为 slave，master节点可读写，slave节点为只读，使用 kubernetes Local PV 作持久化存储。<br />
+首先，为每个节点创建一个PV，Local PV 需要定义<code>nodeAffinity</code>，约束创建的节点。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mypv0
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: mysql-storage
+  local:
+    path: /data/mysql-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - <span style="color:#ae81ff">192.168</span>.<span style="color:#ae81ff">0.1</span>
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mypv1
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: mysql-storage
+  local:
+    path: /data/mysql-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - <span style="color:#ae81ff">192.168</span>.<span style="color:#ae81ff">0.2</span>
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mypv2
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: mysql-storage
+  local:
+    path: /data/mysql-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - <span style="color:#ae81ff">192.168</span>.<span style="color:#ae81ff">0.3</span></code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># create pv</span>
+kubectl create -f pv.yaml
+<span style="color:#75715e"># get presistence volume</span>
+<span style="color:#f92672">[</span>root@localhost<span style="color:#f92672">]</span>$ kubectl get pv
+mypv-0               1Gi        RWO            Delete           Available                                                                     mysql-storage               4s
+mypv-1               1Gi        RWO            Delete           Available                                                                     mysql-storage               4s
+mypv-2               1Gi        RWO            Delete           Available                                                                     mysql-storage               4s</code></pre></div>
+<p>接着，需要在创建 mysql 的 namespace 下，为要创建的 mysql 创建对应的 RBAC 权限。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mysql-agent
+  namespace: mysql2
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mysql-agent
+  namespace: mysql2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mysql-agent
+subjects:
+- kind: ServiceAccount
+  name: mysql-agent
+  namespace: mysql2</code></pre></div>
+<p>如果需要自定义 mysql 的密码，需要为其创建一个 secret，密码需要使用base64加密。linux 下执行 <code>echo -n 'password' | base64</code> 为密码加密。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+data:
+  password: cm9vdA==
+kind: Secret
+metadata:
+  labels:
+    v1alpha1.mysql.oracle.com/cluster: mysql
+  name: mysql-pv-root-password
+  namespace: mysql2</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f rbac.yaml
+kubectl apply -f secret.yaml</code></pre></div>
+<p>在创建 operator 的时候，已经创建了如下的crd类型，部署mysql集群所需创建的就是 mysqlclusters 类型的资源。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@localhost<span style="color:#f92672">]</span>$ kubectl get crd  | grep mysql
+mysqlbackups.mysql.oracle.com                <span style="color:#ae81ff">2019</span>-05-14T02:51:11Z
+mysqlbackupschedules.mysql.oracle.com        <span style="color:#ae81ff">2019</span>-05-14T02:51:11Z
+mysqlclusters.mysql.oracle.com               <span style="color:#ae81ff">2019</span>-05-14T02:51:11Z
+mysqlrestores.mysql.oracle.com               <span style="color:#ae81ff">2019</span>-05-14T02:51:11Z</code></pre></div>
+<p>接下来开始创建 operator 自定义资源类型(CRD)的实例 mysqlclusters。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: mysql.oracle.com/v1alpha1
+kind: Cluster
+metadata:
+  name: mysql
+  namespace: mysql2
+spec:  
+  <span style="color:#75715e"># 和mysql-server镜像版本的tag一直</span>
+  version: <span style="color:#ae81ff">5.7</span>.<span style="color:#ae81ff">26</span>
+  repository: <span style="color:#ae81ff">20.26</span>.<span style="color:#ae81ff">28.56</span>/dcos/mysql-server
+  <span style="color:#75715e"># 节点数量</span>
+  members: <span style="color:#ae81ff">3</span>
+  <span style="color:#75715e"># 指定 mysql 密码，和之前创建的secret名称一致</span>
+  rootPasswordSecret:
+    name: mysql-pv-root-password
+  resources:
+    agent:
+      limits:
+        cpu: 500m
+        memory: 200Mi
+      requests:
+        cpu: 300m
+        memory: 100Mi
+    server:
+      limits:
+        cpu: 1000m
+        memory: 1000Mi
+      requests:
+        cpu: 500m
+        memory: 500Mi
+  volumeClaimTemplate:
+    metadata:
+      name: mysql-pv
+    spec:
+      accessModes: [ <span style="color:#e6db74">&#34;ReadWriteOnce&#34;</span> ]
+      storageClassName: <span style="color:#e6db74">&#34;mysql-storage&#34;</span>
+      resources:
+        requests:
+          storage: 1Gi</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f mysql.yaml</code></pre></div>
+<p>执行后，会看到 kubernetes 在该 namespace 下开始拉起 mysql 的 statefulset，并会创建一个 headless service。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@localhost<span style="color:#f92672">]</span>$ kubectl get all -n mysql2
+NAME                                                      READY   STATUS    RESTARTS   AGE
+pod/mysql-0                                               <span style="color:#ae81ff">2</span>/2     Running   <span style="color:#ae81ff">0</span>          8h
+pod/mysql-1                                               <span style="color:#ae81ff">2</span>/2     Running   <span style="color:#ae81ff">0</span>          8h
+pod/mysql-2                                               <span style="color:#ae81ff">2</span>/2     Running   <span style="color:#ae81ff">0</span>          8h
+
+
+NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT<span style="color:#f92672">(</span>S<span style="color:#f92672">)</span>    AGE
+service/mysql     ClusterIP   None            &lt;none&gt;        <span style="color:#ae81ff">3306</span>/TCP   21h
+
+
+NAME                     READY   AGE
+statefulset.apps/mysql   <span style="color:#ae81ff">1</span>/1     21h</code></pre></div>
+<p>此时执行<code>hack/cluster-status.sh</code>脚本，会得到如下集群信息：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#f92672">&#34;clusterName&#34;</span>: <span style="color:#e6db74">&#34;Cluster&#34;</span>, 
+    <span style="color:#f92672">&#34;defaultReplicaSet&#34;</span>: {
+        <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;default&#34;</span>, 
+        <span style="color:#f92672">&#34;primary&#34;</span>: <span style="color:#e6db74">&#34;mysql-0.mysql:3306&#34;</span>, 
+        <span style="color:#f92672">&#34;ssl&#34;</span>: <span style="color:#e6db74">&#34;DISABLED&#34;</span>, 
+        <span style="color:#f92672">&#34;status&#34;</span>: <span style="color:#e6db74">&#34;OK_NO_TOLERANCE&#34;</span>, 
+        <span style="color:#f92672">&#34;statusText&#34;</span>: <span style="color:#e6db74">&#34;Cluster is NOT tolerant to any failures. 2 members are not active&#34;</span>, 
+        <span style="color:#f92672">&#34;topology&#34;</span>: {
+            <span style="color:#f92672">&#34;mysql-0.mysql:3306&#34;</span>: {
+                <span style="color:#f92672">&#34;address&#34;</span>: <span style="color:#e6db74">&#34;mysql-0.mysql:3306&#34;</span>, 
+                <span style="color:#f92672">&#34;mode&#34;</span>: <span style="color:#e6db74">&#34;R/W&#34;</span>, 
+                <span style="color:#f92672">&#34;readReplicas&#34;</span>: {}, 
+                <span style="color:#f92672">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;HA&#34;</span>, 
+                <span style="color:#f92672">&#34;status&#34;</span>: <span style="color:#e6db74">&#34;ONLINE&#34;</span>
+            }, 
+            <span style="color:#f92672">&#34;mysql-1.mysql:3306&#34;</span>: {
+                <span style="color:#f92672">&#34;address&#34;</span>: <span style="color:#e6db74">&#34;mysql-1.mysql:3306&#34;</span>, 
+                <span style="color:#f92672">&#34;mode&#34;</span>: <span style="color:#e6db74">&#34;n/a&#34;</span>, 
+                <span style="color:#f92672">&#34;readReplicas&#34;</span>: {}, 
+                <span style="color:#f92672">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;HA&#34;</span>, 
+                <span style="color:#f92672">&#34;status&#34;</span>: <span style="color:#e6db74">&#34;ONLINE&#34;</span>
+            }, 
+            <span style="color:#f92672">&#34;mysql-2.mysql:3306&#34;</span>: {
+                <span style="color:#f92672">&#34;address&#34;</span>: <span style="color:#e6db74">&#34;mysql-2.mysql:3306&#34;</span>, 
+                <span style="color:#f92672">&#34;mode&#34;</span>: <span style="color:#e6db74">&#34;n/a&#34;</span>, 
+                <span style="color:#f92672">&#34;readReplicas&#34;</span>: {}, 
+                <span style="color:#f92672">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;HA&#34;</span>, 
+                <span style="color:#f92672">&#34;status&#34;</span>: <span style="color:#e6db74">&#34;ONLINE&#34;</span>
+            }
+        }, 
+        <span style="color:#f92672">&#34;topologyMode&#34;</span>: <span style="color:#e6db74">&#34;Single-Primary&#34;</span>
+    }, 
+    <span style="color:#f92672">&#34;groupInformationSourceMember&#34;</span>: <span style="color:#e6db74">&#34;mysql-0.mysql:3306&#34;</span>
+}</code></pre></div>
+<p>通过DNS地址 <code>mysql-0.mysql.mysql2.svc.cluster.local:3306</code> 可以连接到数据库进行读写操作。此时一个多节点的mysql集群已经部署完成，但是，集群外部的服务还无法访问数据库。</p>
+
+<h2 id="通过-haproxy-ingress-允许外部访问">通过 haproxy-ingress 允许外部访问</h2>
+
+<p>首先，headless service只能通过集群内 DNS 访问服务，要外部访问，还需要另外创建一个 Service。为了让外部可以访问到 mysql-0 的服务，我们为 mysql-0 创建一个ClusterIP 类型的服务。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">kind: Service
+apiVersion: v1
+metadata:
+  name: mysql-<span style="color:#ae81ff">0</span>
+  namespace: mysql2
+spec:
+  selector:
+    <span style="color:#75715e"># 通过 selector 将 pod 约束到 mysql-0</span>
+   statefulset.kubernetes.io/pod-name: mysql-<span style="color:#ae81ff">0</span>
+  ports:
+    - protocol: TCP
+      port: <span style="color:#ae81ff">3306</span>
+      targetPort: <span style="color:#ae81ff">3306</span></code></pre></div>
+<p>接着，需要创建一个ingress-controller，本文选用的是 <a href="https://github.com/jcmoraisjr/haproxy-ingress">haproxy-ingress</a>。<br />
+由于 mysql 服务通过 TCP 协议通信，kubernetes ingress 默认只支持 http 和 https，haproxy-ingress 提供了通过 configmap 的方法，配置 TCP 服务的端口，需要先创建一个 configmap，configmap的data中，key为HAProxy监听的端口，value 为需要转发的 service 的服务和端口。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-tcp
+  namespace: mysql2
+data:
+  <span style="color:#e6db74">&#34;3306&#34;</span>: <span style="color:#e6db74">&#34;mysql2/mysql-0:3306&#34;</span></code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f mysql-0.yaml
+kubectl apply -f tcp-svc.yaml</code></pre></div>
+<p>接下来创建 ingress-controller，</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: haproxy-ingress
+  name: haproxy-ingress-<span style="color:#ae81ff">192.168</span>.<span style="color:#ae81ff">0.1</span>-<span style="color:#ae81ff">30080</span>
+  namespace: mysql2
+spec:
+  replicas: <span style="color:#ae81ff">1</span>
+  selector:
+    matchLabels:
+      run: haproxy-ingress
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: haproxy-ingress
+    spec:
+      tolerations:
+      - key: app 
+        operator: Equal 
+        value: haproxy
+        effect: NoSchedule
+      serviceAccount: ingress-controller      
+      nodeSelector:
+        kubernetes.io/hostname: <span style="color:#ae81ff">192.168</span>.<span style="color:#ae81ff">0.1</span>
+      containers:
+      - args:
+        - --tcp-services-configmap=$(POD_NAMESPACE)/mysql-tcp
+        - --default-backend-service=$(POD_NAMESPACE)/mysql
+        - --default-ssl-certificate=$(POD_NAMESPACE)/tls-secret
+        - --ingress-class=ha-mysql
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: jcmoraisjr/haproxy-ingress
+        name: haproxy-ingress
+        ports:
+          <span style="color:#75715e"># 和 configmap 中定义的端口对应</span>
+        - containerPort: <span style="color:#ae81ff">3306</span>
+          hostPort: <span style="color:#ae81ff">3306</span>
+          name: http
+          protocol: TCP
+        - containerPort: <span style="color:#ae81ff">443</span>
+          name: https
+          protocol: TCP
+        - containerPort: <span style="color:#ae81ff">1936</span>
+          hostPort: <span style="color:#ae81ff">30081</span>
+          name: stat
+          protocol: TCP</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ingress-controller
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ingress-controller
+rules:
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - configmaps
+      - pods
+      - secrets
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - configmaps
+    verbs:
+      - create
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - endpoints
+    verbs:
+      - get
+      - create
+      - update
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: ingress-controller
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: ingress-controller
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ingress-controller
+rules:
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - configmaps
+      - endpoints
+      - nodes
+      - pods
+      - secrets
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - nodes
+    verbs:
+      - get
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;extensions&#34;</span>
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;&#34;</span>
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - <span style="color:#e6db74">&#34;extensions&#34;</span>
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: ingress-controller
+    namespace: mysql2
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: ingress-controller</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f ingress-controller.yaml
+kubectl apply -f ingress-rbac.yaml -n mysql2</code></pre></div>
+<p>最后创建 ingress 规则：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: <span style="color:#e6db74">&#34;false&#34;</span>
+    kubernetes.io/ingress.class: ha-mysql
+  name: ha-mysql
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: mysql-<span style="color:#ae81ff">0</span>
+          servicePort: <span style="color:#ae81ff">3306</span>
+        path: /</code></pre></div>
+<p>此时可以通过 haproxy 的 IP + 映射端口访问到 mysql 集群。</p>
+
+<h2 id="附件">附件</h2>
+
+<p>以下是上面用到的 yaml 文件：</p>
+
+<ul>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/rbac.yaml">rbac.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/mysql.yaml">mysql.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/secret.yaml">secret.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/pv.yaml">pv.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/mysql-0-svc.yaml">mysql-0-svc.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/tcp-svc.yaml">tcp-svc.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/ingress-controller.yaml">ingress-controller.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/ingress-rbac.yaml">ingress-rbac.yaml</a><br /></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/ingress.yaml">ingress.yaml</a><br /></li>
+</ul></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
+        
+          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+        
+          <li><a href="/tags/kubernetes-operator"><span class="tag">Kubernetes-Operator</span></a></li>
+        
+          <li><a href="/tags/mysql-operator"><span class="tag">Mysql-Operator</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>
