@@ -44,7 +44,7 @@
   <meta property="og:title" content="Container Network">
   <meta property="og:description" content="容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。
 ">
-  <meta property="og:url" content="/post/cloud/container-network/">
+  <meta property="og:url" content="maoqide.live/post/cloud/container-network/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -53,7 +53,7 @@
 <meta name="generator" content="Hugo 0.51">
 
 
-<link rel="canonical" href="/post/cloud/container-network/">
+<link rel="canonical" href="maoqide.live/post/cloud/container-network/">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -78,20 +78,20 @@
 <meta name='msapplication-navbutton-color' content="#02b875">
 <meta name="msapplication-TileColor" content="#02b875">
 <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
-<link rel="icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
-<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
-<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
-<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="maoqide.live/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="maoqide.live/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="maoqide.live/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="maoqide.live/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="maoqide.live/icons/icon-152x152.png">
+<link rel="manifest" href="maoqide.live/manifest.json">
 
 
-<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+<link rel="preload" href="maoqide.live/styles/main-rendered.min.css" as="style">
 
 
 <link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
-<link rel="preload" href="/images/golang.svg" as="image">
-<link rel="preload" href="/images/square.svg" as="image">
+<link rel="preload" href="maoqide.live/images/golang.svg" as="image">
+<link rel="preload" href="maoqide.live/images/square.svg" as="image">
 
 
 <style>
@@ -99,7 +99,7 @@
     background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
   }
 </style>
-<link rel="stylesheet" href="/styles/main-rendered.min.css">
+<link rel="stylesheet" href="maoqide.live/styles/main-rendered.min.css">
 
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
@@ -141,9 +141,9 @@
     
     
   <header class="site-header">
-  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  <a href="maoqide.live"><img class="avatar" src="maoqide.live/images/golang.svg" alt="Avatar"></a>
   
-  <h2 class="title"><a href="">Maoqide</a></h2>
+  <h2 class="title"><a href="maoqide.live">Maoqide</a></h2>
   
   <p class="subtitle">~ Keep Learning ~</p>
   <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
@@ -161,28 +161,28 @@
           
           
            is-active">
-          <a href="/">Home</a>
+          <a href="maoqide.live/">Home</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="/post/">Post</a>
+          <a href="maoqide.live/post/">Post</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="/tags/">Tags</a>
+          <a href="maoqide.live/tags/">Tags</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="/about/">About</a>
+          <a href="maoqide.live/about/">About</a>
         </li>
       
     </ul>
@@ -214,7 +214,7 @@
 
 <p><strong>Veth Pair</strong></p>
 
-<p><img src="/media/posts/cloud/container-network/container-network-1.jpg" alt="" /></p>
+<p><img src="maoqide.live/media/posts/cloud/container-network/container-network-1.jpg" alt="" /></p>
 
 <p>如上图，同主机容器，通过容器启动时创建的一对 Veth Pair 设备进行外部通信，Veth Pair 设备一端插在宿主机 <code>docker0</code>网桥上，一端是容器内的<code>eth0</code>网卡, 在宿主机上执行<code>brctl show docker0</code>可以查看连到<code>docker0</code>网桥上的设备。<br />
 容器内默认的路由表：</p>
@@ -238,7 +238,7 @@ default         <span style="color:#ae81ff">172</span>.17.0.1      <span style="
 <h4 id="udp">UDP</h4>
 
 <p>UDP 模式的是性能最差的方式，目前已弃用。(因为在通信过程中要进行多次用户态到内核态的切换)<br />
-<img src="/media/posts/cloud/container-network/container-network-flannel-udp.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
+<img src="maoqide.live/media/posts/cloud/container-network/container-network-flannel-udp.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
 
 <p>如上图，flannel 会在每台宿主机上创建一系列的路由规则，一个 TUN 设备 flannel0(TUN 设备是一种工作在三层的虚拟网络设备，可以在内核和用户应用程序间传递IP包)，以及启动 flanneld 进程，监听 8285 端口。<br />
 flannel 还会为 flannel 网络内的每台主机分配一个 subnet，容器会从所在宿主机的 subnet 中获取 IP。subnet 和 宿主机的对应关系保存在 etcd 中。<br />
@@ -255,7 +255,7 @@ default via <span style="color:#ae81ff">10</span>.168.0.1 dev eth0
 <h4 id="vxlan">VXLAN</h4>
 
 <p>VXLAN 模式封包解包都是在内核态中进行，所以和 UDP 模式相比性能较好。
-<img src="/media/posts/cloud/container-network/container-network-flannel-vxlan.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
+<img src="maoqide.live/media/posts/cloud/container-network/container-network-flannel-vxlan.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
 
 <p>vxlan 模式下，flannel 会在每台宿主机上创建路由规则，一个 VTEP(虚拟隧道端点) 设备 flannel.1。在通信过程中，封包解包操作直接由 VTEP 在内核态完成，而不用 flanneld 进行处理，这些 VTEP 间组成一个虚拟的二层网络，通过二层数据帧进行通信。<br />
 当 node1 上的容器 container1 发送数据给同一 flannel 网络内节点 node2 上的容器 container2 时，同样先通过 docker0 到达宿主机 node1，然后会被转发到本机 VTEP 设备 flannel.1 进行处理；当一个节点加入 flannel 后，其他所有节点的 flanneld 进程都会在本地添加一条路由规则，即发往目的节点对应网段的数据包，都要经过 flannel.1 最终发往目的节点的 VTEP 设备的 IP 地址。根据这条规则，node1 的 flannel.1 设备收到数据包后，就要获 node2 的 VTEP 设备的 MAC 地址，将数据包封装成二层数据帧。为了可以获取 VTEP 的 MAC 地址，flanneld 进程会在新的节点加入后，在所有节点添加一条 ARP 记录，记录新节点 IP 对应的 MAC 地址，这样，Linux 内核就可以通过 ARP 记录直接获取到目的节点的 VTEP 设备的 MAC 地址并封装成数据帧(内部数据帧)，为了能够在宿主机网络传输，Linux 内核会再将此数据帧加上一个 VXLAN 头封装成外部数据帧。</p>
@@ -270,27 +270,27 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 在 Node 1 上，使用“目的 VTEP 设备”的 MAC 地址进行查询</span>
 $ bridge fdb show flannel.1 | grep 5e:f8:4f:00:e3:37
 5e:f8:4f:00:e3:37 dev flannel.1 dst <span style="color:#ae81ff">10</span>.168.0.3 self permanent</code></pre></div>
-<p><img src="/media/posts/cloud/container-network/flannel-vxlan.jpg" alt="" /></p>
+<p><img src="maoqide.live/media/posts/cloud/container-network/flannel-vxlan.jpg" alt="" /></p>
 
 <h4 id="host-gw">host-gw</h4>
 
 <p>host-gw 模式下，flanneld 在每台宿主机上创建路由规则，将每个 flannel 子网的下一跳，设置成该子网对应的宿主机的 IP 地址。也就是说，这台宿主机会充当这条容器通信路径中的*网关*。Flannel 子网和主机的信息，都保存在 ETCD 中，由 flanneld 监听 ETCD 中的数据变化，并实时更新路由表。<br />
-<img src="/media/posts/cloud/container-network/container-network-flannel-host-gateway.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
+<img src="maoqide.live/media/posts/cloud/container-network/container-network-flannel-host-gateway.png" alt="图片来自极客时间 https://time.geekbang.org/column/article/65287#previewimg" /></p>
 
 <p>host-gw 模式要求宿主机直接二层连通。</p></article>
     <footer class="post-footer">
       
       <ul class="post-tags">
         
-          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
+          <li><a href="maoqide.live/tags/cloud"><span class="tag">Cloud</span></a></li>
         
-          <li><a href="/tags/container-network"><span class="tag">Container-Network</span></a></li>
+          <li><a href="maoqide.live/tags/container-network"><span class="tag">Container-Network</span></a></li>
         
-          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+          <li><a href="maoqide.live/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
         
-          <li><a href="/tags/docker"><span class="tag">Docker</span></a></li>
+          <li><a href="maoqide.live/tags/docker"><span class="tag">Docker</span></a></li>
         
-          <li><a href="/tags/flannel"><span class="tag">Flannel</span></a></li>
+          <li><a href="maoqide.live/tags/flannel"><span class="tag">Flannel</span></a></li>
         
       </ul>
       
@@ -366,7 +366,7 @@ $ bridge fdb show flannel.1 | grep 5e:f8:4f:00:e3:37
 
 
 
-<script src="/scripts/index.min.js"></script>
+<script src="maoqide.live/scripts/index.min.js"></script>
 
 <script>
   if ('serviceWorker' in navigator) {

@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Etcd on Maoqide</title>
-    <link>/tags/etcd/</link>
+    <link>maoqide.live/tags/etcd/</link>
     <description>Recent content in Etcd on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
     <lastBuildDate>Wed, 20 Feb 2019 10:51:58 +0800</lastBuildDate>
     
-	<atom:link href="/tags/etcd/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="maoqide.live/tags/etcd/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Awesome Post Collection 2</title>
-      <link>/post/awesome-post/collection-2/</link>
+      <link>maoqide.live/post/awesome-post/collection-2/</link>
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
       
-      <guid>/post/awesome-post/collection-2/</guid>
+      <guid>maoqide.live/post/awesome-post/collection-2/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;goroutine 调度器。&lt;br /&gt;&lt;/li&gt;
 &lt;li&gt;Golang &lt;code&gt;for range&lt;/code&gt;性能分析及优化。&lt;br /&gt;&lt;/li&gt;

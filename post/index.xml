@@ -2,40 +2,40 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Maoqide</title>
-    <link>/post/</link>
+    <link>maoqide.live/post/</link>
     <description>Recent content in Posts on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
     <lastBuildDate>Thu, 16 May 2019 14:06:37 +0800</lastBuildDate>
     
-	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="maoqide.live/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Deploy Mysql on Kubernetes</title>
-      <link>/post/cloud/deploy-mysql-on-kubernetes/</link>
+      <link>maoqide.live/post/cloud/deploy-mysql-on-kubernetes/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
       
-      <guid>/post/cloud/deploy-mysql-on-kubernetes/</guid>
+      <guid>maoqide.live/post/cloud/deploy-mysql-on-kubernetes/</guid>
       <description>&lt;p&gt;本文通过 &lt;a href=&#34;https://github.com/oracle/mysql-operator&#34;&gt;mysql-operator&lt;/a&gt; 在kubernetes集群部署高可用的mysql statefulset。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Sample Controller</title>
-      <link>/post/cloud/sample-controller/</link>
+      <link>maoqide.live/post/cloud/sample-controller/</link>
       <pubDate>Mon, 18 Mar 2019 12:53:41 +0800</pubDate>
       
-      <guid>/post/cloud/sample-controller/</guid>
+      <guid>maoqide.live/post/cloud/sample-controller/</guid>
       <description>&lt;p&gt;自己构建 sample-controller.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Building an Operator for Kubernetes With the Sample Controller</title>
-      <link>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
+      <link>maoqide.live/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
       <pubDate>Sat, 16 Mar 2019 21:34:46 +0800</pubDate>
       
-      <guid>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
+      <guid>maoqide.live/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
       <description>&lt;pre&gt;&lt;code&gt;An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -45,37 +45,37 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
     
     <item>
       <title>Golang Mutex</title>
-      <link>/post/golang/golang-mutex/</link>
+      <link>maoqide.live/post/golang/golang-mutex/</link>
       <pubDate>Mon, 11 Mar 2019 16:35:20 +0800</pubDate>
       
-      <guid>/post/golang/golang-mutex/</guid>
+      <guid>maoqide.live/post/golang/golang-mutex/</guid>
       <description>&lt;p&gt;golang 的&lt;code&gt;sync&lt;/code&gt;包中有两种锁，互斥锁&lt;code&gt;sync.Mutex&lt;/code&gt; 和读写锁&lt;code&gt;sync.RWMutex&lt;/code&gt;。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Kube Scheduler 源码阅读</title>
-      <link>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
       
-      <guid>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s kube-scheduler 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Controller Manager 源码阅读</title>
-      <link>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>
       
-      <guid>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s controller-manager 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Awesome Post Collection 2</title>
-      <link>/post/awesome-post/collection-2/</link>
+      <link>maoqide.live/post/awesome-post/collection-2/</link>
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
       
-      <guid>/post/awesome-post/collection-2/</guid>
+      <guid>maoqide.live/post/awesome-post/collection-2/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;goroutine 调度器。&lt;br /&gt;&lt;/li&gt;
 &lt;li&gt;Golang &lt;code&gt;for range&lt;/code&gt;性能分析及优化。&lt;br /&gt;&lt;/li&gt;
@@ -86,19 +86,19 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
     
     <item>
       <title>Container Network</title>
-      <link>/post/cloud/container-network/</link>
+      <link>maoqide.live/post/cloud/container-network/</link>
       <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
       
-      <guid>/post/cloud/container-network/</guid>
+      <guid>maoqide.live/post/cloud/container-network/</guid>
       <description>&lt;p&gt;容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Docker 原理</title>
-      <link>/post/cloud/docker-%E5%8E%9F%E7%90%86/</link>
+      <link>maoqide.live/post/cloud/docker-%E5%8E%9F%E7%90%86/</link>
       <pubDate>Thu, 17 Jan 2019 14:08:37 +0800</pubDate>
       
-      <guid>/post/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
+      <guid>maoqide.live/post/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;Namespace&lt;/li&gt;
 &lt;li&gt;Cgroup&lt;/li&gt;
@@ -110,46 +110,46 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
     
     <item>
       <title>将网站部署在 Kubernetes 上</title>
-      <link>/post/notes/publish-your-site-on-k8s/</link>
+      <link>maoqide.live/post/notes/publish-your-site-on-k8s/</link>
       <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
       
-      <guid>/post/notes/publish-your-site-on-k8s/</guid>
+      <guid>maoqide.live/post/notes/publish-your-site-on-k8s/</guid>
       <description>&lt;p&gt;将自己的博客网站发布到自己的 Kubernetes 集群上。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Goroutine 的管理</title>
-      <link>/post/golang/goroutine/</link>
+      <link>maoqide.live/post/golang/goroutine/</link>
       <pubDate>Fri, 28 Dec 2018 16:29:32 +0800</pubDate>
       
-      <guid>/post/golang/goroutine/</guid>
+      <guid>maoqide.live/post/golang/goroutine/</guid>
       <description>&lt;p&gt;goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 &lt;a href=&#34;https://golang.org/pkg/net/http/pprof/&#34;&gt;pprof&lt;/a&gt; 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Basic Data Structure</title>
-      <link>/post/algorithm/basic-data-structure/</link>
+      <link>maoqide.live/post/algorithm/basic-data-structure/</link>
       <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
       
-      <guid>/post/algorithm/basic-data-structure/</guid>
+      <guid>maoqide.live/post/algorithm/basic-data-structure/</guid>
       <description>&lt;p&gt;基础的数据结构和一些基本操作，及其 golang 语言的实现。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Build Blog With Hugo</title>
-      <link>/post/notes/build-blog-with-hugo/</link>
+      <link>maoqide.live/post/notes/build-blog-with-hugo/</link>
       <pubDate>Tue, 04 Dec 2018 18:37:11 +0800</pubDate>
       
-      <guid>/post/notes/build-blog-with-hugo/</guid>
+      <guid>maoqide.live/post/notes/build-blog-with-hugo/</guid>
       <description>&lt;p&gt;how to build your own blog using hugo.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Awesome Post Collection 1</title>
-      <link>/post/awesome-post/collection-1/</link>
+      <link>maoqide.live/post/awesome-post/collection-1/</link>
       <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
       
-      <guid>/post/awesome-post/collection-1/</guid>
+      <guid>maoqide.live/post/awesome-post/collection-1/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;Mesos 的资源分配。&lt;br /&gt;&lt;/li&gt;
 &lt;li&gt;Kubernetes调度详解。&lt;br /&gt;&lt;/li&gt;
@@ -160,28 +160,28 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
     
     <item>
       <title>Apiserver 源码阅读</title>
-      <link>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 19:46:06 +0800</pubDate>
       
-      <guid>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s apiserver 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Kubelet</title>
-      <link>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 18:48:01 +0800</pubDate>
       
-      <guid>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;Kubelet 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>阿里云主机搭建 K8S 集群</title>
-      <link>/post/cloud/deploy-kubernetes-on-aliyun/</link>
+      <link>maoqide.live/post/cloud/deploy-kubernetes-on-aliyun/</link>
       <pubDate>Wed, 14 Nov 2018 14:31:38 +0800</pubDate>
       
-      <guid>/post/cloud/deploy-kubernetes-on-aliyun/</guid>
+      <guid>maoqide.live/post/cloud/deploy-kubernetes-on-aliyun/</guid>
       <description>&lt;p&gt;通过阿里云ECS实例搭建K8S集群&lt;/p&gt;</description>
     </item>
     

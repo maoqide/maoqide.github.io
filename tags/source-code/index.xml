@@ -2,49 +2,49 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Source Code on Maoqide</title>
-    <link>/tags/source-code/</link>
+    <link>maoqide.live/tags/source-code/</link>
     <description>Recent content in Source Code on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
     <lastBuildDate>Thu, 07 Mar 2019 20:00:30 +0800</lastBuildDate>
     
-	<atom:link href="/tags/source-code/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="maoqide.live/tags/source-code/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Kube Scheduler 源码阅读</title>
-      <link>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
       
-      <guid>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s kube-scheduler 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Controller Manager 源码阅读</title>
-      <link>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>
       
-      <guid>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s controller-manager 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Apiserver 源码阅读</title>
-      <link>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 19:46:06 +0800</pubDate>
       
-      <guid>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s apiserver 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Kubelet</title>
-      <link>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>maoqide.live/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 18:48:01 +0800</pubDate>
       
-      <guid>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>maoqide.live/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;Kubelet 源码阅读笔记&lt;/p&gt;</description>
     </item>
     
