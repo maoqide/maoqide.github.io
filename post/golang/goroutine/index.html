@@ -44,7 +44,7 @@
   <meta property="og:title" content="Goroutine 的管理">
   <meta property="og:description" content="goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 pprof 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。
 ">
-  <meta property="og:url" content="maoqide.live/post/golang/goroutine/">
+  <meta property="og:url" content="/post/golang/goroutine/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -53,7 +53,7 @@
 <meta name="generator" content="Hugo 0.51">
 
 
-<link rel="canonical" href="maoqide.live/post/golang/goroutine/">
+<link rel="canonical" href="/post/golang/goroutine/">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -78,20 +78,20 @@
 <meta name='msapplication-navbutton-color' content="#02b875">
 <meta name="msapplication-TileColor" content="#02b875">
 <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
-<link rel="icon" href="maoqide.live/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="maoqide.live/icons/icon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="maoqide.live/icons/icon-32x32.png">
-<link rel="icon" sizes="192x192" href="maoqide.live/icons/icon-192x192.png">
-<link rel="apple-touch-icon" href="maoqide.live/icons/icon-152x152.png">
-<link rel="manifest" href="maoqide.live/manifest.json">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
 
 
-<link rel="preload" href="maoqide.live/styles/main-rendered.min.css" as="style">
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
 
 
 <link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
-<link rel="preload" href="maoqide.live/images/golang.svg" as="image">
-<link rel="preload" href="maoqide.live/images/square.svg" as="image">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
 
 
 <style>
@@ -99,7 +99,7 @@
     background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
   }
 </style>
-<link rel="stylesheet" href="maoqide.live/styles/main-rendered.min.css">
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
 
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
@@ -141,9 +141,9 @@
     
     
   <header class="site-header">
-  <a href="maoqide.live"><img class="avatar" src="maoqide.live/images/golang.svg" alt="Avatar"></a>
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
   
-  <h2 class="title"><a href="maoqide.live">Maoqide</a></h2>
+  <h2 class="title"><a href="">Maoqide</a></h2>
   
   <p class="subtitle">~ Keep Learning ~</p>
   <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
@@ -161,28 +161,28 @@
           
           
            is-active">
-          <a href="maoqide.live/">Home</a>
+          <a href="/">Home</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/post/">Post</a>
+          <a href="/post/">Post</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/tags/">Tags</a>
+          <a href="/tags/">Tags</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/about/">About</a>
+          <a href="/about/">About</a>
         </li>
       
     </ul>
@@ -421,7 +421,7 @@ golang 给你在编译时定义一个 channel 的方向的能力<code>recvOnly &
       
       <ul class="post-tags">
         
-          <li><a href="maoqide.live/tags/golang"><span class="tag">Golang</span></a></li>
+          <li><a href="/tags/golang"><span class="tag">Golang</span></a></li>
         
       </ul>
       
@@ -497,7 +497,7 @@ golang 给你在编译时定义一个 channel 的方向的能力<code>recvOnly &
 
 
 
-<script src="maoqide.live/scripts/index.min.js"></script>
+<script src="/scripts/index.min.js"></script>
 
 <script>
   if ('serviceWorker' in navigator) {

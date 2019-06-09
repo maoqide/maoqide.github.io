@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Docker on Maoqide</title>
-    <link>maoqide.live/tags/docker/</link>
+    <link>/tags/docker/</link>
     <description>Recent content in Docker on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
     <lastBuildDate>Tue, 22 Jan 2019 17:28:28 +0800</lastBuildDate>
     
-	<atom:link href="maoqide.live/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/docker/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Container Network</title>
-      <link>maoqide.live/post/cloud/container-network/</link>
+      <link>/post/cloud/container-network/</link>
       <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
       
-      <guid>maoqide.live/post/cloud/container-network/</guid>
+      <guid>/post/cloud/container-network/</guid>
       <description>&lt;p&gt;容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Docker 原理</title>
-      <link>maoqide.live/post/cloud/docker-%E5%8E%9F%E7%90%86/</link>
+      <link>/post/cloud/docker-%E5%8E%9F%E7%90%86/</link>
       <pubDate>Thu, 17 Jan 2019 14:08:37 +0800</pubDate>
       
-      <guid>maoqide.live/post/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
+      <guid>/post/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;Namespace&lt;/li&gt;
 &lt;li&gt;Cgroup&lt;/li&gt;

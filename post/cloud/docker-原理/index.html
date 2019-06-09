@@ -47,7 +47,7 @@
   <meta property="og:description" content=" Namespace Cgroup UnionFS
   docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。
 ">
-  <meta property="og:url" content="maoqide.live/post/cloud/docker-%E5%8E%9F%E7%90%86/">
+  <meta property="og:url" content="/post/cloud/docker-%E5%8E%9F%E7%90%86/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -56,7 +56,7 @@
 <meta name="generator" content="Hugo 0.51">
 
 
-<link rel="canonical" href="maoqide.live/post/cloud/docker-%E5%8E%9F%E7%90%86/">
+<link rel="canonical" href="/post/cloud/docker-%E5%8E%9F%E7%90%86/">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -81,20 +81,20 @@
 <meta name='msapplication-navbutton-color' content="#02b875">
 <meta name="msapplication-TileColor" content="#02b875">
 <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
-<link rel="icon" href="maoqide.live/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="maoqide.live/icons/icon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="maoqide.live/icons/icon-32x32.png">
-<link rel="icon" sizes="192x192" href="maoqide.live/icons/icon-192x192.png">
-<link rel="apple-touch-icon" href="maoqide.live/icons/icon-152x152.png">
-<link rel="manifest" href="maoqide.live/manifest.json">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
 
 
-<link rel="preload" href="maoqide.live/styles/main-rendered.min.css" as="style">
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
 
 
 <link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
-<link rel="preload" href="maoqide.live/images/golang.svg" as="image">
-<link rel="preload" href="maoqide.live/images/square.svg" as="image">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
 
 
 <style>
@@ -102,7 +102,7 @@
     background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
   }
 </style>
-<link rel="stylesheet" href="maoqide.live/styles/main-rendered.min.css">
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
 
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
@@ -144,9 +144,9 @@
     
     
   <header class="site-header">
-  <a href="maoqide.live"><img class="avatar" src="maoqide.live/images/golang.svg" alt="Avatar"></a>
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
   
-  <h2 class="title"><a href="maoqide.live">Maoqide</a></h2>
+  <h2 class="title"><a href="">Maoqide</a></h2>
   
   <p class="subtitle">~ Keep Learning ~</p>
   <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
@@ -164,28 +164,28 @@
           
           
            is-active">
-          <a href="maoqide.live/">Home</a>
+          <a href="/">Home</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/post/">Post</a>
+          <a href="/post/">Post</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/tags/">Tags</a>
+          <a href="/tags/">Tags</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/about/">About</a>
+          <a href="/about/">About</a>
         </li>
       
     </ul>
@@ -370,7 +370,7 @@ cpuacct.stat       			<span style="color:#75715e">#输出系统（system/kernel 
 容器的<strong>元数据</strong>和<strong>各种配置文件</strong>被放在<code>/var/lib/docker/containers/&lt;container-id&gt;</code>文件夹下，无论容器是运行还是停止都会有一个文件夹。如果容器正在运行，其对应的文件夹下会有一个 log 文件。<br />
 容器的<strong>只读层</strong>存储在<code>/var/lib/docker/aufs/diff/&lt;container-id&gt;</code>目录下，对容器的所有修改都会保存在这个文件夹下，即便容器停止，这个文件夹也不会删除。也就是说，容器重启后并不会丢失原先的更改。<br />
 容器中<strong>镜像层</strong>的信息存储在<code>/var/lib/docker/aufs/layers/&lt;container-id&gt;</code>文件中。文件中从上至下依次记录了容器使用的各镜像层。<br />
-<img src="maoqide.live/media/posts/cloud/docker/aufs_layers.jpg" alt="" /></p>
+<img src="/media/posts/cloud/docker/aufs_layers.jpg" alt="" /></p>
 
 <h4 id="性能表现">性能表现</h4>
 
@@ -401,7 +401,7 @@ cpuacct.stat       			<span style="color:#75715e">#输出系统（system/kernel 
 - 可能更快</p>
 
 <p>OverlayFS 将一个 Linux 主机中的两个目录组合起来，一个在上，一个在下，对外提供统一的视图。这两个目录就是层<code>layer</code>，将两个层组合在一起的技术被成为联合挂载<code>union mount</code>。在OverlayFS中，上层的目录被称作<code>upperdir</code>，下层的目录被称作<code>lowerdir</code>，对外提供的统一视图被称作<code>merged</code>。<br />
-<img src="maoqide.live/media/posts/cloud/docker/overlay_constructs.jpg" alt="" /><br />
+<img src="/media/posts/cloud/docker/overlay_constructs.jpg" alt="" /><br />
 OverlayFS 仅有两层，也就是说镜像中的每一层并不对应 OverlayFS 中的层，而是镜像中的每一层对应<code>/var/lib/docker/overlay</code>中的一个文件夹，文件夹以该层的 UUID 命名。然后使用硬连接将下面层的文件引用到上层。这在一定程度上节省了磁盘空间。这样 OverlayFS中 的<code>lowerdir</code>就对应镜像层的最上层，并且是只读的。在创建镜像时，Docker 会新建一个文件夹作为OverlayFS的<code>upperdir</code>，它是可写的。</p>
 
 <p>读写：第一次修改时，文件不在container layer(upperdir)中，overlay driver 调用<code>copy-up</code>操作将文件从<code>lowerdir</code>读到<code>upperdir</code>中，然后对文件的副本做出修改。<br />
@@ -419,9 +419,9 @@ overlay的<code>copy-up</code>操作工作在文件层面, 对文件的修改需
       
       <ul class="post-tags">
         
-          <li><a href="maoqide.live/tags/cloud"><span class="tag">Cloud</span></a></li>
+          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
         
-          <li><a href="maoqide.live/tags/docker"><span class="tag">Docker</span></a></li>
+          <li><a href="/tags/docker"><span class="tag">Docker</span></a></li>
         
       </ul>
       
@@ -497,7 +497,7 @@ overlay的<code>copy-up</code>操作工作在文件层面, 对文件的修改需
 
 
 
-<script src="maoqide.live/scripts/index.min.js"></script>
+<script src="/scripts/index.min.js"></script>
 
 <script>
   if ('serviceWorker' in navigator) {

@@ -2,157 +2,157 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Maoqide</title>
-    <link>maoqide.live/tags/</link>
+    <link>/tags/</link>
     <description>Recent content in Tags on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
     <lastBuildDate>Fri, 07 Dec 2018 16:31:03 +0800</lastBuildDate>
     
-	<atom:link href="maoqide.live/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Algorithm</title>
-      <link>maoqide.live/tags/algorithm/</link>
+      <link>/tags/algorithm/</link>
       <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
       
-      <guid>maoqide.live/tags/algorithm/</guid>
+      <guid>/tags/algorithm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Awesome</title>
-      <link>maoqide.live/tags/awesome/</link>
+      <link>/tags/awesome/</link>
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
       
-      <guid>maoqide.live/tags/awesome/</guid>
+      <guid>/tags/awesome/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Blog</title>
-      <link>maoqide.live/tags/blog/</link>
+      <link>/tags/blog/</link>
       <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
       
-      <guid>maoqide.live/tags/blog/</guid>
+      <guid>/tags/blog/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Cloud</title>
-      <link>maoqide.live/tags/cloud/</link>
+      <link>/tags/cloud/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
       
-      <guid>maoqide.live/tags/cloud/</guid>
+      <guid>/tags/cloud/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Container Network</title>
-      <link>maoqide.live/tags/container-network/</link>
+      <link>/tags/container-network/</link>
       <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
       
-      <guid>maoqide.live/tags/container-network/</guid>
+      <guid>/tags/container-network/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Data Structure</title>
-      <link>maoqide.live/tags/data-structure/</link>
+      <link>/tags/data-structure/</link>
       <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
       
-      <guid>maoqide.live/tags/data-structure/</guid>
+      <guid>/tags/data-structure/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Docker</title>
-      <link>maoqide.live/tags/docker/</link>
+      <link>/tags/docker/</link>
       <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
       
-      <guid>maoqide.live/tags/docker/</guid>
+      <guid>/tags/docker/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Etcd</title>
-      <link>maoqide.live/tags/etcd/</link>
+      <link>/tags/etcd/</link>
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
       
-      <guid>maoqide.live/tags/etcd/</guid>
+      <guid>/tags/etcd/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Flannel</title>
-      <link>maoqide.live/tags/flannel/</link>
+      <link>/tags/flannel/</link>
       <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
       
-      <guid>maoqide.live/tags/flannel/</guid>
+      <guid>/tags/flannel/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Golang</title>
-      <link>maoqide.live/tags/golang/</link>
+      <link>/tags/golang/</link>
       <pubDate>Mon, 11 Mar 2019 16:35:20 +0800</pubDate>
       
-      <guid>maoqide.live/tags/golang/</guid>
+      <guid>/tags/golang/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Kubernetes</title>
-      <link>maoqide.live/tags/kubernetes/</link>
+      <link>/tags/kubernetes/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
       
-      <guid>maoqide.live/tags/kubernetes/</guid>
+      <guid>/tags/kubernetes/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Kubernetes Operator</title>
-      <link>maoqide.live/tags/kubernetes-operator/</link>
+      <link>/tags/kubernetes-operator/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
       
-      <guid>maoqide.live/tags/kubernetes-operator/</guid>
+      <guid>/tags/kubernetes-operator/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Mesos</title>
-      <link>maoqide.live/tags/mesos/</link>
+      <link>/tags/mesos/</link>
       <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
       
-      <guid>maoqide.live/tags/mesos/</guid>
+      <guid>/tags/mesos/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Mysql Operator</title>
-      <link>maoqide.live/tags/mysql-operator/</link>
+      <link>/tags/mysql-operator/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
       
-      <guid>maoqide.live/tags/mysql-operator/</guid>
+      <guid>/tags/mysql-operator/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Notes</title>
-      <link>maoqide.live/tags/notes/</link>
+      <link>/tags/notes/</link>
       <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
       
-      <guid>maoqide.live/tags/notes/</guid>
+      <guid>/tags/notes/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Source Code</title>
-      <link>maoqide.live/tags/source-code/</link>
+      <link>/tags/source-code/</link>
       <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
       
-      <guid>maoqide.live/tags/source-code/</guid>
+      <guid>/tags/source-code/</guid>
       <description></description>
     </item>
     

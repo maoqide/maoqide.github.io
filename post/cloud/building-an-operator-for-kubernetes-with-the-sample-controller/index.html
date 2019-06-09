@@ -47,7 +47,7 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
   <meta property="og:description" content="An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.  Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。
 Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。
 ">
-  <meta property="og:url" content="maoqide.live/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/">
+  <meta property="og:url" content="/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -56,7 +56,7 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
 <meta name="generator" content="Hugo 0.51">
 
 
-<link rel="canonical" href="maoqide.live/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/">
+<link rel="canonical" href="/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -81,20 +81,20 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
 <meta name='msapplication-navbutton-color' content="#02b875">
 <meta name="msapplication-TileColor" content="#02b875">
 <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
-<link rel="icon" href="maoqide.live/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="maoqide.live/icons/icon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="maoqide.live/icons/icon-32x32.png">
-<link rel="icon" sizes="192x192" href="maoqide.live/icons/icon-192x192.png">
-<link rel="apple-touch-icon" href="maoqide.live/icons/icon-152x152.png">
-<link rel="manifest" href="maoqide.live/manifest.json">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
 
 
-<link rel="preload" href="maoqide.live/styles/main-rendered.min.css" as="style">
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
 
 
 <link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
-<link rel="preload" href="maoqide.live/images/golang.svg" as="image">
-<link rel="preload" href="maoqide.live/images/square.svg" as="image">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
 
 
 <style>
@@ -102,7 +102,7 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
     background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
   }
 </style>
-<link rel="stylesheet" href="maoqide.live/styles/main-rendered.min.css">
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
 
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
@@ -144,9 +144,9 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
     
     
   <header class="site-header">
-  <a href="maoqide.live"><img class="avatar" src="maoqide.live/images/golang.svg" alt="Avatar"></a>
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
   
-  <h2 class="title"><a href="maoqide.live">Maoqide</a></h2>
+  <h2 class="title"><a href="">Maoqide</a></h2>
   
   <p class="subtitle">~ Keep Learning ~</p>
   <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
@@ -164,28 +164,28 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
           
           
            is-active">
-          <a href="maoqide.live/">Home</a>
+          <a href="/">Home</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/post/">Post</a>
+          <a href="/post/">Post</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/tags/">Tags</a>
+          <a href="/tags/">Tags</a>
         </li>
       
         <li class="menu-item
           
           
           ">
-          <a href="maoqide.live/about/">About</a>
+          <a href="/about/">About</a>
         </li>
       
     </ul>
@@ -490,11 +490,11 @@ kubectl apply -f deploy.yaml</code></pre></div>
       
       <ul class="post-tags">
         
-          <li><a href="maoqide.live/tags/cloud"><span class="tag">Cloud</span></a></li>
+          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
         
-          <li><a href="maoqide.live/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
         
-          <li><a href="maoqide.live/tags/kubernetes-operator"><span class="tag">Kubernetes-Operator</span></a></li>
+          <li><a href="/tags/kubernetes-operator"><span class="tag">Kubernetes-Operator</span></a></li>
         
       </ul>
       
@@ -570,7 +570,7 @@ kubectl apply -f deploy.yaml</code></pre></div>
 
 
 
-<script src="maoqide.live/scripts/index.min.js"></script>
+<script src="/scripts/index.min.js"></script>
 
 <script>
   if ('serviceWorker' in navigator) {
