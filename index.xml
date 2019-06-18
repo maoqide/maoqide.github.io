@@ -27,6 +27,17 @@ https://www.vultr.com/?ref=8128045</description>
     </item>
     
     <item>
+      <title>Golang Data Race Detector</title>
+      <link>/post/golang/golang-data-race-detector/</link>
+      <pubDate>Tue, 18 Jun 2019 09:26:13 +0800</pubDate>
+      
+      <guid>/post/golang/golang-data-race-detector/</guid>
+      <description>&lt;p&gt;[译] &lt;a href=&#34;https://golang.google.cn/doc/articles/race_detector.html&#34;&gt;https://golang.google.cn/doc/articles/race_detector.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;golang 中的几种 Data Race 场景及 Data Race 检测工具。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Deploy Mysql on Kubernetes</title>
       <link>/post/cloud/deploy-mysql-on-kubernetes/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>

@@ -7,10 +7,21 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Thu, 16 May 2019 14:06:37 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 18 Jun 2019 09:26:13 +0800</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Golang Data Race Detector</title>
+      <link>/post/golang/golang-data-race-detector/</link>
+      <pubDate>Tue, 18 Jun 2019 09:26:13 +0800</pubDate>
+      
+      <guid>/post/golang/golang-data-race-detector/</guid>
+      <description>&lt;p&gt;[译] &lt;a href=&#34;https://golang.google.cn/doc/articles/race_detector.html&#34;&gt;https://golang.google.cn/doc/articles/race_detector.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;golang 中的几种 Data Race 场景及 Data Race 检测工具。&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Deploy Mysql on Kubernetes</title>

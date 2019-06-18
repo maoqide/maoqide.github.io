@@ -214,7 +214,11 @@
 <li>Mutex 为互斥锁，<code>Lock()</code> 加锁，<code>Unlock()</code> 解锁<br /></li>
 <li>使用 <code>Lock()</code> 加锁后，在使用<code>Unlock()</code>解锁前便不能再次对其进行加锁，否则会导致死锁<br /></li>
 <li>在<code>Lock()</code>前使用<code>Unlock()</code>会导致 panic 异常<br /></li>
-<li>适用于读写不确定场景，即读写次数没有明显的区别，并且只允许只有一个读或者写的场景<br /></li>
+
+<li><p>适用于读写不确定场景，即读写次数没有明显的区别，并且只允许只有一个读或者写的场景</p>
+
+<p>the zero value for a sync.Mutex is defined to be an unlocked mutex.<br />
+sync.Mutex 的零值定义为未加锁的互斥锁。</p></li>
 </ul>
 
 <h2 id="sync-rwmutex">sync.RWMutex</h2>
