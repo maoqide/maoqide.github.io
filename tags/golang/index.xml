@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Tue, 18 Jun 2019 09:26:13 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 19 Jun 2019 09:10:37 +0800</lastBuildDate>
     
 	<atom:link href="/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The Go Memory Model</title>
+      <link>/post/golang/the-go-memory-model/</link>
+      <pubDate>Wed, 19 Jun 2019 09:10:37 +0800</pubDate>
+      
+      <guid>/post/golang/the-go-memory-model/</guid>
+      <description>&lt;p&gt;[译]&lt;a href=&#34;https://golang.google.cn/ref/mem&#34;&gt;https://golang.google.cn/ref/mem&lt;/a&gt;&lt;br /&gt;
+Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Golang Data Race Detector</title>
