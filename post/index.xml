@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Wed, 19 Jun 2019 09:10:37 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 14 Jul 2019 11:30:24 +0800</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Kubelet-1 Kubelet 会做些什么</title>
+      <link>/post/cloud/kubelet-1-what-do-kubelet-do/</link>
+      <pubDate>Sun, 14 Jul 2019 11:30:24 +0800</pubDate>
+      
+      <guid>/post/cloud/kubelet-1-what-do-kubelet-do/</guid>
+      <description>&lt;p&gt;Kubelet 是 Kubernetes 集群中非常重要的组件，起在集群中的每个几点上，具体 Kubelet 会做那些事情，可以通过 Kubelet 的源码找到答案。&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>The Go Memory Model</title>

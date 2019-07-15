@@ -50,7 +50,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.51">
+<meta name="generator" content="Hugo 0.55.6">
 
 
 <link rel="canonical" href="/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
@@ -503,34 +503,34 @@ apiserver对应的路径为<code>$GOPATH\k8s.io\kubernetes\cmd\kube-apiserver\ap
 
 <ul>
 <li><code>*APIServerHandler</code>(<em>Handler holds the handlers being used by this API server</em>)<br /></li>
-<li><code>DelegationTarget</code>(<em>delegationTarget is the next delegate in the chain or nil</em>)<br />
-其中最重要的是<code>APIServerHandler</code>这个结构体，它包含了go-restful中的<code>*restful.Container</code>结构体，后面注册API时用到的<code>InstallAPIs()</code>方法，最终也是将路由注册到这个Container中，定义如下:
-<code>golang
-// APIServerHandlers holds the different http.Handlers used by the API server.
-// This includes the full handler chain, the director (which chooses between gorestful and nonGoRestful,
-// the gorestful handler (used for the API) which falls through to the nonGoRestful handler on unregistered paths,
-// and the nonGoRestful handler (which can contain a fallthrough of its own)
-// FullHandlerChain -&gt; Director -&gt; {GoRestfulContainer,NonGoRestfulMux} based on inspection of registered web services
-type APIServerHandler struct {
-	// FullHandlerChain is the one that is eventually served with.  It should include the full filter
-	// chain and then call the Director.
-	FullHandlerChain http.Handler
-	// The registered APIs.  InstallAPIs uses this.  Other servers probably shouldn't access this directly.
-	GoRestfulContainer *restful.Container
-	// NonGoRestfulMux is the final HTTP handler in the chain.
-	// It comes after all filters and the API handling
-	// This is where other servers can attach handler to various parts of the chain.
-	NonGoRestfulMux *mux.PathRecorderMux
-	// Other servers should only use this opaquely to delegate to an API server.
-	Director http.Handler
-}
-</code>
-<code>DelegationTarget</code>(<em>DelegationTarget is an interface which allows for composition of API servers with top level handling that works as expected.</em>)是一个<code>interface</code>，是构成方法名<code>CreateServerChain</code>中ServerChain的结构，结构体内定义了<code>NextDelegate()</code>方法，返回chain中的下一个<code>DelegationTarget</code>，由它串起了多个api servers。(为什么会有多个api server从后面代码中可以看到。)<br /></li>
-</ul>
+
+<li><p><code>DelegationTarget</code>(<em>delegationTarget is the next delegate in the chain or nil</em>)<br />
+其中最重要的是<code>APIServerHandler</code>这个结构体，它包含了go-restful中的<code>*restful.Container</code>结构体，后面注册API时用到的<code>InstallAPIs()</code>方法，最终也是将路由注册到这个Container中，定义如下:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// APIServerHandlers holds the different http.Handlers used by the API server.
+</span><span style="color:#75715e">// This includes the full handler chain, the director (which chooses between gorestful and nonGoRestful,
+</span><span style="color:#75715e">// the gorestful handler (used for the API) which falls through to the nonGoRestful handler on unregistered paths,
+</span><span style="color:#75715e">// and the nonGoRestful handler (which can contain a fallthrough of its own)
+</span><span style="color:#75715e">// FullHandlerChain -&gt; Director -&gt; {GoRestfulContainer,NonGoRestfulMux} based on inspection of registered web services
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">APIServerHandler</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#75715e">// FullHandlerChain is the one that is eventually served with.  It should include the full filter
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// chain and then call the Director.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">FullHandlerChain</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span>
+	<span style="color:#75715e">// The registered APIs.  InstallAPIs uses this.  Other servers probably shouldn&#39;t access this directly.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">GoRestfulContainer</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">restful</span>.<span style="color:#a6e22e">Container</span>
+	<span style="color:#75715e">// NonGoRestfulMux is the final HTTP handler in the chain.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// It comes after all filters and the API handling
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// This is where other servers can attach handler to various parts of the chain.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">NonGoRestfulMux</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">mux</span>.<span style="color:#a6e22e">PathRecorderMux</span>
+	<span style="color:#75715e">// Other servers should only use this opaquely to delegate to an API server.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">Director</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span>
+}</code></pre></div>
+<p><code>DelegationTarget</code>(<em>DelegationTarget is an interface which allows for composition of API servers with top level handling that works as expected.</em>)是一个<code>interface</code>，是构成方法名<code>CreateServerChain</code>中ServerChain的结构，结构体内定义了<code>NextDelegate()</code>方法，返回chain中的下一个<code>DelegationTarget</code>，由它串起了多个api servers。(为什么会有多个api server从后面代码中可以看到。)</p>
 
 <h2 id="createserverchain">CreateServerChain</h2>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// CreateServerChain creates the apiservers connected via delegation.
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">CreateServerChain</span>(<span style="color:#a6e22e">runOptions</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">options</span>.<span style="color:#a6e22e">ServerRunOptions</span>, <span style="color:#a6e22e">stopCh</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) (<span style="color:#f92672">*</span><span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">GenericAPIServer</span>, <span style="color:#66d9ef">error</span>) {}</code></pre></div>
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">CreateServerChain</span>(<span style="color:#a6e22e">runOptions</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">options</span>.<span style="color:#a6e22e">ServerRunOptions</span>, <span style="color:#a6e22e">stopCh</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) (<span style="color:#f92672">*</span><span style="color:#a6e22e">genericapiserver</span>.<span style="color:#a6e22e">GenericAPIServer</span>, <span style="color:#66d9ef">error</span>) {}</code></pre></div></li>
+</ul>
+
 <p><code>CreateServerChain()</code>方法中，先后执行了<code>CreateNodeDialer</code>, <code>CreateKubeAPIServerConfig</code>, <code>createAPIExtensionsConfig</code>, <code>createAPIExtensionsServer</code>, <code>CreateKubeAPIServer</code>, <code>createAggregatorConfig</code>, <code>createAggregatorServer</code>几个方法，根据方法名可以看出启动apiserver的流程。</p>
 
 <ul>
@@ -955,7 +955,7 @@ InstallAPIs 会遍历传入的 restStorageProviders 列表，并调用每个 res
       </ul>
       
       <p class="post-copyright">
-        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.This post was published <strong>210</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.This post was published <strong>236</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
       </p>
     </footer>
     

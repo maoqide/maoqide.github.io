@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Source Code on Maoqide</title>
+    <title>source-code on Maoqide</title>
     <link>/tags/source-code/</link>
-    <description>Recent content in Source Code on Maoqide</description>
+    <description>Recent content in source-code on Maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Thu, 07 Mar 2019 20:00:30 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 14 Jul 2019 11:30:24 +0800</lastBuildDate>
     
 	<atom:link href="/tags/source-code/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Kubelet-1 Kubelet 会做些什么</title>
+      <link>/post/cloud/kubelet-1-what-do-kubelet-do/</link>
+      <pubDate>Sun, 14 Jul 2019 11:30:24 +0800</pubDate>
+      
+      <guid>/post/cloud/kubelet-1-what-do-kubelet-do/</guid>
+      <description>&lt;p&gt;Kubelet 是 Kubernetes 集群中非常重要的组件，起在集群中的每个几点上，具体 Kubelet 会做那些事情，可以通过 Kubelet 的源码找到答案。&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Kube Scheduler 源码阅读</title>
