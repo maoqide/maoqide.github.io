@@ -425,6 +425,8 @@ Showing top <span style="color:#ae81ff">10</span> nodes out of <span style="colo
 
 <p>除了交互式命令行，go tool pprof 还提供了 web 页面，上面的命令加上 -http 参数，<code>go tool pprof -http=&quot;:8081&quot; engine http://127.0.0.1:8080/debug/pprof/profile</code>，即可在指定端口启动一个 web 服务，通过 web 服务可以查看整个应用程序的各种性能信息及图表分析，火焰图等。</p>
 
+<p>非 web 应用，可以在程序中使用 runtime/pprof 包，进行 profile 采集并生成文件，使用 go tool pprof 时将 url 换成文件路径即可。</p>
+
 <p>参考：<br />
 - <a href="https://golang.org/doc/effective_go.html#concurrency">https://golang.org/doc/effective_go.html#concurrency</a><br />
 - <a href="https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/">https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/</a></p></article>
