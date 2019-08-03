@@ -5,10 +5,7 @@
   <meta charset="utf-8" />
 
   
-  <title>
-  Posts
-   | Maoqide
-</title>
+  <title>Maoqide</title>
 
   
   
@@ -42,7 +39,7 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Maoqide">
   <meta property="og:description" content="Maoqide is a personal blog site, recording learning about container, kuberntes, golang...">
-  <meta property="og:url" content="/post/">
+  <meta property="og:url" content="/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -51,8 +48,8 @@
 <meta name="generator" content="Hugo 0.55.6">
 
 
-<link rel="canonical" href="/post/">
-<link rel="alternate" type="application/rss+xml" href="/post/index.xml" title="Maoqide">
+<link rel="canonical" href="/">
+<link rel="alternate" type="application/rss+xml" href="/index.xml" title="Maoqide">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -130,11 +127,10 @@
       
     </div>
     
-    
-  <header class="site-header">
+     <header class="site-header">
   <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
   
-  <h2 class="title"><a href="">Maoqide</a></h2>
+  <h1 class="title"><a href="">Maoqide</a></h1>
   
   <p class="subtitle">~ Keep Learning ~</p>
   <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
@@ -149,14 +145,14 @@
       
       
         <li class="menu-item
+           is-active
           
-          
-           is-active">
+          ">
           <a href="/">Home</a>
         </li>
       
         <li class="menu-item
-           is-active
+          
           
           ">
           <a href="/post/">Post</a>
@@ -192,176 +188,39 @@
   </nav>
 </header>
 
-  <section class="main post-list">
-    <header class="list-header offscreen">
-      <h2 class="list-label">Posts List</h2>
-    </header>
-    
-    
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/awesome-post/collection-2/" class="post-link">Awesome Post Collection 2</a></h3>
-    <p class="post-meta">@Maoqide · Feb 20, 2019 · 1 min read</p>
+<section class="main post-list">
+  <header class="list-header offscreen">
+    <h2 class="list-label">All Posts</h2>
   </header>
   
-  <p class="post-summary"> goroutine 调度器。
- Golang for range性能分析及优化。
- 一致性哈希算法。
- ETCD的一些使用场景及原理分析。
- </p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/awesome-post/collection-2/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
+  
+   <article class="post-entry">
   <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/container-network/" class="post-link">Container Network</a></h3>
-    <p class="post-meta">@Maoqide · Jan 22, 2019 · 2 min read</p>
+    <h3 class="post-title"><a href="/post/cloud/deploy-kubernetes-on-aliyun/" class="post-link">阿里云主机搭建 K8S 集群</a></h3>
+    <p class="post-meta">@Maoqide · Nov 14, 2018 · 2 min read</p>
   </header>
   
-  <p class="post-summary">容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。
+  <p class="post-summary">通过阿里云ECS实例搭建K8S集群
 </p>
   <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/container-network/">Read More →</a>
+    <a class="read-more" href="/post/cloud/deploy-kubernetes-on-aliyun/">Read More →</a>
   </footer>
 </article>
-
+ 
+   
+  <footer class="list-footer">
+    <nav class="pagination">
+      <h3 class="offscreen">Pagination</h3>
       
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/docker-%E5%8E%9F%E7%90%86/" class="post-link">Docker 原理</a></h3>
-    <p class="post-meta">@Maoqide · Jan 17, 2019 · 2 min read</p>
-  </header>
-  
-  <p class="post-summary"> Namespace Cgroup UnionFS
-  docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/docker-%E5%8E%9F%E7%90%86/">Read More →</a>
+      <a class="pagination-previous" href="/page/2/"
+        >← Newer Posts</a
+      >
+       
+    </nav>
   </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/notes/publish-your-site-on-k8s/" class="post-link">将网站部署在 Kubernetes 上</a></h3>
-    <p class="post-meta">@Maoqide · Jan 1, 2019 · 4 min read</p>
-  </header>
   
-  <p class="post-summary">将自己的博客网站发布到自己的 Kubernetes 集群上。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/notes/publish-your-site-on-k8s/">Read More →</a>
-  </footer>
-</article>
+</section>
 
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/golang/goroutine/" class="post-link">Goroutine 的管理</a></h3>
-    <p class="post-meta">@Maoqide · Dec 28, 2018 · 4 min read</p>
-  </header>
-  
-  <p class="post-summary">goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 pprof 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/golang/goroutine/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/algorithm/basic-data-structure/" class="post-link">Basic Data Structure</a></h3>
-    <p class="post-meta">@Maoqide · Dec 7, 2018 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary">基础的数据结构和一些基本操作，及其 golang 语言的实现。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/algorithm/basic-data-structure/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/notes/build-blog-with-hugo/" class="post-link">Build Blog With Hugo</a></h3>
-    <p class="post-meta">@Maoqide · Dec 4, 2018 · 2 min read</p>
-  </header>
-  
-  <p class="post-summary">how to build your own blog using hugo.
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/notes/build-blog-with-hugo/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/awesome-post/collection-1/" class="post-link">Awesome Post Collection 1</a></h3>
-    <p class="post-meta">@Maoqide · Dec 3, 2018 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary"> Mesos 的资源分配。
- Kubernetes调度详解。
- Istio 调用链埋点/tracing。
- kubernetes informer 解析。
- </p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/awesome-post/collection-1/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" class="post-link">Apiserver 源码阅读</a></h3>
-    <p class="post-meta">@Maoqide · Nov 21, 2018 · 20 min read</p>
-  </header>
-  
-  <p class="post-summary">k8s apiserver 源码阅读笔记
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">Read More →</a>
-  </footer>
-</article>
-
-      
-        <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" class="post-link">Kubelet</a></h3>
-    <p class="post-meta">@Maoqide · Nov 21, 2018 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary">Kubelet 源码阅读笔记
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">Read More →</a>
-  </footer>
-</article>
-
-      
-    
-    
-      <footer class="list-footer">
-        <nav class="pagination">
-          <h3 class="offscreen">Pagination</h3>
-          
-            <a class="pagination-previous" href="/post/">← Newer Posts</a>
-          
-          
-            <a class="pagination-next" href="/post/page/3/">Older Posts →</a>
-          
-        </nav>
-      </footer>
-    
-  </section>
-  
 <footer class="site-footer">
   <p>© 2017-2019 Maoqide</p>
   <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
@@ -418,7 +277,6 @@ var _hmt = _hmt || [];
 })();
 </script>
 
-
-
+ 
   </body>
 </html>
