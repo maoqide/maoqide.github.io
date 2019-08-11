@@ -43,6 +43,18 @@
   </url>
   
   <url>
+    <loc>/tags/goroutine/</loc>
+    <lastmod>2019-07-20T21:38:08+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/pprof/</loc>
+    <lastmod>2019-07-20T21:38:08+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/post/cloud/kubelet-1-what-do-kubelet-do/</loc>
     <lastmod>2019-07-14T11:30:24+08:00</lastmod>
   </url>

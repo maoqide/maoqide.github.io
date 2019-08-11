@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>goroutine on Maoqide</title>
+    <link>/tags/goroutine/</link>
+    <description>Recent content in goroutine on Maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
+    <lastBuildDate>Sat, 20 Jul 2019 21:38:08 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/goroutine/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Go Concurrency</title>
+      <link>/post/golang/go-concurrency/</link>
+      <pubDate>Sat, 20 Jul 2019 21:38:08 +0800</pubDate>
+      
+      <guid>/post/golang/go-concurrency/</guid>
+      <description>&lt;p&gt;go 语言相比其他语言的一大优势，就是便捷，高效的并发代码的编写。本文具体介绍 go 语言的并发机制和使用 go 语言作并发编程的方法。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
