@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Upgrade Kubernets From Binary to Kubeadm</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Upgrade Kubernets From Binary to Kubeadm">
+    <meta name="twitter:description" content="记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Upgrade Kubernets From Binary to Kubeadm">
+  <meta property="og:description" content="记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。
+">
+  <meta property="og:url" content="/post/notes/upgrade-kubernets-from-binary-to-kubeadm/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.55.6">
+
+
+<link rel="canonical" href="/post/notes/upgrade-kubernets-from-binary-to-kubeadm/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+<meta name="google-site-verification" content="moDctZ0TPe6VxisyOQD_1YWrlEXu3jHdB1go5ptHRn0">
+<meta name="msvalidate.01" content="0498007A4CDA3EAB6CD23570479B29DA">
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Upgrade Kubernets From Binary to Kubeadm</h1>
+      <p class="post-meta">@Maoqide · Aug 6, 2019 · 2 min read</p>
+    </header>
+    <article class="post-content"><p>记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。<br />
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。</p>
+
+<h2 id="部署新的-master-集群">部署新的 master 集群</h2>
+
+<h3 id="etcd-数据迁移">etcd 数据迁移</h3>
+
+<p>为了完全不影响原有集群的运行，将 etcd 也做迁移，新的 master 连接新的 etcd，不对老集群造成影响。<br />
+首先新建一个 etcd，并使用 etcd 的 make-mirror 功能将原有集群的 etcd 数据同步到新的etcd中。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 新起一个 etcd，为了方便这里新建不带证书的 http 端口</span>
+docker run -d <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>        --name etcd <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>	--net host <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>	-v /data/etcd:/var/lib/etcd <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>	quay.io/coreos/etcd:v3.3.13 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>	etcd --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#  迁移数据</span>
+export ETCDCTL_API<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>
+etcdctl --endpoints<span style="color:#f92672">=</span>https://etcd-ip:2379 --cert<span style="color:#f92672">=</span>/etc/kubernetes/ssl/etcd.pem --cacert<span style="color:#f92672">=</span>/etc/kubernetes/ssl/ca.pem --key<span style="color:#f92672">=</span>/etc/kubernetes/ssl/etcd-key.pem make-mirror http://destination-ip:2379</code></pre></div>
+<p>由于 kubeadm 会自动新建 dns，所以在新的 etcd 中，将导入过来的 kube-dns 相关数据手动删掉。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 执行如下命令知道删掉所有 kube-dns 相关的key</span>
+echo  <span style="color:#66d9ef">$(</span>etcdctl get / --prefix --keys-only | grep <span style="color:#e6db74">&#39;kube-dns&#39;</span><span style="color:#66d9ef">)</span> | awk -F <span style="color:#e6db74">&#39; &#39;</span> <span style="color:#e6db74">&#39;{ print $1}&#39;</span> | xargs etcdctl del</code></pre></div>
+<h3 id="新建-master-集群">新建 master 集群</h3>
+
+<p>使用 kubeadm 新建集群，要注意集群配置要和之前一致，如 serviceSubnet, netSubnet 等，并指定 etcd 为刚才新建的 etcd，以下为 kubeadm 配置文件(用的老版本配置，最新版本的 kubeadm 已经不支持)。</p>
+
+<pre><code>apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+api:
+  advertiseAddress: 172.27.32.165
+etcd:
+  endpoints:
+    - http://172.27.32.165:2379
+networking:
+  serviceSubnet: 10.254.0.0/16
+  podSubnet: 172.41.0.0/16
+kubernetesVersion: 1.10.13
+imageRepository: harbor.guahao-inc.com/kubernetes
+apiServerExtraArgs:
+  insecure-bind-address: 172.27.32.165
+kubeletConfiguration:
+  baseConfig:
+    clusterDNS:
+    - 10.254.0.2
+nodeName: 172.27.32.165
+</code></pre>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># kubelet.service 加上如下配置</span>
+Environment<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;KUBELET_EXTRA_ARGS=--pod-infra-container-image=harbor.guahao-inc.com/kubernetes/pause-amd64:3.1 --hostname-override=172.27.32.165&#34;</span></code></pre></div>
+<p><em>kubeadm 配置文件中设置了nodeName，要同时在 kubelet 的 kubelet.service文件中加上 &ndash;hostname-override 参事，否则 kubelet 注册 apiserver 时会出现node forbidden 错误</em></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 使用配置文件新建 master 节点，目前所用 k8s 集群版本较老，不支持新版本docker，忽略docker版本校验</span>
+<span style="color:#75715e"># 创建之前可以先 dryrun 进行校验，没问题再真正执行，dryrun 会将需要做的步骤模拟执行并输出，不会真正操作</span>
+kubeadm init --dry-run  --config kubeadm.yaml --ignore-preflight-errors<span style="color:#f92672">=</span>SystemVerification
+kubeadm init --config kubeadm.yaml --ignore-preflight-errors<span style="color:#f92672">=</span>SystemVerification</code></pre></div>
+<p>完成后会提示新建成功，并提示后续操作命令，及node节点加入集群的命令。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 配置 kubectl</span>
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown <span style="color:#66d9ef">$(</span>id -u<span style="color:#66d9ef">)</span>:<span style="color:#66d9ef">$(</span>id -g<span style="color:#66d9ef">)</span> $HOME/.kube/config
+
+<span style="color:#75715e"># 加入集群的命令可以用 kubeadm 重新生成</span>
+kubeadm token create --print-join-command</code></pre></div>
+<p>此时已经建好新的 master 节点，并且使用 kubectl get no 可以看到原有集群的节点信息，但这时只是导过来的 etcd，实际上此时 master 节点并未控制 node 节点，node 节点的 kubelet 依然是注册到老的 master 节点，想要将原来的 node 节点迁移到新的 master 节点下，还需要逐台修改每台 node 节点的配置。</p>
+
+<h3 id="迁移-node-节点">迁移 node 节点</h3>
+
+<p>迁移 node 节点要注意首先要备份原node节点的 <code>/etc/kubernetes/</code>、<code>/var/lib/kubelet/</code> 和 <code>/etc/systemd/system/kubelet.service</code>、<code>/etc/systemd/system/kubelet.service.d/</code>文件及目录，以便出现异常时可以快速回滚恢复。<br />
+做好备份后，将当前节点<code>kubelet</code>、<code>kube-proxy</code>停掉，并执行如下命令，由于节点上 kebelet 已经启动且已有 pod 在运行，需要加上 <code>--ignore-preflight-errors=all</code> 强制执行，主要是为了生成 kubelet 相关证书及配置文件，并重启 kubelet 注册到新的 master 节点的 apiserver，此时 <code>--node-name</code> 要指定和之前一样的节点名称，如果 kubelet.service 配置不正确的话，需要手动修改相关配置（参考 kubeadm 新建节点的配置）。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubeadm join  --node-name <span style="color:#ae81ff">192</span>.168.l96.31 <span style="color:#ae81ff">172</span>.27.32.165:6443 --token qfr5ff.sd7qn0tlx2a3kxtl --discovery-token-ca-cert-hash sha256:0f7175e3cf8e40d41983688aeb8e80153c2502cd375629379a5abb53f71bce0d --ignore-preflight-errors<span style="color:#f92672">=</span>all</code></pre></div>
+<p>成功的话，在新的 master 节点执行<code>kubectl get no</code>会能够看到迁移的节点已经变成 ready 状态。<br />
+若出现异常，将之前备份的目录和文件还原，并重启<code>kubelet</code>和<code>kube-proxy</code>，即可恢复节点。</p>
+
+<hr />
+
+<p>以上是经测试验证过的一种思路，但是在实际生产中，用这种方式进行迁移，还是会对在运行容器产生影响，若要应用到生产环境，还需更严谨详细的测试，并且此种方式的迁移风险较大，测试中遇到很多坑，应尽量避免。</p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+        
+          <li><a href="/tags/kubeadm"><span class="tag">Kubeadm</span></a></li>
+        
+          <li><a href="/tags/etcd"><span class="tag">Etcd</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>

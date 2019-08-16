@@ -7,10 +7,37 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Sat, 20 Jul 2019 21:38:08 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 06 Aug 2019 13:55:04 +0800</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>etcd</title>
+      <link>/tags/etcd/</link>
+      <pubDate>Tue, 06 Aug 2019 13:55:04 +0800</pubDate>
+      
+      <guid>/tags/etcd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kubeadm</title>
+      <link>/tags/kubeadm/</link>
+      <pubDate>Tue, 06 Aug 2019 13:55:04 +0800</pubDate>
+      
+      <guid>/tags/kubeadm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kubernetes</title>
+      <link>/tags/kubernetes/</link>
+      <pubDate>Tue, 06 Aug 2019 13:55:04 +0800</pubDate>
+      
+      <guid>/tags/kubernetes/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>concurrency</title>
@@ -58,15 +85,6 @@
     </item>
     
     <item>
-      <title>kubernetes</title>
-      <link>/tags/kubernetes/</link>
-      <pubDate>Sun, 14 Jul 2019 11:30:24 +0800</pubDate>
-      
-      <guid>/tags/kubernetes/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>source-code</title>
       <link>/tags/source-code/</link>
       <pubDate>Sun, 14 Jul 2019 11:30:24 +0800</pubDate>
@@ -99,15 +117,6 @@
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
       
       <guid>/tags/awesome/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>etcd</title>
-      <link>/tags/etcd/</link>
-      <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
-      
-      <guid>/tags/etcd/</guid>
       <description></description>
     </item>
     

@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Sat, 20 Jul 2019 21:38:08 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 06 Aug 2019 13:55:04 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -22,6 +22,16 @@
 A Gopher.
 Working on Cloud Native.
 Keep Learning.</description>
+    </item>
+    
+    <item>
+      <title>Upgrade Kubernets From Binary to Kubeadm</title>
+      <link>/post/notes/upgrade-kubernets-from-binary-to-kubeadm/</link>
+      <pubDate>Tue, 06 Aug 2019 13:55:04 +0800</pubDate>
+      
+      <guid>/post/notes/upgrade-kubernets-from-binary-to-kubeadm/</guid>
+      <description>&lt;p&gt;记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。&lt;br /&gt;
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。&lt;/p&gt;</description>
     </item>
     
     <item>
