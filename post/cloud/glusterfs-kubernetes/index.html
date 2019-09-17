@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Glusterfs Kubernetes</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="在 kubernetes 中使用 glusterfs 作为 pv。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Glusterfs Kubernetes">
+    <meta name="twitter:description" content="在 kubernetes 中使用 glusterfs 作为 pv。
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Glusterfs Kubernetes">
+  <meta property="og:description" content="在 kubernetes 中使用 glusterfs 作为 pv。
+">
+  <meta property="og:url" content="/post/cloud/glusterfs-kubernetes/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.55.6">
+
+
+<link rel="canonical" href="/post/cloud/glusterfs-kubernetes/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+<meta name="google-site-verification" content="moDctZ0TPe6VxisyOQD_1YWrlEXu3jHdB1go5ptHRn0">
+<meta name="msvalidate.01" content="0498007A4CDA3EAB6CD23570479B29DA">
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Glusterfs Kubernetes</h1>
+      <p class="post-meta">@Maoqide · Sep 6, 2019 · 10 min read</p>
+    </header>
+    <article class="post-content"><p>在 kubernetes 中使用 glusterfs 作为 pv。</p>
+
+<h2 id="environment">environment</h2>
+
+<ul>
+<li>centos7<br /></li>
+<li>3.10.0-957.27.2.el7.x86_64<br /></li>
+</ul>
+
+<h2 id="机器-virtualbox-虚拟机">机器（virtualbox 虚拟机）</h2>
+
+<ul>
+<li>centos10 - 172.27.32.165 - kubernetes master节点<br /></li>
+<li>centos12l - 172.27.32.182 - glusterfs节点/kubernetes node节点<br /></li>
+<li>centos11 - 172.27.32.164 - glusterfs节点/kubernetes node节点<br /></li>
+</ul>
+
+<h2 id="virtualbox-添加硬盘">virtualbox 添加硬盘</h2>
+
+<ul>
+<li>关闭虚拟机<br /></li>
+<li>设置-存储-控制器SATA-新建磁盘-固定大小<br /></li>
+<li>启动虚拟机<br /></li>
+</ul>
+
+<p>开机后执行<code>fdisk -l</code>，其中 /dev/sdb 为新创建出的磁盘。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos12l ~<span style="color:#f92672">]</span>$ fdisk -l
+Disk /dev/sda: <span style="color:#ae81ff">54</span>.5 GB, <span style="color:#ae81ff">54495248384</span> bytes, <span style="color:#ae81ff">106436032</span> sectors
+Units <span style="color:#f92672">=</span> sectors of <span style="color:#ae81ff">1</span> * 512 <span style="color:#f92672">=</span> <span style="color:#ae81ff">512</span> bytes
+Sector size <span style="color:#f92672">(</span>logical/physical<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes
+I/O size <span style="color:#f92672">(</span>minimum/optimal<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes
+Disk label type: dos
+Disk identifier: 0x0001552e
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        <span style="color:#ae81ff">2048</span>     <span style="color:#ae81ff">2099199</span>     <span style="color:#ae81ff">1048576</span>   <span style="color:#ae81ff">83</span>  Linux
+/dev/sda2         <span style="color:#ae81ff">2099200</span>   <span style="color:#ae81ff">106434559</span>    <span style="color:#ae81ff">52167680</span>   8e  Linux LVM
+
+Disk /dev/sdb: <span style="color:#ae81ff">10</span>.7 GB, <span style="color:#ae81ff">10737418240</span> bytes, <span style="color:#ae81ff">20971520</span> sectors
+Units <span style="color:#f92672">=</span> sectors of <span style="color:#ae81ff">1</span> * 512 <span style="color:#f92672">=</span> <span style="color:#ae81ff">512</span> bytes
+Sector size <span style="color:#f92672">(</span>logical/physical<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes
+I/O size <span style="color:#f92672">(</span>minimum/optimal<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes
+
+
+Disk /dev/mapper/centos-root: <span style="color:#ae81ff">51</span>.3 GB, <span style="color:#ae81ff">51266977792</span> bytes, <span style="color:#ae81ff">100130816</span> sectors
+Units <span style="color:#f92672">=</span> sectors of <span style="color:#ae81ff">1</span> * 512 <span style="color:#f92672">=</span> <span style="color:#ae81ff">512</span> bytes
+Sector size <span style="color:#f92672">(</span>logical/physical<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes
+I/O size <span style="color:#f92672">(</span>minimum/optimal<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes
+
+
+Disk /dev/mapper/centos-swap: <span style="color:#ae81ff">2147</span> MB, <span style="color:#ae81ff">2147483648</span> bytes, <span style="color:#ae81ff">4194304</span> sectors
+Units <span style="color:#f92672">=</span> sectors of <span style="color:#ae81ff">1</span> * 512 <span style="color:#f92672">=</span> <span style="color:#ae81ff">512</span> bytes
+Sector size <span style="color:#f92672">(</span>logical/physical<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes
+I/O size <span style="color:#f92672">(</span>minimum/optimal<span style="color:#f92672">)</span>: <span style="color:#ae81ff">512</span> bytes / <span style="color:#ae81ff">512</span> bytes</code></pre></div>
+<p>如果使用<a href="https://github.com/gluster/gluster-kubernetes">gluster-kubernetes</a>提供的<code>gk-deploy</code>脚本配置glusterfs，无需进行一下的磁盘挂载操作。</p>
+
+<h2 id="磁盘挂载">磁盘挂载</h2>
+
+<p><strong><em>以下为手动部署 glusterfs 的步骤，使用<code>gk-deploy</code>在kubernetes上使用glusterfs跳过此步，否则会创建失败。</em></strong></p>
+
+<p><strong>执行<code>fdisk /dev/sdb</code>并根据提示进行磁盘写入</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos12l ~<span style="color:#f92672">]</span>$ fdisk /dev/sdb 
+Welcome to fdisk <span style="color:#f92672">(</span>util-linux <span style="color:#ae81ff">2</span>.23.2<span style="color:#f92672">)</span>.
+
+Changes will remain in memory only, <span style="color:#66d9ef">until</span> you decide to write them.
+Be careful before using the write command.
+
+Device does not contain a recognized partition table
+Building a new DOS disklabel with disk identifier 0xf6e6b69c.
+
+Command <span style="color:#f92672">(</span>m <span style="color:#66d9ef">for</span> help<span style="color:#f92672">)</span>: n
+Partition type:
+   p   primary <span style="color:#f92672">(</span><span style="color:#ae81ff">0</span> primary, <span style="color:#ae81ff">0</span> extended, <span style="color:#ae81ff">4</span> free<span style="color:#f92672">)</span>
+   e   extended
+Select <span style="color:#f92672">(</span>default p<span style="color:#f92672">)</span>: p
+Partition number <span style="color:#f92672">(</span><span style="color:#ae81ff">1</span>-4, default <span style="color:#ae81ff">1</span><span style="color:#f92672">)</span>: 
+First sector <span style="color:#f92672">(</span><span style="color:#ae81ff">2048</span>-20971519, default <span style="color:#ae81ff">2048</span><span style="color:#f92672">)</span>: 
+Using default value <span style="color:#ae81ff">2048</span>
+Last sector, +sectors or +size<span style="color:#f92672">{</span>K,M,G<span style="color:#f92672">}</span> <span style="color:#f92672">(</span><span style="color:#ae81ff">2048</span>-20971519, default <span style="color:#ae81ff">20971519</span><span style="color:#f92672">)</span>: 
+Using default value <span style="color:#ae81ff">20971519</span>
+Partition <span style="color:#ae81ff">1</span> of type Linux and of size <span style="color:#ae81ff">10</span> GiB is set
+
+Command <span style="color:#f92672">(</span>m <span style="color:#66d9ef">for</span> help<span style="color:#f92672">)</span>: w
+The partition table has been altered!
+
+Calling ioctl<span style="color:#f92672">()</span> to re-read partition table.
+Syncing disks.</code></pre></div>
+<p>需要 ext4 模块，<code>lsmod | grep ext4</code> 查看是否已加载，没有的话执行<code>modprobe ext4</code>加载。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos12l ~<span style="color:#f92672">]</span>$ lsmod | grep ext4  
+ext4                  <span style="color:#ae81ff">579979</span>  <span style="color:#ae81ff">0</span> 
+mbcache                <span style="color:#ae81ff">14958</span>  <span style="color:#ae81ff">1</span> ext4
+jbd2                  <span style="color:#ae81ff">107478</span>  <span style="color:#ae81ff">1</span> ext4</code></pre></div>
+<p><strong>执行<code>mkfs.ext4 /dev/sdb1</code>格式化磁盘。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos12l ~<span style="color:#f92672">]</span>$ mkfs.ext4 /dev/sdb1
+mke2fs <span style="color:#ae81ff">1</span>.42.9 <span style="color:#f92672">(</span><span style="color:#ae81ff">28</span>-Dec-2013<span style="color:#f92672">)</span>
+Filesystem label<span style="color:#f92672">=</span>
+OS type: Linux
+Block size<span style="color:#f92672">=</span><span style="color:#ae81ff">4096</span> <span style="color:#f92672">(</span>log<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span><span style="color:#f92672">)</span>
+Fragment size<span style="color:#f92672">=</span><span style="color:#ae81ff">4096</span> <span style="color:#f92672">(</span>log<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span><span style="color:#f92672">)</span>
+Stride<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> blocks, Stripe width<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> blocks
+<span style="color:#ae81ff">655360</span> inodes, <span style="color:#ae81ff">2621184</span> blocks
+<span style="color:#ae81ff">131059</span> blocks <span style="color:#f92672">(</span><span style="color:#ae81ff">5</span>.00%<span style="color:#f92672">)</span> reserved <span style="color:#66d9ef">for</span> the super user
+First data block<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+Maximum filesystem blocks<span style="color:#f92672">=</span><span style="color:#ae81ff">2151677952</span>
+<span style="color:#ae81ff">80</span> block groups
+<span style="color:#ae81ff">32768</span> blocks per group, <span style="color:#ae81ff">32768</span> fragments per group
+<span style="color:#ae81ff">8192</span> inodes per group
+Superblock backups stored on blocks: 
+	<span style="color:#ae81ff">32768</span>, <span style="color:#ae81ff">98304</span>, <span style="color:#ae81ff">163840</span>, <span style="color:#ae81ff">229376</span>, <span style="color:#ae81ff">294912</span>, <span style="color:#ae81ff">819200</span>, <span style="color:#ae81ff">884736</span>, <span style="color:#ae81ff">1605632</span>
+
+Allocating group tables: <span style="color:#66d9ef">done</span>                            
+Writing inode tables: <span style="color:#66d9ef">done</span>                            
+Creating journal <span style="color:#f92672">(</span><span style="color:#ae81ff">32768</span> blocks<span style="color:#f92672">)</span>: <span style="color:#66d9ef">done</span>
+Writing superblocks and filesystem accounting information: <span style="color:#66d9ef">done</span> </code></pre></div>
+<p><strong>将磁盘挂载到<code>data</code>目录</strong><br />
+<code>mkdir /data</code>
+<code>mount -t ext4 /dev/sdb1 /data</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos12l ~<span style="color:#f92672">]</span>$ df -h
+Filesystem               Size  Used Avail Use% Mounted on
+/dev/mapper/centos-root   48G  <span style="color:#ae81ff">2</span>.7G   46G   <span style="color:#ae81ff">6</span>% /
+devtmpfs                 908M     <span style="color:#ae81ff">0</span>  908M   <span style="color:#ae81ff">0</span>% /dev
+tmpfs                    920M     <span style="color:#ae81ff">0</span>  920M   <span style="color:#ae81ff">0</span>% /dev/shm
+tmpfs                    920M  <span style="color:#ae81ff">9</span>.2M  910M   <span style="color:#ae81ff">1</span>% /run
+tmpfs                    920M     <span style="color:#ae81ff">0</span>  920M   <span style="color:#ae81ff">0</span>% /sys/fs/cgroup
+/dev/sda1               1014M  189M  826M  <span style="color:#ae81ff">19</span>% /boot
+tmpfs                    184M     <span style="color:#ae81ff">0</span>  184M   <span style="color:#ae81ff">0</span>% /run/user/0
+/dev/sdb1                <span style="color:#ae81ff">9</span>.8G   37M  <span style="color:#ae81ff">9</span>.2G   <span style="color:#ae81ff">1</span>% /data</code></pre></div>
+<p><strong>写入fstab开机自动挂载</strong><br />
+<code>vim /etc/fstab</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">/dev/sdb1                   /data                ext4    defaults        <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">0</span></code></pre></div>
+<h2 id="安装-glusterfs-server">安装 glusterfs server</h2>
+
+<p><code>yum install -y centos-release-gluster</code>
+<code>yum install -y glusterfs-server</code>
+<code>systemctl start glusterd</code>
+<code>systemctl enable glusterd</code></p>
+
+<p>以下命名从glusterfs节点中选取一台执行即可。<br />
+<code>gluster peer probe 172.27.32.182</code>，添加远程节点。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos11 ~<span style="color:#f92672">]</span>$ gluster peer probe <span style="color:#ae81ff">172</span>.27.32.182
+peer probe: success. </code></pre></div>
+<p><code>gluster peer status</code>，查看远程节点状态。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">root@centos11 ~<span style="color:#f92672">]</span>$ gluster peer status
+Number of Peers: <span style="color:#ae81ff">1</span>
+
+Hostname: <span style="color:#ae81ff">172</span>.27.32.182
+Uuid: 3ad2f5fc-2cd6-4d0a-a42d-d3325eb0c687
+State: Peer in Cluster <span style="color:#f92672">(</span>Connected<span style="color:#f92672">)</span></code></pre></div>
+<p><code>gluster pool list</code>，查看节点列表。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos11 ~<span style="color:#f92672">]</span>$ gluster pool list
+UUID					Hostname     	State
+3ad2f5fc-2cd6-4d0a-a42d-d3325eb0c687	<span style="color:#ae81ff">172</span>.27.32.182	Connected 
+1717b41d-c7cd-457e-bfe3-1c825d837488	localhost    	Connected </code></pre></div>
+<h2 id="安装-glusterfs">安装 glusterfs</h2>
+
+<p>glusterfs 需要以下内核模块：<br />
+- dm_snapshot<br />
+- dm_mirror<br />
+- dm_thin_pool<br />
+执行<code>lsmod | grep &lt;name&gt;</code>查看模块是否存在，如果不存在的话执行<code>modprobe &lt;name&gt;</code>加载模块。</p>
+
+<p>安装 glusterfs：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># install</span>
+yum install glusterfs-fuse -y
+<span style="color:#75715e"># version</span>
+glusterfs --version</code></pre></div>
+<h2 id="创建-glusterfs-volume">创建 glusterfs volume</h2>
+
+<p><strong><em>以下为手动部署 glusterfs 的步骤，使用<code>gk-deploy</code>在kubernetes上使用glusterfs跳过此步，否则会创建失败。</em></strong></p>
+
+<p><code>mkdir /data/gvol</code>，在节点上创建 volume 的目录。</p>
+
+<p>以下命名从glusterfs节点中选取一台执行即可。<br />
+<code>gluster volume create gvol1 replica 2 172.27.32.182:/data/gvol 172.27.32.164:/data/gvol</code>，创建volume。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"> <span style="color:#75715e"># 提示两个节点容易发生脑裂，测试目的可以直接选择继续，生产建议3个节点。</span>    
+<span style="color:#f92672">[</span>root@centos11 ~<span style="color:#f92672">]</span>$ gluster volume create gvol1 replica <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">172</span>.27.32.182:/data/gvol <span style="color:#ae81ff">172</span>.27.32.164:/data/gvol
+Replica <span style="color:#ae81ff">2</span> volumes are prone to split-brain. Use Arbiter or Replica <span style="color:#ae81ff">3</span> to avoid this. See: http://docs.gluster.org/en/latest/Administrator%20Guide/Split%20brain%20and%20ways%20to%20deal%20with%20it/.
+Do you still want to <span style="color:#66d9ef">continue</span>?
+ <span style="color:#f92672">(</span>y/n<span style="color:#f92672">)</span> y
+volume create: gvol1: success: please start the volume to access data</code></pre></div>
+<p>此 volume 为 Repicate 类型，其他类型可查看官方文档<a href="https://docs.gluster.org/en/latest/Administrator%20Guide/Setting%20Up%20Volumes/#volume-types">volume-types</a>。</p>
+
+<p><code>gluster volume start gvol1</code>，启动 volume。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos11 ~<span style="color:#f92672">]</span>$ gluster volume start gvol1
+volume start: gvol1: success</code></pre></div>
+<p><code>gluster volume info gvol1</code>，查看 volume 信息。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos11 ~<span style="color:#f92672">]</span>$ gluster volume info gvol1
+Volume Name: gvol1
+Type: Replicate
+Volume ID: ed8662a9-a698-4730-8ac7-de579890b720
+Status: Started
+Snapshot Count: <span style="color:#ae81ff">0</span>
+Number of Bricks: <span style="color:#ae81ff">1</span> x 2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+Transport-type: tcp
+Bricks:
+Brick1: <span style="color:#ae81ff">172</span>.27.32.182:/data/vol1
+Brick2: <span style="color:#ae81ff">172</span>.27.32.164:/data/vol1
+Options Reconfigured:
+transport.address-family: inet
+nfs.disable: on
+performance.client-io-threads: off</code></pre></div>
+<p>挂载 glusterfs volume，将 glusterfs 的 vloume gvol1 挂载到<code>/data/gfs</code>目录下。<br />
+<code>mkdir -p /data/gfs</code><br />
+<code>mount -t glusterfs 172.27.32.164:/gvol1 /data/gfs</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># df -h 可以看到已经挂载上</span>
+<span style="color:#f92672">[</span>root@centos11 gfs<span style="color:#f92672">]</span>$ df -h
+Filesystem               Size  Used Avail Use% Mounted on
+/dev/mapper/centos-root   46G  <span style="color:#ae81ff">3</span>.3G   42G   <span style="color:#ae81ff">8</span>% /
+devtmpfs                 <span style="color:#ae81ff">1</span>.9G     <span style="color:#ae81ff">0</span>  <span style="color:#ae81ff">1</span>.9G   <span style="color:#ae81ff">0</span>% /dev
+tmpfs                    <span style="color:#ae81ff">1</span>.9G     <span style="color:#ae81ff">0</span>  <span style="color:#ae81ff">1</span>.9G   <span style="color:#ae81ff">0</span>% /dev/shm
+tmpfs                    <span style="color:#ae81ff">1</span>.9G  <span style="color:#ae81ff">9</span>.5M  <span style="color:#ae81ff">1</span>.9G   <span style="color:#ae81ff">1</span>% /run
+tmpfs                    <span style="color:#ae81ff">1</span>.9G     <span style="color:#ae81ff">0</span>  <span style="color:#ae81ff">1</span>.9G   <span style="color:#ae81ff">0</span>% /sys/fs/cgroup
+/dev/sda1               1014M  189M  826M  <span style="color:#ae81ff">19</span>% /boot
+tmpfs                    379M     <span style="color:#ae81ff">0</span>  379M   <span style="color:#ae81ff">0</span>% /run/user/0
+/dev/sdb1                <span style="color:#ae81ff">9</span>.8G   37M  <span style="color:#ae81ff">9</span>.2G   <span style="color:#ae81ff">1</span>% /data
+<span style="color:#ae81ff">172</span>.27.32.182:/gvol1     <span style="color:#ae81ff">9</span>.8G  136M  <span style="color:#ae81ff">9</span>.2G   <span style="color:#ae81ff">2</span>% /data/gfs</code></pre></div>
+<p>在 <code>data/gfs</code> 下写入或更改文件，会自动同步到所有glusterfs节点 <code>gvol1</code> 下的目录中。<br />
+将如下配置添加到<code>/etc/fstab</code>，当系统重启后自动 mount 目录。</p>
+
+<pre><code>172.27.32.182:/gvol1 /data/gfs glusterfs  defaults,_netdev 0 0
+</code></pre>
+
+<h2 id="gluster-kubernetes">gluster-kubernetes</h2>
+
+<p><a href="https://github.com/gluster/gluster-kubernetes">gluster-kubernetes</a> 项目由官方提供的脚本，在kubernetes 上集成 glusterfs。<br />
+以下命令未特殊说明的都是在kubernetes master节点上执行。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 下载项目代码到 /root 文件夹下</span>
+git clone https://github.com/gluster/gluster-kubernetes.git
+<span style="color:#75715e"># 进入到 deploy 目录，这也是脚本所在的工作目录</span>
+<span style="color:#75715e"># deploy/kube-templates/ 文件夹下为需要在kubernetes上创建的资源的 yaml 文件。</span>
+cd /gluster-kubernetes/deploy
+
+<span style="color:#75715e"># 修改 topology.json, 描述你的 glusterfs 集群的信息</span>
+mv topology.json.sample topology.json
+vim topology.json</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">{</span>
+  <span style="color:#e6db74">&#34;clusters&#34;</span>: <span style="color:#f92672">[</span>
+    <span style="color:#f92672">{</span>
+      <span style="color:#e6db74">&#34;nodes&#34;</span>: <span style="color:#f92672">[</span>
+        <span style="color:#f92672">{</span>
+          <span style="color:#e6db74">&#34;node&#34;</span>: <span style="color:#f92672">{</span>
+            <span style="color:#e6db74">&#34;hostnames&#34;</span>: <span style="color:#f92672">{</span>
+              <span style="color:#e6db74">&#34;manage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.164&#34;</span>
+              <span style="color:#f92672">]</span>,
+              <span style="color:#e6db74">&#34;storage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.164&#34;</span>
+              <span style="color:#f92672">]</span>
+            <span style="color:#f92672">}</span>,
+            <span style="color:#e6db74">&#34;zone&#34;</span>: <span style="color:#ae81ff">1</span>
+          <span style="color:#f92672">}</span>,
+          <span style="color:#e6db74">&#34;devices&#34;</span>: <span style="color:#f92672">[</span>
+            <span style="color:#e6db74">&#34;/dev/sdc&#34;</span>
+          <span style="color:#f92672">]</span>
+        <span style="color:#f92672">}</span>,
+        <span style="color:#f92672">{</span>
+          <span style="color:#e6db74">&#34;node&#34;</span>: <span style="color:#f92672">{</span>
+            <span style="color:#e6db74">&#34;hostnames&#34;</span>: <span style="color:#f92672">{</span>
+              <span style="color:#e6db74">&#34;manage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.182&#34;</span>
+              <span style="color:#f92672">]</span>,
+              <span style="color:#e6db74">&#34;storage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.182&#34;</span>
+              <span style="color:#f92672">]</span>
+            <span style="color:#f92672">}</span>,
+            <span style="color:#e6db74">&#34;zone&#34;</span>: <span style="color:#ae81ff">1</span>
+          <span style="color:#f92672">}</span>,
+          <span style="color:#e6db74">&#34;devices&#34;</span>: <span style="color:#f92672">[</span>
+            <span style="color:#e6db74">&#34;/dev/sdc&#34;</span>
+          <span style="color:#f92672">]</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">]</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">]</span>
+<span style="color:#f92672">}</span></code></pre></div>
+<p><code>gk-deploy</code>需要为初始化过的磁盘，所以这里在两个节点上分别挂载了新的磁盘设备<code>/dev/sdc</code>，并执行以下命令。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 每台 glusterfs 节点上执行如下命令</span>
+<span style="color:#75715e"># /dev/sdc 需要是新的为初始化的设备</span>
+dd <span style="color:#66d9ef">if</span><span style="color:#f92672">=</span>/dev/urandom of<span style="color:#f92672">=</span>/dev/sdc bs<span style="color:#f92672">=</span><span style="color:#ae81ff">512</span> count<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span></code></pre></div>
+<p>使用 base64 生成 heketi 所需要的key，此节点需要指定能够登陆 glusterfs 节点的私钥。<br />
+如果不指定 &ndash;ssh-keyfile, <code>gk-deploy</code>会默认在kubernetes内创建新的 glusterfs pod，而不是使用本地已有的。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># generate key</span>
+echo -n hello | base64
+<span style="color:#75715e"># gk-deploy</span>
+./gk-deploy -h
+./gk-deploy --admin-key aGVsbG8<span style="color:#f92672">=</span> --user-key aGVsbG8<span style="color:#f92672">=</span>  --ssh-keyfile /root/.ssh/id_rsa</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 deploy<span style="color:#f92672">]</span>$ ./gk-deploy --admin-key aGVsbG8<span style="color:#f92672">=</span> --user-key aGVsbG8<span style="color:#f92672">=</span>  --ssh-keyfile /root/.ssh/id_rsa
+Welcome to the deployment tool <span style="color:#66d9ef">for</span> GlusterFS on Kubernetes and OpenShift.
+
+Before getting started, this script has some requirements of the execution
+environment and of the container platform that you should verify.
+
+The client machine that will run this script must have:
+ * Administrative access to an existing Kubernetes or OpenShift cluster
+ * Access to a python interpreter <span style="color:#e6db74">&#39;python&#39;</span>
+
+Each of the nodes that will host GlusterFS must also have appropriate firewall
+rules <span style="color:#66d9ef">for</span> the required GlusterFS ports:
+ * <span style="color:#ae81ff">2222</span>  - sshd <span style="color:#f92672">(</span><span style="color:#66d9ef">if</span> running GlusterFS in a pod<span style="color:#f92672">)</span>
+ * <span style="color:#ae81ff">24007</span> - GlusterFS Management
+ * <span style="color:#ae81ff">24008</span> - GlusterFS RDMA
+ * <span style="color:#ae81ff">49152</span> to <span style="color:#ae81ff">49251</span> - Each brick <span style="color:#66d9ef">for</span> every volume on the host requires its own
+   port. For every new brick, one new port will be used starting at <span style="color:#ae81ff">49152</span>. We
+   recommend a default range of <span style="color:#ae81ff">49152</span>-49251 on each host, though you can adjust
+   this to fit your needs.
+
+The following kernel modules must be loaded:
+ * dm_snapshot
+ * dm_mirror
+ * dm_thin_pool
+
+For systems with SELinux, the following settings need to be considered:
+ * virt_sandbox_use_fusefs should be enabled on each node to allow writing to
+   remote GlusterFS volumes
+
+In addition, <span style="color:#66d9ef">for</span> an OpenShift deployment you must:
+ * Have <span style="color:#e6db74">&#39;cluster_admin&#39;</span> role on the administrative account doing the deployment
+ * Add the <span style="color:#e6db74">&#39;default&#39;</span> and <span style="color:#e6db74">&#39;router&#39;</span> Service Accounts to the <span style="color:#e6db74">&#39;privileged&#39;</span> SCC
+ * Have a router deployed that is configured to allow apps to access services
+   running in the cluster
+
+Do you wish to proceed with deployment?
+
+<span style="color:#f92672">[</span>Y<span style="color:#f92672">]</span>es, <span style="color:#f92672">[</span>N<span style="color:#f92672">]</span>o? <span style="color:#f92672">[</span>Default: Y<span style="color:#f92672">]</span>: y
+Using Kubernetes CLI.
+Using namespace <span style="color:#e6db74">&#34;default&#34;</span>.
+Checking <span style="color:#66d9ef">for</span> pre-existing resources...
+  GlusterFS pods ... not found.
+  deploy-heketi pod ... not found.
+  heketi pod ... not found.
+  gluster-s3 pod ... not found.
+Creating initial resources ... serviceaccount <span style="color:#e6db74">&#34;heketi-service-account&#34;</span> created
+clusterrolebinding.rbac.authorization.k8s.io <span style="color:#e6db74">&#34;heketi-sa-view&#34;</span> created
+clusterrolebinding.rbac.authorization.k8s.io <span style="color:#e6db74">&#34;heketi-sa-view&#34;</span> labeled
+OK
+secret <span style="color:#e6db74">&#34;heketi-config-secret&#34;</span> created
+secret <span style="color:#e6db74">&#34;heketi-config-secret&#34;</span> labeled
+service <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> created
+deployment.extensions <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> created
+Waiting <span style="color:#66d9ef">for</span> deploy-heketi pod to start ... OK
+Creating cluster ... ID: e5558e7dacc4f24c75f62a68168105fc
+Allowing file volumes on cluster.
+Allowing block volumes on cluster.
+Creating node <span style="color:#ae81ff">172</span>.27.32.164 ... ID: 23abb66f328935c437b6d0274388027f
+Adding device /dev/sdc ... OK
+Creating node <span style="color:#ae81ff">172</span>.27.32.182 ... ID: 7f99fb669bad6434cdf16258e507dbb7
+Adding device /dev/sdc ... OK
+heketi topology loaded.
+Error: Failed to allocate new volume: No space
+command terminated with exit code <span style="color:#ae81ff">255</span>
+Failed on setup openshift heketi storage
+This may indicate that the storage must be wiped and the GlusterFS nodes must be reset.</code></pre></div>
+<p>直接执行会发生如上报错 No space，这是由于我们的 glusterfs 集群只有两个节点，和 heketi 默认至少需要三个节点，可以在执行<code>gk-deploy</code>时加上<code>--single-ndoe</code>参数跳过此报错。</p>
+
+<p>再次执行之前，需要对环境做下清理，在glusterfs节点上执行以下命令。（这里的pv跟k8s的pv概念没有关系）</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 查看 pv，第二行 /dev/sdc 即为 heketi 创建的 pv，需要删除</span>
+<span style="color:#f92672">[</span>root@centos11 ~<span style="color:#f92672">]</span>$ pvs
+  PV         VG                                  Fmt  Attr PSize   PFree
+  /dev/sda2  centos                              lvm2 a--  &lt;<span style="color:#ae81ff">49</span>.00g <span style="color:#ae81ff">4</span>.00m
+  /dev/sdc   vg_bf7e75e181a24a59edc0d38e33d5ee9c lvm2 a--    <span style="color:#ae81ff">7</span>.87g <span style="color:#ae81ff">7</span>.87g</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">## 删除pv</span>
+<span style="color:#f92672">[</span>root@centos11 ~<span style="color:#f92672">]</span>$ pvremove /dev/sdc  -ff
+  WARNING: PV /dev/sdc is used by VG vg_bf7e75e181a24a59edc0d38e33d5ee9c.
+Really WIPE LABELS from physical volume <span style="color:#e6db74">&#34;/dev/sdc&#34;</span> of volume group <span style="color:#e6db74">&#34;vg_bf7e75e181a24a59edc0d38e33d5ee9c&#34;</span> <span style="color:#f92672">[</span>y/n<span style="color:#f92672">]</span>? y
+  WARNING: Wiping physical volume label from /dev/sdc of volume group <span style="color:#e6db74">&#34;vg_bf7e75e181a24a59edc0d38e33d5ee9c&#34;</span>.
+  Labels on physical volume <span style="color:#e6db74">&#34;/dev/sdc&#34;</span> successfully wiped.</code></pre></div>
+<p>清理<code>gk-deploy</code>脚本创建的 kubernetes 资源。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl delete sa heketi-service-account
+kubectl delete clusterrolebinding heketi-sa-view
+kubectl delete secret heketi-config-secret
+kubectl delete svc deploy-heketi
+kubectl delete deploy deploy-heketi</code></pre></div>
+<p>再次创建：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># heketi 默认要求至少3个glusterfs 节点，否则会报错 no space，我们只有两个节点，需要添加 --single-node 参数</span>
+<span style="color:#f92672">[</span>root@centos10 deploy<span style="color:#f92672">]</span>$ ./gk-deploy --admin-key aGVsbG8<span style="color:#f92672">=</span> --user-key aGVsbG8<span style="color:#f92672">=</span>  --ssh-keyfile /root/.ssh/id_rsa --single-node
+Welcome to the deployment tool <span style="color:#66d9ef">for</span> GlusterFS on Kubernetes and OpenShift.
+
+Before getting started, this script has some requirements of the execution
+environment and of the container platform that you should verify.
+
+The client machine that will run this script must have:
+ * Administrative access to an existing Kubernetes or OpenShift cluster
+ * Access to a python interpreter <span style="color:#e6db74">&#39;python&#39;</span>
+
+Each of the nodes that will host GlusterFS must also have appropriate firewall
+rules <span style="color:#66d9ef">for</span> the required GlusterFS ports:
+ * <span style="color:#ae81ff">2222</span>  - sshd <span style="color:#f92672">(</span><span style="color:#66d9ef">if</span> running GlusterFS in a pod<span style="color:#f92672">)</span>
+ * <span style="color:#ae81ff">24007</span> - GlusterFS Management
+ * <span style="color:#ae81ff">24008</span> - GlusterFS RDMA
+ * <span style="color:#ae81ff">49152</span> to <span style="color:#ae81ff">49251</span> - Each brick <span style="color:#66d9ef">for</span> every volume on the host requires its own
+   port. For every new brick, one new port will be used starting at <span style="color:#ae81ff">49152</span>. We
+   recommend a default range of <span style="color:#ae81ff">49152</span>-49251 on each host, though you can adjust
+   this to fit your needs.
+
+The following kernel modules must be loaded:
+ * dm_snapshot
+ * dm_mirror
+ * dm_thin_pool
+
+For systems with SELinux, the following settings need to be considered:
+ * virt_sandbox_use_fusefs should be enabled on each node to allow writing to
+   remote GlusterFS volumes
+
+In addition, <span style="color:#66d9ef">for</span> an OpenShift deployment you must:
+ * Have <span style="color:#e6db74">&#39;cluster_admin&#39;</span> role on the administrative account doing the deployment
+ * Add the <span style="color:#e6db74">&#39;default&#39;</span> and <span style="color:#e6db74">&#39;router&#39;</span> Service Accounts to the <span style="color:#e6db74">&#39;privileged&#39;</span> SCC
+ * Have a router deployed that is configured to allow apps to access services
+   running in the cluster
+
+Do you wish to proceed with deployment?
+
+<span style="color:#f92672">[</span>Y<span style="color:#f92672">]</span>es, <span style="color:#f92672">[</span>N<span style="color:#f92672">]</span>o? <span style="color:#f92672">[</span>Default: Y<span style="color:#f92672">]</span>: y
+Using Kubernetes CLI.
+Using namespace <span style="color:#e6db74">&#34;default&#34;</span>.
+Checking <span style="color:#66d9ef">for</span> pre-existing resources...
+  GlusterFS pods ... not found.
+  deploy-heketi pod ... 
+
+not found.
+  heketi pod ... not found.
+  gluster-s3 pod ... not found.
+Creating initial resources ... serviceaccount <span style="color:#e6db74">&#34;heketi-service-account&#34;</span> created
+clusterrolebinding.rbac.authorization.k8s.io <span style="color:#e6db74">&#34;heketi-sa-view&#34;</span> created
+clusterrolebinding.rbac.authorization.k8s.io <span style="color:#e6db74">&#34;heketi-sa-view&#34;</span> labeled
+OK
+secret <span style="color:#e6db74">&#34;heketi-config-secret&#34;</span> created
+secret <span style="color:#e6db74">&#34;heketi-config-secret&#34;</span> labeled
+service <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> created
+deployment.extensions <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> created
+Waiting <span style="color:#66d9ef">for</span> deploy-heketi pod to start ... 
+OK
+
+Creating cluster ... ID: 09f68c8a429b152a196d0edc936c170f
+Allowing file volumes on cluster.
+Allowing block volumes on cluster.
+Creating node <span style="color:#ae81ff">172</span>.27.32.164 ... ID: 534b4285f90fadabc67341e8547a21fa
+Adding device /dev/sdc ... OK
+Creating node <span style="color:#ae81ff">172</span>.27.32.182 ... ID: c53b72f42949056bcf21aa360f3ec442
+Adding device /dev/sdc ... OK
+heketi topology loaded.
+Saving /tmp/heketi-storage.json
+secret <span style="color:#e6db74">&#34;heketi-storage-secret&#34;</span> created
+endpoints <span style="color:#e6db74">&#34;heketi-storage-endpoints&#34;</span> created
+service <span style="color:#e6db74">&#34;heketi-storage-endpoints&#34;</span> created
+job.batch <span style="color:#e6db74">&#34;heketi-storage-copy-job&#34;</span> created
+service <span style="color:#e6db74">&#34;heketi-storage-endpoints&#34;</span> labeled
+pod <span style="color:#e6db74">&#34;deploy-heketi-bf46f97fb-p9t4m&#34;</span> deleted
+service <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> deleted
+deployment.apps <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> deleted
+job.batch <span style="color:#e6db74">&#34;heketi-storage-copy-job&#34;</span> deleted
+secret <span style="color:#e6db74">&#34;heketi-storage-secret&#34;</span> deleted
+service <span style="color:#e6db74">&#34;heketi&#34;</span> created
+deployment.extensions <span style="color:#e6db74">&#34;heketi&#34;</span> created
+Waiting <span style="color:#66d9ef">for</span> heketi pod to start ... OK
+Flag --show-all has been deprecated, will be removed in an upcoming release
+
+heketi is now running and accessible via http://10.244.145.28:8080 . To run
+administrative commands you can install <span style="color:#e6db74">&#39;heketi-cli&#39;</span> and use it as follows:
+
+  <span style="color:#75715e"># heketi-cli -s http://10.244.145.28:8080 --user admin --secret &#39;&lt;ADMIN_KEY&gt;&#39; cluster list</span>
+
+You can find it at https://github.com/heketi/heketi/releases . Alternatively,
+use it from within the heketi pod:
+
+  <span style="color:#75715e"># /usr/bin/kubectl -n default exec -i heketi-77f4797494-45cfl -- heketi-cli -s http://localhost:8080 --user admin --secret &#39;&lt;ADMIN_KEY&gt;&#39; cluster list</span>
+
+For dynamic provisioning, create a StorageClass similar to this:
+
+---
+apiVersion: storage.k8s.io/v1beta1
+kind: StorageClass
+metadata:
+  name: glusterfs-storage
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: <span style="color:#e6db74">&#34;http://10.244.145.28:8080&#34;</span>
+  restuser: <span style="color:#e6db74">&#34;user&#34;</span>
+  restuserkey: <span style="color:#e6db74">&#34;aGVsbG8=&#34;</span>
+
+
+Deployment complete!</code></pre></div>
+<p>创建成功！</p>
+
+<h2 id="创建-storageclass-测试">创建 storageclass 测试</h2>
+
+<h2 id="创建-pv-pvc-测试">创建 pv pvc 测试</h2>
+
+<h2 id="在-kubernetes-集群内起-glusterfs-pod">在 kubernetes 集群内起 glusterfs pod</h2></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+        
+          <li><a href="/tags/glusterfs"><span class="tag">Glusterfs</span></a></li>
+        
+          <li><a href="/tags/presistence-volume"><span class="tag">Presistence Volume</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>
