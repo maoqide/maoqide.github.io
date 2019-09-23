@@ -204,7 +204,7 @@
   <section class="main post-detail">
     <header class="post-header">
       <h1 class="post-title">Glusterfs Kubernetes</h1>
-      <p class="post-meta">@Maoqide · Sep 6, 2019 · 10 min read</p>
+      <p class="post-meta">@Maoqide · Sep 6, 2019 · 12 min read</p>
     </header>
     <article class="post-content"><p>在 kubernetes 中使用 glusterfs 作为 pv。</p>
 
@@ -218,7 +218,7 @@
 <h2 id="机器-virtualbox-虚拟机">机器（virtualbox 虚拟机）</h2>
 
 <ul>
-<li>centos10 - 172.27.32.165 - kubernetes master节点<br /></li>
+<li>centos10 - 172.27.32.165 - kubernetes master节点/glusterfs节点<br /></li>
 <li>centos12l - 172.27.32.182 - glusterfs节点/kubernetes node节点<br /></li>
 <li>centos11 - 172.27.32.164 - glusterfs节点/kubernetes node节点<br /></li>
 </ul>
@@ -575,9 +575,66 @@ kubectl delete clusterrolebinding heketi-sa-view
 kubectl delete secret heketi-config-secret
 kubectl delete svc deploy-heketi
 kubectl delete deploy deploy-heketi</code></pre></div>
+<p>修改 topology.json</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">{</span>
+  <span style="color:#e6db74">&#34;clusters&#34;</span>: <span style="color:#f92672">[</span>
+    <span style="color:#f92672">{</span>
+      <span style="color:#e6db74">&#34;nodes&#34;</span>: <span style="color:#f92672">[</span>
+        <span style="color:#f92672">{</span>
+          <span style="color:#e6db74">&#34;node&#34;</span>: <span style="color:#f92672">{</span>
+            <span style="color:#e6db74">&#34;hostnames&#34;</span>: <span style="color:#f92672">{</span>
+              <span style="color:#e6db74">&#34;manage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.164&#34;</span>
+              <span style="color:#f92672">]</span>,
+              <span style="color:#e6db74">&#34;storage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.164&#34;</span>
+              <span style="color:#f92672">]</span>
+            <span style="color:#f92672">}</span>,
+            <span style="color:#e6db74">&#34;zone&#34;</span>: <span style="color:#ae81ff">1</span>
+          <span style="color:#f92672">}</span>,
+          <span style="color:#e6db74">&#34;devices&#34;</span>: <span style="color:#f92672">[</span>
+            <span style="color:#e6db74">&#34;/dev/sdc&#34;</span>
+          <span style="color:#f92672">]</span>
+        <span style="color:#f92672">}</span>,
+        <span style="color:#f92672">{</span>
+          <span style="color:#e6db74">&#34;node&#34;</span>: <span style="color:#f92672">{</span>
+            <span style="color:#e6db74">&#34;hostnames&#34;</span>: <span style="color:#f92672">{</span>
+              <span style="color:#e6db74">&#34;manage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.182&#34;</span>
+              <span style="color:#f92672">]</span>,
+              <span style="color:#e6db74">&#34;storage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.182&#34;</span>
+              <span style="color:#f92672">]</span>
+            <span style="color:#f92672">}</span>,
+            <span style="color:#e6db74">&#34;zone&#34;</span>: <span style="color:#ae81ff">1</span>
+          <span style="color:#f92672">}</span>,
+          <span style="color:#e6db74">&#34;devices&#34;</span>: <span style="color:#f92672">[</span>
+            <span style="color:#e6db74">&#34;/dev/sdc&#34;</span>
+          <span style="color:#f92672">]</span>
+        <span style="color:#f92672">}</span>,
+        <span style="color:#f92672">{</span>
+          <span style="color:#e6db74">&#34;node&#34;</span>: <span style="color:#f92672">{</span>
+            <span style="color:#e6db74">&#34;hostnames&#34;</span>: <span style="color:#f92672">{</span>
+              <span style="color:#e6db74">&#34;manage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.165&#34;</span>
+              <span style="color:#f92672">]</span>,
+              <span style="color:#e6db74">&#34;storage&#34;</span>: <span style="color:#f92672">[</span>
+                <span style="color:#e6db74">&#34;172.27.32.165&#34;</span>
+              <span style="color:#f92672">]</span>
+            <span style="color:#f92672">}</span>,
+            <span style="color:#e6db74">&#34;zone&#34;</span>: <span style="color:#ae81ff">1</span>
+          <span style="color:#f92672">}</span>,
+          <span style="color:#e6db74">&#34;devices&#34;</span>: <span style="color:#f92672">[</span>
+            <span style="color:#e6db74">&#34;/dev/sdc&#34;</span>
+          <span style="color:#f92672">]</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">]</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">]</span>
+<span style="color:#f92672">}</span></code></pre></div>
 <p>再次创建：</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># heketi 默认要求至少3个glusterfs 节点，否则会报错 no space，我们只有两个节点，需要添加 --single-node 参数</span>
-<span style="color:#f92672">[</span>root@centos10 deploy<span style="color:#f92672">]</span>$ ./gk-deploy --admin-key aGVsbG8<span style="color:#f92672">=</span> --user-key aGVsbG8<span style="color:#f92672">=</span>  --ssh-keyfile /root/.ssh/id_rsa --single-node
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># heketi 默认要求至少3个glusterfs 节点，否则会报错 no space，添加一个节点 172.27.32.165</span>
+<span style="color:#f92672">[</span>root@centos10 deploy<span style="color:#f92672">]</span>$ ./gk-deploy --admin-key aGVsbG8<span style="color:#f92672">=</span> --user-key aGVsbG8<span style="color:#f92672">=</span>  --ssh-keyfile /root/.ssh/id_rsa
 Welcome to the deployment tool <span style="color:#66d9ef">for</span> GlusterFS on Kubernetes and OpenShift.
 
 Before getting started, this script has some requirements of the execution
@@ -619,9 +676,7 @@ Using Kubernetes CLI.
 Using namespace <span style="color:#e6db74">&#34;default&#34;</span>.
 Checking <span style="color:#66d9ef">for</span> pre-existing resources...
   GlusterFS pods ... not found.
-  deploy-heketi pod ... 
-
-not found.
+  deploy-heketi pod ... not found.
   heketi pod ... not found.
   gluster-s3 pod ... not found.
 Creating initial resources ... serviceaccount <span style="color:#e6db74">&#34;heketi-service-account&#34;</span> created
@@ -632,15 +687,15 @@ secret <span style="color:#e6db74">&#34;heketi-config-secret&#34;</span> created
 secret <span style="color:#e6db74">&#34;heketi-config-secret&#34;</span> labeled
 service <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> created
 deployment.extensions <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> created
-Waiting <span style="color:#66d9ef">for</span> deploy-heketi pod to start ... 
-OK
-
-Creating cluster ... ID: 09f68c8a429b152a196d0edc936c170f
+Waiting <span style="color:#66d9ef">for</span> deploy-heketi pod to start ... OK
+Creating cluster ... ID: d46fce0516378e5aa913bd1baf97d08b
 Allowing file volumes on cluster.
 Allowing block volumes on cluster.
-Creating node <span style="color:#ae81ff">172</span>.27.32.164 ... ID: 534b4285f90fadabc67341e8547a21fa
+Creating node <span style="color:#ae81ff">172</span>.27.32.164 ... ID: 8058c666087f1b411738b802b6cf1d5d
 Adding device /dev/sdc ... OK
-Creating node <span style="color:#ae81ff">172</span>.27.32.182 ... ID: c53b72f42949056bcf21aa360f3ec442
+Creating node <span style="color:#ae81ff">172</span>.27.32.182 ... ID: b08d71449838ed66e2d5aa10f2b8771b
+Adding device /dev/sdc ... OK
+Creating node <span style="color:#ae81ff">172</span>.27.32.165 ... ID: 9b173570da2fee54f25ed03e74f11c72
 Adding device /dev/sdc ... OK
 heketi topology loaded.
 Saving /tmp/heketi-storage.json
@@ -649,25 +704,26 @@ endpoints <span style="color:#e6db74">&#34;heketi-storage-endpoints&#34;</span> 
 service <span style="color:#e6db74">&#34;heketi-storage-endpoints&#34;</span> created
 job.batch <span style="color:#e6db74">&#34;heketi-storage-copy-job&#34;</span> created
 service <span style="color:#e6db74">&#34;heketi-storage-endpoints&#34;</span> labeled
-pod <span style="color:#e6db74">&#34;deploy-heketi-bf46f97fb-p9t4m&#34;</span> deleted
+pod <span style="color:#e6db74">&#34;deploy-heketi-bf46f97fb-k42wr&#34;</span> deleted
 service <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> deleted
 deployment.apps <span style="color:#e6db74">&#34;deploy-heketi&#34;</span> deleted
 job.batch <span style="color:#e6db74">&#34;heketi-storage-copy-job&#34;</span> deleted
 secret <span style="color:#e6db74">&#34;heketi-storage-secret&#34;</span> deleted
 service <span style="color:#e6db74">&#34;heketi&#34;</span> created
 deployment.extensions <span style="color:#e6db74">&#34;heketi&#34;</span> created
-Waiting <span style="color:#66d9ef">for</span> heketi pod to start ... OK
+Waiting <span style="color:#66d9ef">for</span> heketi pod to start ... 
+OK
 Flag --show-all has been deprecated, will be removed in an upcoming release
 
-heketi is now running and accessible via http://10.244.145.28:8080 . To run
+heketi is now running and accessible via http://10.244.106.5:8080 . To run
 administrative commands you can install <span style="color:#e6db74">&#39;heketi-cli&#39;</span> and use it as follows:
 
-  <span style="color:#75715e"># heketi-cli -s http://10.244.145.28:8080 --user admin --secret &#39;&lt;ADMIN_KEY&gt;&#39; cluster list</span>
+  <span style="color:#75715e"># heketi-cli -s http://10.244.106.5:8080 --user admin --secret &#39;&lt;ADMIN_KEY&gt;&#39; cluster list</span>
 
 You can find it at https://github.com/heketi/heketi/releases . Alternatively,
 use it from within the heketi pod:
 
-  <span style="color:#75715e"># /usr/bin/kubectl -n default exec -i heketi-77f4797494-45cfl -- heketi-cli -s http://localhost:8080 --user admin --secret &#39;&lt;ADMIN_KEY&gt;&#39; cluster list</span>
+  <span style="color:#75715e"># /usr/bin/kubectl -n default exec -i heketi-77f4797494-8sqng -- heketi-cli -s http://localhost:8080 --user admin --secret &#39;&lt;ADMIN_KEY&gt;&#39; cluster list</span>
 
 For dynamic provisioning, create a StorageClass similar to this:
 
@@ -678,16 +734,102 @@ metadata:
   name: glusterfs-storage
 provisioner: kubernetes.io/glusterfs
 parameters:
-  resturl: <span style="color:#e6db74">&#34;http://10.244.145.28:8080&#34;</span>
+  resturl: <span style="color:#e6db74">&#34;http://10.244.106.5:8080&#34;</span>
   restuser: <span style="color:#e6db74">&#34;user&#34;</span>
   restuserkey: <span style="color:#e6db74">&#34;aGVsbG8=&#34;</span>
 
 
 Deployment complete!</code></pre></div>
 <p>创建成功！</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl delete secret heketi-storage-secret
+kubectl delete endpoint heketi-storage-endpoints
+kubectl delete svc heketi-storage-endpoints
+kubectl delete job heketi-storage-copy-job
+kubectl delete svc heketi
+kubectl delete deploy heketi</code></pre></div>
 <h2 id="创建-storageclass-测试">创建 storageclass 测试</h2>
 
+<p><code>kubectl create -f glusterfs-storage.yaml</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">---
+apiVersion: storage.k8s.io/v1beta1
+kind: StorageClass
+metadata:
+  name: glusterfs-storage
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: <span style="color:#e6db74">&#34;http://10.254.130.133:8080&#34;</span> <span style="color:#75715e"># heketi service ip</span>
+  restuser: <span style="color:#e6db74">&#34;admin&#34;</span>
+  restuserkey: <span style="color:#e6db74">&#34;aGVsbG8=&#34;</span></code></pre></div>
+<p><code>kubectl create -f pvc.yaml</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gluster-pvc-test
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: glusterfs-storage
+  resources:
+    requests:
+      storage: 1Gi</code></pre></div>
+<p>创建pvc，等待一段时间后，从Pending变为Bound状态</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 gfs<span style="color:#f92672">]</span>$ kubectl get pvc -w
+NAME               STATUS    VOLUME    CAPACITY   ACCESS MODES   STORAGECLASS        AGE
+gluster-pvc-test   Pending                                       glusterfs-storage   13s
+gluster-pvc-test   Pending   pvc-cacc8019-d9e4-11e9-b223-0800272600e0   <span style="color:#ae81ff">0</span>                   glusterfs-storage   25s
+gluster-pvc-test   Bound     pvc-cacc8019-d9e4-11e9-b223-0800272600e0   1Gi       RWO       glusterfs-storage   25s</code></pre></div>
+<p>自动创建了对应pv</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 gfs<span style="color:#f92672">]</span>$ kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM                      STORAGECLASS        REASON    AGE
+pvc-cacc8019-d9e4-11e9-b223-0800272600e0   1Gi        RWO            Delete           Bound     default/gluster-pvc-test   glusterfs-storage             52s</code></pre></div>
+<p><code>kubectl create -f nginx.yaml</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: <span style="color:#ae81ff">1</span>
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: harbor.guahao-inc.com/test4engine/nginx:<span style="color:#ae81ff">1.15</span>-alpine
+        volumeMounts:
+        - mountPath: <span style="color:#e6db74">&#34;/root/&#34;</span>
+          name: root
+        ports:
+        - containerPort: <span style="color:#ae81ff">80</span>
+        resources:
+          limits:
+            cpu: <span style="color:#e6db74">&#34;1&#34;</span>
+            memory: 5Mi
+          requests:
+            <span style="color:#ae81ff">2</span>: 500m
+            memory: 5Mi
+      volumes:
+        - name: root
+          persistentVolumeClaim:
+            claimName: gluster-pvc-test</code></pre></div>
+<p>创建Pod绑定到PVC上，pod running。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 gfs<span style="color:#f92672">]</span><span style="color:#75715e"># kubectl get pod  -owide</span>
+NAME                      READY     STATUS    RESTARTS   AGE       IP              NODE
+...............
+nginx-6dc67b9dc5-84sfg    <span style="color:#ae81ff">1</span>/1       Running   <span style="color:#ae81ff">0</span>          2m        <span style="color:#ae81ff">10</span>.244.145.35   <span style="color:#ae81ff">172</span>.27.32.164</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 向 pod 中写入数据</span>
+kubectl exec -it nginx-6dc67b9dc5-84sfg sh
+echo hello &gt; /root/hello.txt</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 每台 glusterfs node 节点都会生成类似如下目录（每台节点的vg_xxx和brick_xxx名称不同），并可看到目录中有刚才写入pod的文件.</span>
+ls /var/lib/heketi/mounts/vg_2c32b0932a02c5b2098de24592b9a2f1/brick_1bf403d9677e9ae11e370f5fcaf8b9bb/brick/</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 删除 deployment，pv 数据仍然存在,重新创建deployment，仍然可以绑定到原有pv。</span>
+kubectl delete -f nginx.yaml
+<span style="color:#75715e"># 删除 pvc，对应pv会变成Released状态，并稍后被删除。</span>
+kubectl delete -f pvc.yaml</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 gfs<span style="color:#f92672">]</span>$ kubectl get pv -w
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS     CLAIM                      STORAGECLASS        REASON    AGE
+pvc-cacc8019-d9e4-11e9-b223-0800272600e0   1Gi        RWO            Delete           Relegiased   default/gluster-pvc-test   glusterfs-storage             9h
+pvc-cacc8019-d9e4-11e9-b223-0800272600e0   1Gi       RWO       Delete    Failed    default/gluster-pvc-test   glusterfs-storage             9h</code></pre></div>
 <h2 id="创建-pv-pvc-测试">创建 pv pvc 测试</h2>
 
 <h2 id="在-kubernetes-集群内起-glusterfs-pod">在 kubernetes 集群内起 glusterfs pod</h2></article>
