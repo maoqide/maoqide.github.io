@@ -7,10 +7,37 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Fri, 06 Sep 2019 08:46:14 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 25 Sep 2019 10:15:26 +0800</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>kubernetes</title>
+      <link>/tags/kubernetes/</link>
+      <pubDate>Wed, 25 Sep 2019 10:15:26 +0800</pubDate>
+      
+      <guid>/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>monitoring</title>
+      <link>/tags/monitoring/</link>
+      <pubDate>Wed, 25 Sep 2019 10:15:26 +0800</pubDate>
+      
+      <guid>/tags/monitoring/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>prometheus</title>
+      <link>/tags/prometheus/</link>
+      <pubDate>Wed, 25 Sep 2019 10:15:26 +0800</pubDate>
+      
+      <guid>/tags/prometheus/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>glusterfs</title>
@@ -18,15 +45,6 @@
       <pubDate>Fri, 06 Sep 2019 08:46:14 +0800</pubDate>
       
       <guid>/tags/glusterfs/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>kubernetes</title>
-      <link>/tags/kubernetes/</link>
-      <pubDate>Fri, 06 Sep 2019 08:46:14 +0800</pubDate>
-      
-      <guid>/tags/kubernetes/</guid>
       <description></description>
     </item>
     
