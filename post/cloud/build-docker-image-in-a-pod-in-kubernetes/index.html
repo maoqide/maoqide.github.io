@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
 
   
-  <title>Basic Data Structure</title>
+  <title>Build Docker Image in a Pod in Kubernetes</title>
 
   
   
@@ -26,25 +26,25 @@
 
   
   <meta name="author" content="Maoqide">
-  <meta name="description" content="基础的数据结构和一些基本操作，及其 golang 语言的实现。
+  <meta name="description" content="利用 kaniko 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。
 ">
 
   
   
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@gohugoio">
-    <meta name="twitter:title" content="Basic Data Structure">
-    <meta name="twitter:description" content="基础的数据结构和一些基本操作，及其 golang 语言的实现。
+    <meta name="twitter:title" content="Build Docker Image in a Pod in Kubernetes">
+    <meta name="twitter:description" content="利用 kaniko 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。
 ">
     <meta name="twitter:image" content="/images/golang.svg">
   
 
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Basic Data Structure">
-  <meta property="og:description" content="基础的数据结构和一些基本操作，及其 golang 语言的实现。
+  <meta property="og:title" content="Build Docker Image in a Pod in Kubernetes">
+  <meta property="og:description" content="利用 kaniko 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。
 ">
-  <meta property="og:url" content="/post/algorithm/basic-data-structure/">
+  <meta property="og:url" content="/post/cloud/build-docker-image-in-a-pod-in-kubernetes/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -53,7 +53,7 @@
 <meta name="generator" content="Hugo 0.55.6">
 
 
-<link rel="canonical" href="/post/algorithm/basic-data-structure/">
+<link rel="canonical" href="/post/cloud/build-docker-image-in-a-pod-in-kubernetes/">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -203,116 +203,94 @@
 
   <section class="main post-detail">
     <header class="post-header">
-      <h1 class="post-title">Basic Data Structure</h1>
-      <p class="post-meta">@Maoqide · Dec 7, 2018 · 1 min read</p>
+      <h1 class="post-title">Build Docker Image in a Pod in Kubernetes</h1>
+      <p class="post-meta">@Maoqide · Oct 27, 2019 · 2 min read</p>
     </header>
-    <article class="post-content"><p>基础的数据结构和一些基本操作，及其 golang 语言的实现。</p>
+    <article class="post-content"><p>利用 <a href="https://github.com/GoogleContainerTools/kaniko">kaniko</a> 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。</p>
 
-<h2 id="array">Array</h2>
+<h2 id="pre-request">pre-request</h2>
 
-<p>数组 是线性表数据结构。用一组连续存储空间，储存一组相同类型的数据。支持<em>随机访问</em> O(1)。<br />
-低效插入和删除 O(n)，需要数据搬移。优化：删除操作延后(JVM垃圾回收算法)。</p>
-
-<h2 id="linked-list">Linked list</h2>
-
-<p>链表 插入删除 O(1)，随机访问O(n)。<br />
-单链表：插入删除时需要查找前驱节点 O(n)。<br />
-双向链表：插入删除时查找前驱结点 O(1)。</p>
-
-<ul class="task-list">
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>链表代码实现</strong></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>单链表字符串回文判断</strong><br /></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>单链表反转</strong><br /></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>链表中环的检测</strong><br /></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>两个有序的链表合并</strong></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>删除链表倒数第 n 个结点</strong></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>求链表中间节点</strong></label></li>
+<ul>
+<li>kubernetes cluster<br /></li>
+<li>kaniko-executor image<br /></li>
 </ul>
 
-<h2 id="stack">Stack</h2>
+<h2 id="构建">构建</h2>
 
-<p>栈 后进先出，先进后出。入栈出栈 O(1)<br />
-顺序栈：数组。动态扩容（动态扩容数组，数据搬移O(n)）<br />
-链式栈：链表。</p>
+<p>具体用法可以阅读 <a href="https://github.com/GoogleContainerTools/kaniko">kaniko</a> 项目的 README 文档，项目本身支持<code>GCS Bucket</code>、<code>S3 Bucket</code>、<code>Local Directory</code>、<code>Git Repository</code>四种 buildcontext 存储方案，在实际的使用中，感觉使用内部的文件服务器更加方便，添加了对直接 http/https 下载链接的支持，<a href="https://github.com/maoqide/kaniko。">https://github.com/maoqide/kaniko。</a></p>
 
-<ul class="task-list">
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>ArrayStack 实现</strong></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>LinkedListStack 实现</strong><br /></label></li>
-</ul>
+<h2 id="quick-start">quick start</h2>
 
-<h2 id="queue">Queue</h2>
+<h3 id="build-yourself-a-image-for-kaniko-executor">build yourself a image for kaniko executor</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># build yourself a image for kaniko executor</span>
+cd $GOPATH/src/github.com/GoogleContainerTools
+git clone https://github.com/maoqide/kaniko
+make images</code></pre></div>
+<h3 id="start-a-file-server-if-using-http-https-for-buildcontext">start a file server if using http/https for buildcontext</h3>
 
-<p>队列 先进先出，后进后出。 入队出队O(1)</p>
+<pre><code>kaniko's build context is very similar to the build context you would send your Docker daemon for an image build; it represents a directory containing a Dockerfile which kaniko will use to build your image. For example, a COPY command in your Dockerfile should refer to a file in the build context.    
+</code></pre>
 
-<ul class="task-list">
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>数组实现(数据搬移)</strong></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>链表实现</strong></label></li>
-<li><label><input type="checkbox" checked disabled class="task-list-item"> <strong>循环链表数组实现</strong></label></li>
-</ul>
+<p>using <a href="https://github.com/minio/minio">minio</a> as file server:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run -p <span style="color:#ae81ff">9000</span>:9000 minio/minio server /data</code></pre></div>
+<h3 id="create-context-tar-gz">create context.tar.gz</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># tar your build context including Dockerfile into context.tar.gz</span>
+tar -C &lt;path to build context&gt; -zcvf context.tar.gz .</code></pre></div>
+<p>upload to minio and generate a download url.</p>
 
-<h2 id="skip-list">Skip list</h2>
-
-<p>跳表 链表加多级索引的数据结构。查找 O(logn)。Redis 中有序集合 Sorted Set 用跳表实现。<br />
-<img src="/media/posts/algorithm/basic-data-structure/skip-list.jpg" alt="" /><br />
-插入删除 O(logn)。 平衡性维护-随机函数。</p>
-
-<ul class="task-list">
-<li><label><input type="checkbox" disabled class="task-list-item"> <strong>实现</strong>
-<br /></label></li>
-</ul>
-
-<h2 id="hash-table">Hash Table</h2>
-
-<p>散列表 通过散列函数把元素的键值映射为下标，然后将数据存储在数组中对应下标的位置。支持随机访问 O(1)。</p>
-
-<p>散列函数。<br />
-装载因子 = 填入表中的元素个数 / 散列表的长度</p>
-
-<p>解决散列冲突：<br />
-- 开放寻址法<br />
-优点：可以有效利用CPU缓存加快查询速度；便于序列化。<br />
-缺点：删除时不能直接删除，需要特使标记已删除的数据；冲突代价高。<br />
-    - 线性探测(ThreadLocalMap)：当往散列表中插入数据时，如果某个数据经过散列函数散列之后，存储位置已经被占用了，就从当前位置开始，依次往后查找，看是否有空闲位置，直到找到为止。(hash(key)+n)<br />
-    - 二次探测：hash(key)+n^2<br />
-    - 双重散列：使用多组散列函数(hash1(key)，hash2(key)，hash3(key))<br />
-- 链表法(LinkedHashMap)<br />
-优点：内存利用率高，链表节点不需要提前申请；大装载因子容忍度高。<br />
-缺点：CPU缓存不友好；由于要存储指针，存储小对象时内存消耗大。</p>
-
-<p>动态扩容：避免一次性搬移大量数据。扩容时只申请新空间，新的数据插入新的散列表，同时将小部分老数据搬移至新散列表，将扩容消耗均摊至每次插入。</p>
-
-<p>散列表+双向链表 查找删除添加 O(1):<br />
-&gt; LRU 缓存淘汰算法/Redis 有序集合/Java LinkedHashMap</p>
-
-<p>散列表是通过链表法解决散列冲突的，所以每个结点会在两条链中。一个链是刚刚我们提到的双向链表，另一个链是散列表中的拉链。前驱和后继指针是为了将结点串在双向链表中，hnext 指针是为了将结点串在散列表的拉链中。<br />
-<img src="/media/posts/algorithm/basic-data-structure/lru.jpg" alt="" /></p>
-
-<p>哈希算法：<br />
-将任意长度的二进制值串映射为固定长度的二进制值串的算法。<br />
-应用：<br />
-1. 安全加密(MD5/SHA/AES)<br />
-2. 唯一标识<br />
-3. 数据校验<br />
-4. 散列函数<br />
-5. 负载均衡(会话粘滞, 对IP或会话ID哈希)<br />
-6. 数据分片(大文件关键词分片)<br />
-7. 分布式存储(机器扩容导致重新计算哈希值，一致性哈希算法)</p>
-
-<hr />
-
-<p><a href="https://github.com/maoqide/algorithm-test">practice-code</a></p></article>
+<h3 id="create-secret-on-kubernetes">create secret on kubernetes</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># registry can also be a harbor or other registry.</span>
+kubectl create secret docker-registry regcred --docker-server<span style="color:#f92672">=</span>&lt;your-registry-server&gt; --docker-username<span style="color:#f92672">=</span>&lt;your-name&gt; --docker-password<span style="color:#f92672">=</span>&lt;your-pword&gt; --docker-email<span style="color:#f92672">=</span>&lt;your-email&gt;</code></pre></div>
+<h3 id="create-pod">create pod</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+spec:
+  containers:
+  - name: kaniko
+    env:
+    - name: DOCKER_CONFIG
+      value: /root/.docker/
+    image: harbor.guahao-inc.com/mqtest/executor
+    args: [ <span style="color:#e6db74">&#34;--context=http://download_url/context.tar.gz&#34;</span>,
+            <span style="color:#e6db74">&#34;--destination=maoqide/test:latest&#34;</span>,
+            <span style="color:#e6db74">&#34;--verbosity=debug&#34;</span>,
+		]
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /root
+      - name: context
+        mountPath: /kaniko/buildcontext/
+  restartPolicy: Never
+  volumes:
+    - name: context
+      emptyDir: {}
+    - name: kaniko-secret
+      secret:
+        secretName: regcred
+        items:
+          - key: .dockerconfigjson
+            path: .docker/config.json</code></pre></div>
+<p><em>env DOCKER_CONFIG is required for regidtry authorization, otherwise you would get an UNAUTHORIZED error.</em></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f pod.yaml</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 ~<span style="color:#f92672">]</span>$ kubectl get po
+NAME                      READY     STATUS      RESTARTS   AGE
+kaniko                    <span style="color:#ae81ff">0</span>/1       Completed   <span style="color:#ae81ff">0</span>          5h</code></pre></div>
+<p>and you can find your image pushed.</p></article>
     <footer class="post-footer">
       
       <ul class="post-tags">
         
-          <li><a href="/tags/algorithm"><span class="tag">Algorithm</span></a></li>
+          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
         
-          <li><a href="/tags/data-structure"><span class="tag">Data-Structure</span></a></li>
+          <li><a href="/tags/docker-image"><span class="tag">Docker Image</span></a></li>
+        
+          <li><a href="/tags/kaniko"><span class="tag">Kaniko</span></a></li>
         
       </ul>
       
       <p class="post-copyright">
-        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.This post was published <strong>324</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.
       </p>
     </footer>
     

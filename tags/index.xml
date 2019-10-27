@@ -7,10 +7,37 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Wed, 25 Sep 2019 10:15:26 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 27 Oct 2019 11:24:01 +0800</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>cloud</title>
+      <link>/tags/cloud/</link>
+      <pubDate>Sun, 27 Oct 2019 11:24:01 +0800</pubDate>
+      
+      <guid>/tags/cloud/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>docker image</title>
+      <link>/tags/docker-image/</link>
+      <pubDate>Sun, 27 Oct 2019 11:24:01 +0800</pubDate>
+      
+      <guid>/tags/docker-image/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kaniko</title>
+      <link>/tags/kaniko/</link>
+      <pubDate>Sun, 27 Oct 2019 11:24:01 +0800</pubDate>
+      
+      <guid>/tags/kaniko/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>kubernetes</title>
@@ -135,15 +162,6 @@
       <pubDate>Sat, 20 Jul 2019 21:38:08 +0800</pubDate>
       
       <guid>/tags/pprof/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>cloud</title>
-      <link>/tags/cloud/</link>
-      <pubDate>Sun, 14 Jul 2019 11:30:24 +0800</pubDate>
-      
-      <guid>/tags/cloud/</guid>
       <description></description>
     </item>
     
