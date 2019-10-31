@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Upgrade Kubeadm Cluster</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="升级 kubeadm 部署的 kubernetes 集群。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Upgrade Kubeadm Cluster">
+    <meta name="twitter:description" content="升级 kubeadm 部署的 kubernetes 集群。
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Upgrade Kubeadm Cluster">
+  <meta property="og:description" content="升级 kubeadm 部署的 kubernetes 集群。
+">
+  <meta property="og:url" content="/post/notes/upgrade-kubeadm-cluster/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.55.6">
+
+
+<link rel="canonical" href="/post/notes/upgrade-kubeadm-cluster/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+<meta name="google-site-verification" content="moDctZ0TPe6VxisyOQD_1YWrlEXu3jHdB1go5ptHRn0">
+<meta name="msvalidate.01" content="0498007A4CDA3EAB6CD23570479B29DA">
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Upgrade Kubeadm Cluster</h1>
+      <p class="post-meta">@Maoqide · Oct 31, 2019 · 8 min read</p>
+    </header>
+    <article class="post-content"><p>升级 kubeadm 部署的 kubernetes 集群。</p>
+
+<h2 id="当前环境">当前环境</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 ~<span style="color:#f92672">]</span>$ uname -a 
+Linux centos10 <span style="color:#ae81ff">3</span>.10.0-957.27.2.el7.x86_64 <span style="color:#75715e">#1 SMP Mon Jul 29 17:46:05 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux</span>
+
+<span style="color:#f92672">[</span>root@centos10 ~<span style="color:#f92672">]</span>$ kubectl version
+Client Version: version.Info<span style="color:#f92672">{</span>Major:<span style="color:#e6db74">&#34;1&#34;</span>, Minor:<span style="color:#e6db74">&#34;11&#34;</span>, GitVersion:<span style="color:#e6db74">&#34;v1.11.10&#34;</span>, GitCommit:<span style="color:#e6db74">&#34;7a578febe155a7366767abce40d8a16795a96371&#34;</span>, GitTreeState:<span style="color:#e6db74">&#34;clean&#34;</span>, BuildDate:<span style="color:#e6db74">&#34;2019-05-01T04:14:38Z&#34;</span>, GoVersion:<span style="color:#e6db74">&#34;go1.10.8&#34;</span>, Compiler:<span style="color:#e6db74">&#34;gc&#34;</span>, Platform:<span style="color:#e6db74">&#34;linux/amd64&#34;</span><span style="color:#f92672">}</span>
+Server Version: version.Info<span style="color:#f92672">{</span>Major:<span style="color:#e6db74">&#34;1&#34;</span>, Minor:<span style="color:#e6db74">&#34;11&#34;</span>, GitVersion:<span style="color:#e6db74">&#34;v1.11.10&#34;</span>, GitCommit:<span style="color:#e6db74">&#34;7a578febe155a7366767abce40d8a16795a96371&#34;</span>, GitTreeState:<span style="color:#e6db74">&#34;clean&#34;</span>, BuildDate:<span style="color:#e6db74">&#34;2019-05-01T04:05:01Z&#34;</span>, GoVersion:<span style="color:#e6db74">&#34;go1.10.8&#34;</span>, Compiler:<span style="color:#e6db74">&#34;gc&#34;</span>, Platform:<span style="color:#e6db74">&#34;linux/amd64&#34;</span><span style="color:#f92672">}</span></code></pre></div>
+<h2 id="确认升级版本">确认升级版本</h2>
+
+<p>由于目前集群版本和最新版本相差版本较多，采用逐个版本升级的策略，首先确认要升级到的具体版本。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">yum list --showduplicates | grep kubeadm</code></pre></div>
+<p>选取要升级版本的最新小版本，即<code>1.12.10-0</code>。</p>
+
+<h2 id="升级-master">升级 master</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># backup config</span>
+kubeadm config view &gt; kubeadm.yaml
+
+<span style="color:#75715e"># upgrade kubeadm</span>
+yum upgrade -y kubeadm-1.12.x --disableexcludes<span style="color:#f92672">=</span>kubernetes
+
+<span style="color:#75715e"># confirm version</span>
+kubeadm version</code></pre></div>
+<p><code>kubeadm upgrade plan</code>查看升级组件后版本</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"> <span style="color:#f92672">[</span>root@centos10 v1.12.10<span style="color:#f92672">]</span><span style="color:#75715e"># kubeadm upgrade plan</span>
+<span style="color:#f92672">[</span>preflight<span style="color:#f92672">]</span> Running pre-flight checks.
+<span style="color:#f92672">[</span>upgrade<span style="color:#f92672">]</span> Making sure the cluster is healthy:
+<span style="color:#f92672">[</span>upgrade/config<span style="color:#f92672">]</span> Making sure the configuration is correct:
+<span style="color:#f92672">[</span>upgrade/config<span style="color:#f92672">]</span> Reading configuration from the cluster...
+<span style="color:#f92672">[</span>upgrade/config<span style="color:#f92672">]</span> FYI: You can look at this config file with <span style="color:#e6db74">&#39;kubectl -n kube-system get cm kubeadm-config -oyaml&#39;</span>
+<span style="color:#f92672">[</span>upgrade<span style="color:#f92672">]</span> Fetching available versions to upgrade to
+<span style="color:#f92672">[</span>upgrade/versions<span style="color:#f92672">]</span> Cluster version: v1.11.10
+<span style="color:#f92672">[</span>upgrade/versions<span style="color:#f92672">]</span> kubeadm version: v1.12.10
+I1031 <span style="color:#ae81ff">13</span>:42:09.427100    <span style="color:#ae81ff">7721</span> version.go:93<span style="color:#f92672">]</span> could not fetch a Kubernetes version from the internet: unable to get URL <span style="color:#e6db74">&#34;https://dl.k8s.io/release/stable.txt&#34;</span>: Get https://dl.k8s.io/release/stable.txt: net/http: request canceled <span style="color:#66d9ef">while</span> waiting <span style="color:#66d9ef">for</span> connection <span style="color:#f92672">(</span>Client.Timeout exceeded <span style="color:#66d9ef">while</span> awaiting headers<span style="color:#f92672">)</span>
+I1031 <span style="color:#ae81ff">13</span>:42:09.427154    <span style="color:#ae81ff">7721</span> version.go:94<span style="color:#f92672">]</span> falling back to the local client version: v1.12.10
+<span style="color:#f92672">[</span>upgrade/versions<span style="color:#f92672">]</span> Latest stable version: v1.12.10
+I1031 <span style="color:#ae81ff">13</span>:42:19.466181    <span style="color:#ae81ff">7721</span> version.go:93<span style="color:#f92672">]</span> could not fetch a Kubernetes version from the internet: unable to get URL <span style="color:#e6db74">&#34;https://dl.k8s.io/release/stable-1.11.txt&#34;</span>: Get https://dl.k8s.io/release/stable-1.11.txt: net/http: request canceled <span style="color:#66d9ef">while</span> waiting <span style="color:#66d9ef">for</span> connection <span style="color:#f92672">(</span>Client.Timeout exceeded <span style="color:#66d9ef">while</span> awaiting headers<span style="color:#f92672">)</span>
+I1031 <span style="color:#ae81ff">13</span>:42:19.466211    <span style="color:#ae81ff">7721</span> version.go:94<span style="color:#f92672">]</span> falling back to the local client version: v1.12.10
+<span style="color:#f92672">[</span>upgrade/versions<span style="color:#f92672">]</span> Latest version in the v1.11 series: v1.12.10
+
+External components that should be upgraded manually before you upgrade the control plane with <span style="color:#e6db74">&#39;kubeadm upgrade apply&#39;</span>:
+COMPONENT   CURRENT   AVAILABLE
+Etcd        <span style="color:#ae81ff">3</span>.3.13    <span style="color:#ae81ff">3</span>.2.24
+
+Components that must be upgraded manually after you have upgraded the control plane with <span style="color:#e6db74">&#39;kubeadm upgrade apply&#39;</span>:
+COMPONENT   CURRENT        AVAILABLE
+Kubelet     <span style="color:#ae81ff">3</span> x v1.11.10   v1.12.10
+
+Upgrade to the latest version in the v1.11 series:
+
+COMPONENT            CURRENT    AVAILABLE
+API Server           v1.11.10   v1.12.10
+Controller Manager   v1.11.10   v1.12.10
+Scheduler            v1.11.10   v1.12.10
+Kube Proxy           v1.11.10   v1.12.10
+CoreDNS              <span style="color:#ae81ff">1</span>.1.3      <span style="color:#ae81ff">1</span>.2.2
+
+You can now apply the upgrade by executing the following command:
+
+	kubeadm upgrade apply v1.12.10
+
+_____________________________________________________________________</code></pre></div>
+<p>可以看到升级后 k8s 各组件版本，由于无法直接访问 gcr 镜像仓库，需要手动拉取对应版本。<br />
+k8s组件的镜像命名基本为 <code>k8s.gcr.io/&lt;component-name&gt;-&lt;arch&gt;:&lt;component-version&gt;</code> 或 <code>gcr.io/google-containers/&lt;component-name&gt;:&lt;component-version&gt;</code>, 二者实际上是同一仓库，国内可以使用azure 的镜像仓库下载，只要将后者<code>gcr.io</code>替换为<code>gcr.azk8s.cn</code>即可。也可以使用<code>https://raw.githubusercontent.com/maoqide/utils/master/pullgcr.sh</code>脚本一键拉取。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pullgcr k8s.gcr.io/kube-apiserver:v1.12.10
+pullgcr k8s.gcr.io/kube-controller-manager:v1.12.10
+pullgcr k8s.gcr.io/kube-scheduler:v1.12.10
+pullgcr k8s.gcr.io/kube-proxy:v1.12.10
+pullgcr k8s.gcr.io/coredns:1.2.2
+pullgcr k8s.gcr.io/etcd:3.2.24</code></pre></div>
+<p>如果使用的内部镜像仓库，将以上镜像tag后推送到内部的镜像仓库中。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># using fry-run flag for validation</span>
+kubeadm upgrade apply v1.12.10 --config kubeadm.yaml --dry-run</code></pre></div>
+<p>使用 <code>kubeadm config view</code> 保存的配置，有可能有遗漏，在升级时遇到主节点的 nodeName 配置没有保存，所以在更新时，使用默认的 hostname 为 node name，导致在拉起apiserver的静态pod时，以 kube-apiserver-&lt;node-name&gt;的规则拼接 pod 名出错，一直找不到已有的 apiserver 的静态pod，进而导致 upgrade 超时而失败。<br />
+遇到<code>kubeadm upgrade</code>一直卡住并最终超时的情况时，首先 <code>kubeadm upgrade apply  v1.12.10 --config kubeadm.yaml  -v 5</code>的时候添加 <code>-v</code>参数指定 log 等级，一般到5就比较详细了，然后通过日志来定位问题，以上问题就是通过如下日志看到一直在请求错误的 apiserver 的pod名称，从而定位到错误。</p>
+
+<pre><code>[upgrade/apply] Upgrading your Static Pod-hosted control plane to version &quot;v1.12.10&quot;...
+I1031 16:03:08.955081   25594 request.go:530] Throttling request took 185.13957ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods/kube-apiserver-centos10
+</code></pre>
+
+<p>解决：<code>kubeadm config print-default</code> 可以查看 kubeadm 的 config 文件的所有默认的配置，查看后发现有如下<code>nodeRegistration</code>配置, 将node name默认指定成主机的 hostname，导致了上述的错误，在之前通过<code>kubeadm config view</code>生成的配置文件中，加上</p>
+
+<pre><code>nodeRegistration:
+  name: &lt;real-node-name&gt;
+</code></pre>
+
+<p>并重新执行<code>kubeadm upgrade apply  v1.12.10 --config kubeadm.yaml</code>即可。</p>
+
+<pre><code>...
+
+nodeRegistration:
+  criSocket: /var/run/dockershim.sock
+  name: centos10
+tlsBootstrapToken: abcdef.0123456789abcdef
+token: abcdef.0123456789abcdef
+...
+</code></pre>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 v1.12.10<span style="color:#f92672">]</span>$ kubeadm upgrade apply  v1.12.10 --config kubeadm.yaml  -v <span style="color:#ae81ff">5</span>
+I1031 <span style="color:#ae81ff">16</span>:18:09.848434   <span style="color:#ae81ff">31033</span> apply.go:86<span style="color:#f92672">]</span> running preflight checks
+<span style="color:#f92672">[</span>preflight<span style="color:#f92672">]</span> Running pre-flight checks.
+I1031 <span style="color:#ae81ff">16</span>:18:09.848496   <span style="color:#ae81ff">31033</span> apply.go:92<span style="color:#f92672">]</span> fetching configuration from file kubeadm.yaml
+I1031 <span style="color:#ae81ff">16</span>:18:09.848507   <span style="color:#ae81ff">31033</span> masterconfig.go:167<span style="color:#f92672">]</span> loading configuration from the given file
+I1031 <span style="color:#ae81ff">16</span>:18:09.855269   <span style="color:#ae81ff">31033</span> feature_gate.go:206<span style="color:#f92672">]</span> feature gates: &amp;<span style="color:#f92672">{</span>map<span style="color:#f92672">[]}</span>
+I1031 <span style="color:#ae81ff">16</span>:18:09.855302   <span style="color:#ae81ff">31033</span> apply.go:150<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>upgrade/apply<span style="color:#f92672">]</span> verifying health of cluster
+I1031 <span style="color:#ae81ff">16</span>:18:09.855307   <span style="color:#ae81ff">31033</span> apply.go:151<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>upgrade/apply<span style="color:#f92672">]</span> retrieving configuration from cluster
+<span style="color:#f92672">[</span>upgrade<span style="color:#f92672">]</span> Making sure the cluster is healthy:
+<span style="color:#f92672">[</span>upgrade/config<span style="color:#f92672">]</span> Making sure the configuration is correct:
+<span style="color:#f92672">[</span>upgrade/config<span style="color:#f92672">]</span> Reading configuration options from a file: kubeadm.yaml
+<span style="color:#f92672">[</span>upgrade/apply<span style="color:#f92672">]</span> Respecting the --cri-socket flag that is set with higher priority than the config file.
+I1031 <span style="color:#ae81ff">16</span>:18:09.877158   <span style="color:#ae81ff">31033</span> apply.go:163<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>upgrade/apply<span style="color:#f92672">]</span> validating requested and actual version
+I1031 <span style="color:#ae81ff">16</span>:18:09.877171   <span style="color:#ae81ff">31033</span> apply.go:181<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>upgrade/version<span style="color:#f92672">]</span> enforcing version skew policies
+<span style="color:#f92672">[</span>upgrade/version<span style="color:#f92672">]</span> You have chosen to change the cluster version to <span style="color:#e6db74">&#34;v1.12.10&#34;</span>
+<span style="color:#f92672">[</span>upgrade/versions<span style="color:#f92672">]</span> Cluster version: v1.11.10
+<span style="color:#f92672">[</span>upgrade/versions<span style="color:#f92672">]</span> kubeadm version: v1.12.10
+<span style="color:#f92672">[</span>upgrade/confirm<span style="color:#f92672">]</span> Are you sure you want to proceed with the upgrade? <span style="color:#f92672">[</span>y/N<span style="color:#f92672">]</span>: y
+I1031 <span style="color:#ae81ff">16</span>:18:11.377401   <span style="color:#ae81ff">31033</span> apply.go:195<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>upgrade/apply<span style="color:#f92672">]</span> creating prepuller
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Will prepull images <span style="color:#66d9ef">for</span> components <span style="color:#f92672">[</span>kube-apiserver kube-controller-manager kube-scheduler etcd<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulling image <span style="color:#66d9ef">for</span> component etcd.
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulling image <span style="color:#66d9ef">for</span> component kube-apiserver.
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulling image <span style="color:#66d9ef">for</span> component kube-controller-manager.
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulling image <span style="color:#66d9ef">for</span> component kube-scheduler.
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> Pods <span style="color:#66d9ef">for</span> label selector k8s-app<span style="color:#f92672">=</span>upgrade-prepull-kube-apiserver
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">0</span> Pods <span style="color:#66d9ef">for</span> label selector k8s-app<span style="color:#f92672">=</span>upgrade-prepull-etcd
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">0</span> Pods <span style="color:#66d9ef">for</span> label selector k8s-app<span style="color:#f92672">=</span>upgrade-prepull-kube-scheduler
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> Pods <span style="color:#66d9ef">for</span> label selector k8s-app<span style="color:#f92672">=</span>upgrade-prepull-kube-controller-manager
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> Pods <span style="color:#66d9ef">for</span> label selector k8s-app<span style="color:#f92672">=</span>upgrade-prepull-etcd
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> Pods <span style="color:#66d9ef">for</span> label selector k8s-app<span style="color:#f92672">=</span>upgrade-prepull-kube-scheduler
+I1031 <span style="color:#ae81ff">16</span>:18:14.046733   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">64</span>.263528ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-controller-manager
+I1031 <span style="color:#ae81ff">16</span>:18:14.246235   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">263</span>.748054ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-scheduler
+I1031 <span style="color:#ae81ff">16</span>:18:14.647280   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">173</span>.534831ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-apiserver
+I1031 <span style="color:#ae81ff">16</span>:18:14.846492   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">367</span>.060734ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-controller-manager
+I1031 <span style="color:#ae81ff">16</span>:18:15.045493   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">566</span>.033546ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-scheduler
+I1031 <span style="color:#ae81ff">16</span>:18:15.245604   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">271</span>.241012ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-etcd
+I1031 <span style="color:#ae81ff">16</span>:18:15.445656   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">471</span>.269391ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-apiserver
+I1031 <span style="color:#ae81ff">16</span>:18:15.646784   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">668</span>.609111ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-controller-manager
+I1031 <span style="color:#ae81ff">16</span>:18:15.845868   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">370</span>.912219ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-etcd
+I1031 <span style="color:#ae81ff">16</span>:18:16.045929   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">570</span>.956625ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-apiserver
+I1031 <span style="color:#ae81ff">16</span>:18:16.245422   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">767</span>.553384ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-scheduler
+I1031 <span style="color:#ae81ff">16</span>:18:16.445445   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">468</span>.71903ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-etcd
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulled image <span style="color:#66d9ef">for</span> component etcd.
+I1031 <span style="color:#ae81ff">16</span>:18:16.645553   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">666</span>.826898ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-controller-manager
+I1031 <span style="color:#ae81ff">16</span>:18:16.845616   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">371</span>.917463ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-apiserver
+I1031 <span style="color:#ae81ff">16</span>:18:17.047923   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">568</span>.641489ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-scheduler
+I1031 <span style="color:#ae81ff">16</span>:18:17.245839   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">273</span>.128186ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-apiserver
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulled image <span style="color:#66d9ef">for</span> component kube-apiserver.
+I1031 <span style="color:#ae81ff">16</span>:18:17.445456   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">466</span>.94069ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-controller-manager
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulled image <span style="color:#66d9ef">for</span> component kube-controller-manager.
+I1031 <span style="color:#ae81ff">16</span>:18:17.646001   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">167</span>.6097ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>k8s-app%3Dupgrade-prepull-kube-scheduler
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Prepulled image <span style="color:#66d9ef">for</span> component kube-scheduler.
+<span style="color:#f92672">[</span>upgrade/prepull<span style="color:#f92672">]</span> Successfully prepulled the images <span style="color:#66d9ef">for</span> all the control plane components
+I1031 <span style="color:#ae81ff">16</span>:18:17.653778   <span style="color:#ae81ff">31033</span> apply.go:202<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>upgrade/apply<span style="color:#f92672">]</span> performing upgrade
+I1031 <span style="color:#ae81ff">16</span>:18:17.653785   <span style="color:#ae81ff">31033</span> apply.go:268<span style="color:#f92672">]</span> checking <span style="color:#66d9ef">if</span> cluster is self-hosted
+<span style="color:#f92672">[</span>upgrade/apply<span style="color:#f92672">]</span> Upgrading your Static Pod-hosted control plane to version <span style="color:#e6db74">&#34;v1.12.10&#34;</span>...
+I1031 <span style="color:#ae81ff">16</span>:18:17.845963   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">184</span>.620923ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods/kube-apiserver-172.27.32.165
+Static pod: kube-apiserver-172.27.32.165 hash: c5c5b18e12d5e605ef55d516c4559ba0
+I1031 <span style="color:#ae81ff">16</span>:18:18.045736   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">193</span>.159946ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods/kube-controller-manager-172.27.32.165
+Static pod: kube-controller-manager-172.27.32.165 hash: 6e79e209a8bc468fa21969e807be68e3
+I1031 <span style="color:#ae81ff">16</span>:18:18.245404   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">197</span>.471715ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods/kube-scheduler-172.27.32.165
+Static pod: kube-scheduler-172.27.32.165 hash: dcb7e042ad7733f6f04068629eb4b8b9
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Writing new Static Pod manifests to <span style="color:#e6db74">&#34;/etc/kubernetes/tmp/kubeadm-upgraded-manifests040725233&#34;</span>
+I1031 <span style="color:#ae81ff">16</span>:18:18.247454   <span style="color:#ae81ff">31033</span> manifests.go:44<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>controlplane<span style="color:#f92672">]</span> creating static pod files
+I1031 <span style="color:#ae81ff">16</span>:18:18.247469   <span style="color:#ae81ff">31033</span> manifests.go:117<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>controlplane<span style="color:#f92672">]</span> getting StaticPodSpecs
+<span style="color:#f92672">[</span>controlplane<span style="color:#f92672">]</span> wrote Static Pod manifest <span style="color:#66d9ef">for</span> component kube-apiserver to <span style="color:#e6db74">&#34;/etc/kubernetes/tmp/kubeadm-upgraded-manifests040725233/kube-apiserver.yaml&#34;</span>
+<span style="color:#f92672">[</span>controlplane<span style="color:#f92672">]</span> wrote Static Pod manifest <span style="color:#66d9ef">for</span> component kube-controller-manager to <span style="color:#e6db74">&#34;/etc/kubernetes/tmp/kubeadm-upgraded-manifests040725233/kube-controller-manager.yaml&#34;</span>
+<span style="color:#f92672">[</span>controlplane<span style="color:#f92672">]</span> wrote Static Pod manifest <span style="color:#66d9ef">for</span> component kube-scheduler to <span style="color:#e6db74">&#34;/etc/kubernetes/tmp/kubeadm-upgraded-manifests040725233/kube-scheduler.yaml&#34;</span>
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Moved new manifest to <span style="color:#e6db74">&#34;/etc/kubernetes/manifests/kube-apiserver.yaml&#34;</span> and backed up old manifest to <span style="color:#e6db74">&#34;/etc/kubernetes/tmp/kubeadm-backup-manifests-2019-10-31-16-18-17/kube-apiserver.yaml&#34;</span>
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Waiting <span style="color:#66d9ef">for</span> the kubelet to restart the component
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> This might take a minute or longer depending on the component/version gap <span style="color:#f92672">(</span>timeout 5m0s
+I1031 <span style="color:#ae81ff">16</span>:18:18.446010   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">178</span>.44808ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods/kube-apiserver-172.27.32.165
+Static pod: kube-apiserver-172.27.32.165 hash: 7d9abb385d9679f7575617a4e03828be
+I1031 <span style="color:#ae81ff">16</span>:18:18.648914   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">200</span>.383408ms, request: GET:https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>component%3Dkube-apiserver
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Error getting Pods with label selector <span style="color:#e6db74">&#34;component=kube-apiserver&#34;</span> <span style="color:#f92672">[</span>Get https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>component%3Dkube-apiserver: dial tcp <span style="color:#ae81ff">172</span>.27.32.165:6443: connect: connection refused<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Error getting Pods with label selector <span style="color:#e6db74">&#34;component=kube-apiserver&#34;</span> <span style="color:#f92672">[</span>Get https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>component%3Dkube-apiserver: dial tcp <span style="color:#ae81ff">172</span>.27.32.165:6443: connect: connection refused<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Error getting Pods with label selector <span style="color:#e6db74">&#34;component=kube-apiserver&#34;</span> <span style="color:#f92672">[</span>Get https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>component%3Dkube-apiserver: dial tcp <span style="color:#ae81ff">172</span>.27.32.165:6443: connect: connection refused<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Error getting Pods with label selector <span style="color:#e6db74">&#34;component=kube-apiserver&#34;</span> <span style="color:#f92672">[</span>Get https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>component%3Dkube-apiserver: dial tcp <span style="color:#ae81ff">172</span>.27.32.165:6443: connect: connection refused<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Error getting Pods with label selector <span style="color:#e6db74">&#34;component=kube-apiserver&#34;</span> <span style="color:#f92672">[</span>Get https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>component%3Dkube-apiserver: dial tcp <span style="color:#ae81ff">172</span>.27.32.165:6443: connect: connection refused<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Error getting Pods with label selector <span style="color:#e6db74">&#34;component=kube-apiserver&#34;</span> <span style="color:#f92672">[</span>Get https://172.27.32.165:6443/api/v1/namespaces/kube-system/pods?labelSelector<span style="color:#f92672">=</span>component%3Dkube-apiserver: net/http: TLS handshake timeout<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> Pods <span style="color:#66d9ef">for</span> label selector component<span style="color:#f92672">=</span>kube-apiserver
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Component <span style="color:#e6db74">&#34;kube-apiserver&#34;</span> upgraded successfully!
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Moved new manifest to <span style="color:#e6db74">&#34;/etc/kubernetes/manifests/kube-controller-manager.yaml&#34;</span> and backed up old manifest to <span style="color:#e6db74">&#34;/etc/kubernetes/tmp/kubeadm-backup-manifests-2019-10-31-16-18-17/kube-controller-manager.yaml&#34;</span>
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Waiting <span style="color:#66d9ef">for</span> the kubelet to restart the component
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> This might take a minute or longer depending on the component/version gap <span style="color:#f92672">(</span>timeout 5m0s
+Static pod: kube-controller-manager-172.27.32.165 hash: 6e79e209a8bc468fa21969e807be68e3
+Static pod: kube-controller-manager-172.27.32.165 hash: a9ef5d96e631ef6bb37aa7399b39ce31
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> Pods <span style="color:#66d9ef">for</span> label selector component<span style="color:#f92672">=</span>kube-controller-manager
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Component <span style="color:#e6db74">&#34;kube-controller-manager&#34;</span> upgraded successfully!
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Moved new manifest to <span style="color:#e6db74">&#34;/etc/kubernetes/manifests/kube-scheduler.yaml&#34;</span> and backed up old manifest to <span style="color:#e6db74">&#34;/etc/kubernetes/tmp/kubeadm-backup-manifests-2019-10-31-16-18-17/kube-scheduler.yaml&#34;</span>
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Waiting <span style="color:#66d9ef">for</span> the kubelet to restart the component
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> This might take a minute or longer depending on the component/version gap <span style="color:#f92672">(</span>timeout 5m0s
+Static pod: kube-scheduler-172.27.32.165 hash: dcb7e042ad7733f6f04068629eb4b8b9
+Static pod: kube-scheduler-172.27.32.165 hash: 92d30ca7866fe98c3147c1f8f4c3d413
+<span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> Pods <span style="color:#66d9ef">for</span> label selector component<span style="color:#f92672">=</span>kube-scheduler
+<span style="color:#f92672">[</span>upgrade/staticpods<span style="color:#f92672">]</span> Component <span style="color:#e6db74">&#34;kube-scheduler&#34;</span> upgraded successfully!
+I1031 <span style="color:#ae81ff">16</span>:18:47.231899   <span style="color:#ae81ff">31033</span> apply.go:208<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>upgrade/postupgrade<span style="color:#f92672">]</span> upgrading RBAC rules and addons
+<span style="color:#f92672">[</span>uploadconfig<span style="color:#f92672">]</span> storing the configuration used in ConfigMap <span style="color:#e6db74">&#34;kubeadm-config&#34;</span> in the <span style="color:#e6db74">&#34;kube-system&#34;</span> Namespace
+<span style="color:#f92672">[</span>kubelet<span style="color:#f92672">]</span> Creating a ConfigMap <span style="color:#e6db74">&#34;kubelet-config-1.12&#34;</span> in namespace kube-system with the configuration <span style="color:#66d9ef">for</span> the kubelets in the cluster
+<span style="color:#f92672">[</span>kubelet<span style="color:#f92672">]</span> Downloading configuration <span style="color:#66d9ef">for</span> the kubelet from the <span style="color:#e6db74">&#34;kubelet-config-1.12&#34;</span> ConfigMap in the kube-system namespace
+<span style="color:#f92672">[</span>kubelet<span style="color:#f92672">]</span> Writing kubelet configuration to file <span style="color:#e6db74">&#34;/var/lib/kubelet/config.yaml&#34;</span>
+<span style="color:#f92672">[</span>patchnode<span style="color:#f92672">]</span> Uploading the CRI Socket information <span style="color:#e6db74">&#34;/var/run/dockershim.sock&#34;</span> to the Node API object <span style="color:#e6db74">&#34;172.27.32.165&#34;</span> as an annotation
+<span style="color:#f92672">[</span>bootstraptoken<span style="color:#f92672">]</span> configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order <span style="color:#66d9ef">for</span> nodes to get long term certificate credentials
+<span style="color:#f92672">[</span>bootstraptoken<span style="color:#f92672">]</span> configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+<span style="color:#f92672">[</span>bootstraptoken<span style="color:#f92672">]</span> configured RBAC rules to allow certificate rotation <span style="color:#66d9ef">for</span> all node client certificates in the cluster
+I1031 <span style="color:#ae81ff">16</span>:18:47.794738   <span style="color:#ae81ff">31033</span> clusterinfo.go:79<span style="color:#f92672">]</span> creating the RBAC rules <span style="color:#66d9ef">for</span> exposing the cluster-info ConfigMap in the kube-public namespace
+I1031 <span style="color:#ae81ff">16</span>:18:47.849852   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">50</span>.242056ms, request: POST:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-public/rolebindings
+I1031 <span style="color:#ae81ff">16</span>:18:48.049867   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">195</span>.937473ms, request: PUT:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-public/rolebindings/kubeadm:bootstrap-signer-clusterinfo
+I1031 <span style="color:#ae81ff">16</span>:18:48.249312   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">189</span>.877158ms, request: POST:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/clusterroles
+I1031 <span style="color:#ae81ff">16</span>:18:48.449307   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">195</span>.86853ms, request: PUT:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/clusterroles/system:coredns
+I1031 <span style="color:#ae81ff">16</span>:18:48.650121   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">198</span>.286357ms, request: POST:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings
+I1031 <span style="color:#ae81ff">16</span>:18:48.849300   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">196</span>.19422ms, request: PUT:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/system:coredns
+<span style="color:#f92672">[</span>addons<span style="color:#f92672">]</span> Applied essential addon: CoreDNS
+I1031 <span style="color:#ae81ff">16</span>:18:49.049271   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">146</span>.459988ms, request: POST:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings
+I1031 <span style="color:#ae81ff">16</span>:18:49.249379   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">195</span>.347278ms, request: PUT:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/kubeadm:node-proxier
+I1031 <span style="color:#ae81ff">16</span>:18:49.449396   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">198</span>.120697ms, request: POST:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/roles
+I1031 <span style="color:#ae81ff">16</span>:18:49.649555   <span style="color:#ae81ff">31033</span> request.go:530<span style="color:#f92672">]</span> Throttling request took <span style="color:#ae81ff">197</span>.170914ms, request: POST:https://172.27.32.165:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/rolebindings
+<span style="color:#f92672">[</span>addons<span style="color:#f92672">]</span> Applied essential addon: kube-proxy
+
+<span style="color:#f92672">[</span>upgrade/successful<span style="color:#f92672">]</span> SUCCESS! Your cluster was upgraded to <span style="color:#e6db74">&#34;v1.12.10&#34;</span>. Enjoy!
+
+<span style="color:#f92672">[</span>upgrade/kubelet<span style="color:#f92672">]</span> Now that your control plane is upgraded, please proceed with upgrading your kubelets <span style="color:#66d9ef">if</span> you haven<span style="color:#960050;background-color:#1e0010">&#39;</span>t already <span style="color:#66d9ef">done</span> so.</code></pre></div>
+<p>升级成功后升级 kubectl：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># upgrade kubectl</span>
+yum upgrade -y  kubectl-1.12.10 --disableexcludes<span style="color:#f92672">=</span>kubernetes</code></pre></div>
+<h2 id="升级-kubelet">升级 kubelet</h2>
+
+<p>逐台节点升级 kubelet。<br />
+升级前最好先备份下当前kubelet的配置：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cp /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf <span style="color:#ae81ff">10</span>-kubeadm.conf.bak</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># upgrade kubelet/kubeadm</span>
+yum upgrade -y  kubelet-1.12.10 kubeadm-1.12.10 --disableexcludes<span style="color:#f92672">=</span>kubernetes
+<span style="color:#75715e"># kubeadm upgrade node config</span>
+kubeadm upgrade node config --kubelet-version <span style="color:#66d9ef">$(</span>kubelet --version | cut -d <span style="color:#e6db74">&#39; &#39;</span> -f <span style="color:#ae81ff">2</span><span style="color:#66d9ef">)</span>
+<span style="color:#75715e"># restart</span>
+systemctl daemon-reload
+systemctl restart kubelet</code></pre></div>
+<p>至此升级完成，可以执行<code>kubectl get nodes</code>，进行验证，是否所有 node 都正常启动。</p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/kubernetes"><span class="tag">Kubernetes</span></a></li>
+        
+          <li><a href="/tags/kubeadm"><span class="tag">Kubeadm</span></a></li>
+        
+          <li><a href="/tags/upgrade"><span class="tag">Upgrade</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2019 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>
