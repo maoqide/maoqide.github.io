@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Thu, 31 Oct 2019 09:50:41 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 07 Jan 2020 21:57:36 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -23,6 +23,17 @@ A Gopher.
 Working on Cloud Native.
 Keep Learning.
  contact: maoqidemail@gmail.com  </description>
+    </item>
+    
+    <item>
+      <title>Collection 3</title>
+      <link>/post/awesome-post/collection-3/</link>
+      <pubDate>Tue, 07 Jan 2020 21:57:36 +0800</pubDate>
+      
+      <guid>/post/awesome-post/collection-3/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;golang GC&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
     </item>
     
     <item>

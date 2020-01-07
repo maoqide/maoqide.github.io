@@ -7,10 +7,21 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Sat, 20 Jul 2019 21:38:08 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 07 Jan 2020 21:57:36 +0800</lastBuildDate>
     
 	<atom:link href="/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Collection 3</title>
+      <link>/post/awesome-post/collection-3/</link>
+      <pubDate>Tue, 07 Jan 2020 21:57:36 +0800</pubDate>
+      
+      <guid>/post/awesome-post/collection-3/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;golang GC&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
     
     <item>
       <title>Go Concurrency</title>
