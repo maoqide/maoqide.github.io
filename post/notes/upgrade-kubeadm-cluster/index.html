@@ -278,7 +278,7 @@ pullgcr k8s.gcr.io/kube-proxy:v1.12.10
 pullgcr k8s.gcr.io/coredns:1.2.2
 pullgcr k8s.gcr.io/etcd:3.2.24</code></pre></div>
 <p>如果使用的内部镜像仓库，将以上镜像tag后推送到内部的镜像仓库中。</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># using fry-run flag for validation</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># using dry-run flag for validation</span>
 kubeadm upgrade apply v1.12.10 --config kubeadm.yaml --dry-run</code></pre></div>
 <p>使用 <code>kubeadm config view</code> 保存的配置，有可能有遗漏，在升级时遇到主节点的 nodeName 配置没有保存，所以在更新时，使用默认的 hostname 为 node name，导致在拉起apiserver的静态pod时，以 kube-apiserver-&lt;node-name&gt;的规则拼接 pod 名出错，一直找不到已有的 apiserver 的静态pod，进而导致 upgrade 超时而失败。<br />
 遇到<code>kubeadm upgrade</code>一直卡住并最终超时的情况时，首先 <code>kubeadm upgrade apply  v1.12.10 --config kubeadm.yaml  -v 5</code>的时候添加 <code>-v</code>参数指定 log 等级，一般到5就比较详细了，然后通过日志来定位问题，以上问题就是通过如下日志看到一直在请求错误的 apiserver 的pod名称，从而定位到错误。</p>
