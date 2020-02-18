@@ -8,32 +8,43 @@
   </url>
   
   <url>
-    <loc>/post/golang/golang-websocket-message-pushing/</loc>
-    <lastmod>2020-01-11T20:49:24+08:00</lastmod>
+    <loc>/post/awesome-post/collection-4/</loc>
+    <lastmod>2020-02-18T12:13:08+08:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-01-11T20:49:24+08:00</lastmod>
+    <lastmod>2020-02-18T12:13:08+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2020-01-11T20:49:24+08:00</lastmod>
+    <lastmod>2020-02-18T12:13:08+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2020-01-11T20:49:24+08:00</lastmod>
+    <lastmod>2020-02-18T12:13:08+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/awesome/</loc>
+    <lastmod>2020-02-18T12:13:08+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/golang/</loc>
-    <lastmod>2020-01-11T20:49:24+08:00</lastmod>
+    <lastmod>2020-02-18T12:13:08+08:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/golang/golang-websocket-message-pushing/</loc>
+    <lastmod>2020-01-11T20:49:24+08:00</lastmod>
   </url>
   
   <url>
@@ -45,12 +56,6 @@
   <url>
     <loc>/post/awesome-post/collection-3/</loc>
     <lastmod>2020-01-07T21:57:36+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/awesome/</loc>
-    <lastmod>2020-01-07T21:57:36+08:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
