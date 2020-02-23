@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Tue, 18 Feb 2020 12:13:08 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 18 Feb 2020 17:20:47 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -23,6 +23,15 @@ A Gopher.
 Working on Cloud Native.
 Keep Learning.
  contact: maoqidemail@gmail.com  </description>
+    </item>
+    
+    <item>
+      <title>Golang Gc &amp; Memory Allocation</title>
+      <link>/post/golang/golang-gc-memory-allocation/</link>
+      <pubDate>Tue, 18 Feb 2020 17:20:47 +0800</pubDate>
+      
+      <guid>/post/golang/golang-gc-memory-allocation/</guid>
+      <description>&lt;p&gt;关于 Golang GC 和内存管理相关的流程和原理的一些总结。&lt;/p&gt;</description>
     </item>
     
     <item>

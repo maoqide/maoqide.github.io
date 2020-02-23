@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Golang Gc &amp; Memory Allocation</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="关于 Golang GC 和内存管理相关的流程和原理的一些总结。
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Golang Gc &amp; Memory Allocation">
+    <meta name="twitter:description" content="关于 Golang GC 和内存管理相关的流程和原理的一些总结。
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Golang Gc &amp; Memory Allocation">
+  <meta property="og:description" content="关于 Golang GC 和内存管理相关的流程和原理的一些总结。
+">
+  <meta property="og:url" content="/post/golang/golang-gc-memory-allocation/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.55.6">
+
+
+<link rel="canonical" href="/post/golang/golang-gc-memory-allocation/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+<meta name="google-site-verification" content="moDctZ0TPe6VxisyOQD_1YWrlEXu3jHdB1go5ptHRn0">
+<meta name="msvalidate.01" content="0498007A4CDA3EAB6CD23570479B29DA">
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Golang Gc &amp; Memory Allocation</h1>
+      <p class="post-meta">@Maoqide · Feb 18, 2020 · 1 min read</p>
+    </header>
+    <article class="post-content"><p>关于 Golang GC 和内存管理相关的流程和原理的一些总结。</p>
+
+<h2 id="gc-流程">GC 流程</h2>
+
+<p>golang GC 采用基于标记-清除的三色标记法，下图为 golang 一轮完整的 GC 的过程：<br />
+<img src="/media/posts/golang/golang-gc/GC-Algorithm-Phases.png" alt="" /></p>
+
+<p>一轮完整的 GC，总是从 Off，如果不是 Off 状态，则代表上一轮GC还未完成，如果这时修改指针的值，是直接修改的。</p>
+
+<p>Stack scan: 收集根对象（全局变量和 goroutine 栈上的变量），该阶段会开启写屏障(Write Barrier)。</p>
+
+<p>Mark: 标记对象，直到标记完所有根对象和根对象可达对象。此时写屏障会记录所有指针的更改(通过 mutator)。</p>
+
+<p>Mark Termination: 重新扫描部分全局变量和发生更改的栈变量，完成标记，该阶段会STW(Stop The World)，也是 gc 时造成 go 程序停顿的主要阶段。</p>
+
+<p>Sweep: 并发的清除未标记的对象。</p>
+
+<h2 id="三色标记">三色标记</h2>
+
+<p>以上 Mark 阶段，采用的是三色标记法，是传统标记-清除算法的一种优化，主要思想是增加了一种中间状态，即灰色对象，以减少 STW 时间。<br />
+三色标记将对象分为黑色、白色、灰色三种：<br />
+- 黑色：已标记的对象，表示对象是根对象可达的。<br />
+- 白色：未标记对象，gc开始时所有对象为白色，当gc结束时，如果仍为白色，说明对象不可达，在 sweep 阶段会被清除。<br />
+- 灰色：被黑色对象引用到的对象，但其引用的自对象还未被扫描，灰色为标记过程的中间状态，当灰色对象全部被标记完成代表本次标记阶段结束。</p>
+
+<p>三色标记的主要过程即：<br />
+1. 开始时所有对象为白色<br />
+2. 将所有<strong>根对象</strong>标记为灰色，放入队列<br />
+3. 遍历灰色对象，将其标记为黑色，并将他们引用的对象标记为灰色，放入队列<br />
+4. 重复步骤 <em>3</em> 持续遍历灰色对象，直至队列为空<br />
+5. 此时只剩下黑色对象和白色对象，白色对象即为下一步需要清除的对象</p>
+
+<h2 id="stw">STW</h2>
+
+<p>传统的标记-清除算法，为了防止在标记过程中，对象引用发生变化，导致清除仍在使用的对象，需要 STW(Stop The World)，这会造成程序的停顿。在三色标记的过程中，由于引入了灰色对象这一中间状态，标记过程和用户的 golang 代码中可以并发执行，不需要 STW，这极大的减少了应用的停顿时间。<br />
+三色标记具体如何避免在标记过程中对象应用的改变呢，这里用到了写屏障(Write Barrier)。</p>
+
+<h2 id="写屏障">写屏障</h2>
+
+<p>在 GC 的流程中，Stack scan 这一步骤，启用了写屏障。写屏障的主要思想，是在标记的过程中，通过写屏障记录发生变化的指针，然后在 Mark termination 的 rescan 过程中，重新进行扫描，因为在这一步骤会 STW，所以在这一步骤完成后的白色对象，不会再被引用，可以直接清除。关于写屏障具体原理和实现，这里不再展开。</p>
+
+<h2 id="gc触发">GC触发</h2>
+
+<p>golang 程序的执行过程中，如下几种情况下会触发 GC:<br />
+- 主动触发，用户代码中调用 <code>runtime.GC</code> 会主动触发 GC<br />
+- 默认每 2min 未产生 GC 时，golang 的守护协程 sysmon 会强制触发 GC<br />
+- 当 go 程序分配的内存增长超过阈值时，会触发 GC</p>
+
+<h2 id="内存分配">内存分配</h2>
+
+<p>golang 内存分配分为堆内存和栈内存。<br />
+栈：一般函数内部执行中声明的变量，函数返回直接释放，不会引起垃圾回收，对性能无影响。<br />
+堆：有引用到的内存空间，靠 GC 回收，会影响程序进程。</p>
+
+<h2 id="内存逃逸">内存逃逸</h2>
+
+<p>逃逸分析是指由编译器决定内存分配的位置，不需要程序员指定。即由编译器决定新申请的对象会分配到堆上还是栈上。<br />
+逃逸分析场景：<br />
+1. 指针逃逸<br />
+   go 将函数内定义的变量返回到函数外，会将本应分配到栈上的内存分配到堆上。<br />
+2. 栈空间不足逃逸<br />
+   当栈空间不足或无法判断当前切片长度时会将对象分配到堆上。<br />
+3. 动态类型逃逸<br />
+   当函数参数为 interface 类型，编译期间无法确定参数的具体类型，也可能会产生逃逸。</p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/golang"><span class="tag">Golang</span></a></li>
+        
+          <li><a href="/tags/gc"><span class="tag">Gc</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2020 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>
