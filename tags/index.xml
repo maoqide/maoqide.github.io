@@ -7,10 +7,46 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Tue, 18 Feb 2020 17:20:47 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 28 Mar 2020 11:23:38 +0800</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>algorithm</title>
+      <link>/tags/algorithm/</link>
+      <pubDate>Sat, 28 Mar 2020 11:23:38 +0800</pubDate>
+      
+      <guid>/tags/algorithm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>bfs</title>
+      <link>/tags/bfs/</link>
+      <pubDate>Sat, 28 Mar 2020 11:23:38 +0800</pubDate>
+      
+      <guid>/tags/bfs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>dfs</title>
+      <link>/tags/dfs/</link>
+      <pubDate>Sat, 28 Mar 2020 11:23:38 +0800</pubDate>
+      
+      <guid>/tags/dfs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>tree</title>
+      <link>/tags/tree/</link>
+      <pubDate>Sat, 28 Mar 2020 11:23:38 +0800</pubDate>
+      
+      <guid>/tags/tree/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>gc</title>
@@ -270,15 +306,6 @@
       <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
       
       <guid>/tags/notes/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>algorithm</title>
-      <link>/tags/algorithm/</link>
-      <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
-      
-      <guid>/tags/algorithm/</guid>
       <description></description>
     </item>
     

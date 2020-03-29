@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Tue, 18 Feb 2020 17:20:47 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 28 Mar 2020 11:23:38 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -23,6 +23,15 @@ A Gopher.
 Working on Cloud Native.
 Keep Learning.
  contact: maoqidemail@gmail.com  </description>
+    </item>
+    
+    <item>
+      <title>Bfs and Dfs</title>
+      <link>/post/algorithm/bfs-and-dfs/</link>
+      <pubDate>Sat, 28 Mar 2020 11:23:38 +0800</pubDate>
+      
+      <guid>/post/algorithm/bfs-and-dfs/</guid>
+      <description>&lt;p&gt;golang 深度优先搜索和广度优先搜索。&lt;/p&gt;</description>
     </item>
     
     <item>
