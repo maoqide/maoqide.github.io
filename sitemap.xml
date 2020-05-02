@@ -8,26 +8,55 @@
   </url>
   
   <url>
-    <loc>/post/algorithm/bfs-and-dfs/</loc>
-    <lastmod>2020-03-28T11:23:38+08:00</lastmod>
+    <loc>/post/cloud/kubernetes-events/</loc>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-03-28T11:23:38+08:00</lastmod>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2020-03-28T11:23:38+08:00</lastmod>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2020-03-28T11:23:38+08:00</lastmod>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/event/</loc>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/kubernetes/</loc>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/kubernetes-event/</loc>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/source-code/</loc>
+    <lastmod>2020-04-25T16:38:17+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/algorithm/bfs-and-dfs/</loc>
+    <lastmod>2020-03-28T11:23:38+08:00</lastmod>
   </url>
   
   <url>
@@ -111,12 +140,6 @@
   
   <url>
     <loc>/tags/kubeadm/</loc>
-    <lastmod>2019-10-31T09:50:41+08:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/kubernetes/</loc>
     <lastmod>2019-10-31T09:50:41+08:00</lastmod>
     <priority>0</priority>
   </url>
@@ -238,12 +261,6 @@
   <url>
     <loc>/post/cloud/kubelet-1-what-do-kubelet-do/</loc>
     <lastmod>2019-07-14T11:30:24+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/source-code/</loc>
-    <lastmod>2019-07-14T11:30:24+08:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
