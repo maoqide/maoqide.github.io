@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Sat, 25 Apr 2020 16:38:17 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 29 Jun 2020 15:40:29 +0800</lastBuildDate>
     
 	<atom:link href="/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Sample Operator</title>
+      <link>/post/cloud/sample-operator/</link>
+      <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
+      
+      <guid>/post/cloud/sample-operator/</guid>
+      <description>&lt;p&gt;用 kubebuilder 开发 operator 实现 sample-controller&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Kubernetes Events</title>

@@ -31,20 +31,47 @@
     </item>
     
     <item>
-      <title>event</title>
-      <link>/tags/event/</link>
-      <pubDate>Sat, 25 Apr 2020 16:38:17 +0800</pubDate>
+      <title>crd</title>
+      <link>/tags/crd/</link>
+      <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
       
-      <guid>/tags/event/</guid>
+      <guid>/tags/crd/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kubernetes</title>
       <link>/tags/kubernetes/</link>
-      <pubDate>Sat, 25 Apr 2020 16:38:17 +0800</pubDate>
+      <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
       
       <guid>/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>operator</title>
+      <link>/tags/operator/</link>
+      <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
+      
+      <guid>/tags/operator/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sample-controller</title>
+      <link>/tags/sample-controller/</link>
+      <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
+      
+      <guid>/tags/sample-controller/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>event</title>
+      <link>/tags/event/</link>
+      <pubDate>Sat, 25 Apr 2020 16:38:17 +0800</pubDate>
+      
+      <guid>/tags/event/</guid>
       <description></description>
     </item>
     

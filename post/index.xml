@@ -22,6 +22,15 @@
     </item>
     
     <item>
+      <title>Sample Operator</title>
+      <link>/post/cloud/sample-operator/</link>
+      <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
+      
+      <guid>/post/cloud/sample-operator/</guid>
+      <description>&lt;p&gt;用 kubebuilder 开发 operator 实现 sample-controller&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Kubernetes Events</title>
       <link>/post/cloud/kubernetes-events/</link>
       <pubDate>Sat, 25 Apr 2020 16:38:17 +0800</pubDate>
