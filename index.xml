@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Fri, 03 Jul 2020 11:27:06 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 10 Aug 2020 09:18:18 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -25,6 +25,15 @@ Keep Learning.
  Contact: maoqidemail@gmail.com
  Github: https://github.com/maoqide
   </description>
+    </item>
+    
+    <item>
+      <title>Application Containerization</title>
+      <link>/post/cloud/kubernetes-pattern/</link>
+      <pubDate>Mon, 10 Aug 2020 09:18:18 +0800</pubDate>
+      
+      <guid>/post/cloud/kubernetes-pattern/</guid>
+      <description>&lt;p&gt;应用容器化部署最佳实践&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -367,6 +376,17 @@ Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom
       
       <guid>/post/cloud/deploy-kubernetes-on-aliyun/</guid>
       <description>&lt;p&gt;通过阿里云ECS实例搭建K8S集群&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/post/problems/java-jvm-in-container/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/post/problems/java-jvm-in-container/</guid>
+      <description>openjdk:8u121-apline 20Mi/100Mi
+/ # java -XshowSettings:vm -version VM settings: Max. Heap Size (Estimated): 444.69M Ergonomics Machine Class: client Using VM: OpenJDK 64-Bit Server VM openjdk version &amp;#34;1.8.0_121&amp;#34; OpenJDK Runtime Environment (IcedTea 3.3.0) (Alpine 8.121.13-r0) OpenJDK 64-Bit Server VM (build 25.121-b13, mixed mode) openjdk:8u191-apline 20Mi/100Mi
+/ # java -XshowSettings:vm -version VM settings: Max. Heap Size (Estimated): 48.38M Ergonomics Machine Class: client Using VM: OpenJDK 64-Bit Server VM openjdk version &amp;#34;1.8.0_191&amp;#34; OpenJDK Runtime Environment (IcedTea 3.</description>
     </item>
     
   </channel>
