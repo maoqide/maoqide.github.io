@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Mon, 10 Aug 2020 09:18:18 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 22 Mar 2021 09:37:09 +0800</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Raft</title>
+      <link>/post/cloud/raft/</link>
+      <pubDate>Mon, 22 Mar 2021 09:37:09 +0800</pubDate>
+      
+      <guid>/post/cloud/raft/</guid>
+      <description>&lt;p&gt;Raft 是一个管理复制日志的分布式一致性算法，也是 ETCD 实现分布式一致性的基础，保证 ETCD 集群中各节点数据的强一致性。&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Application Containerization</title>
