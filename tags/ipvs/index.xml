@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ipvs on Maoqide</title>
+    <link>/tags/ipvs/</link>
+    <description>Recent content in ipvs on Maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
+    <lastBuildDate>Sun, 18 Apr 2021 14:00:22 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/ipvs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Kubernetes Service 502</title>
+      <link>/post/problems/kubernetes-service-502/</link>
+      <pubDate>Sun, 18 Apr 2021 14:00:22 +0800</pubDate>
+      
+      <guid>/post/problems/kubernetes-service-502/</guid>
+      <description>&lt;p&gt;目前部署在 Kubernetes 中的服务，通过 calico BGP 将 Service 与集群外网络打通，并在外部的 nginx 中配置 Service 地址对外进行服务暴露。经过一段时间的观察，发现在 Deployment 滚动更新中及之后一段时间，偶现服务访问 502 的问题。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

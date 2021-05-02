@@ -7,10 +7,37 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.</copyright>
-    <lastBuildDate>Mon, 22 Mar 2021 09:37:09 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 18 Apr 2021 14:00:22 +0800</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ipvs</title>
+      <link>/tags/ipvs/</link>
+      <pubDate>Sun, 18 Apr 2021 14:00:22 +0800</pubDate>
+      
+      <guid>/tags/ipvs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kubernetes</title>
+      <link>/tags/kubernetes/</link>
+      <pubDate>Sun, 18 Apr 2021 14:00:22 +0800</pubDate>
+      
+      <guid>/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>problem</title>
+      <link>/tags/problem/</link>
+      <pubDate>Sun, 18 Apr 2021 14:00:22 +0800</pubDate>
+      
+      <guid>/tags/problem/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>distributed</title>
@@ -81,15 +108,6 @@
       <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
       
       <guid>/tags/crd/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>kubernetes</title>
-      <link>/tags/kubernetes/</link>
-      <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
-      
-      <guid>/tags/kubernetes/</guid>
       <description></description>
     </item>
     
