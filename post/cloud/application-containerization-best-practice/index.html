@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8" />
+
+  
+  <title>Application Containerization Best Practice</title>
+
+  
+  
+  <link href="//cdn.jsdelivr.net" rel="dns-prefetch">
+  <link href="//cdnjs.cloudflare.com" rel="dns-prefetch">
+  
+  <link href="//at.alicdn.com" rel="dns-prefetch">
+  
+  <link href="//fonts.googleapis.com" rel="dns-prefetch">
+  <link href="//fonts.gstatic.com" rel="dns-prefetch">
+  <link href="///disqus.com" rel="dns-prefetch">
+  <link href="//c.disquscdn.com" rel="dns-prefetch">
+  
+  <link href="//www.google-analytics.com" rel="dns-prefetch">
+  <link href="//hm.baidu.com" rel="dns-prefetch">
+
+  
+
+  
+  <meta name="author" content="Maoqide">
+  <meta name="description" content="应用容器化部署最佳实践
+">
+
+  
+  
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@gohugoio">
+    <meta name="twitter:title" content="Application Containerization Best Practice">
+    <meta name="twitter:description" content="应用容器化部署最佳实践
+">
+    <meta name="twitter:image" content="/images/golang.svg">
+  
+
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Application Containerization Best Practice">
+  <meta property="og:description" content="应用容器化部署最佳实践
+">
+  <meta property="og:url" content="/post/cloud/application-containerization-best-practice/">
+  <meta property="og:image" content="/images/golang.svg">
+
+
+
+
+<meta name="generator" content="Hugo 0.55.6">
+
+
+<link rel="canonical" href="/post/cloud/application-containerization-best-practice/">
+
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,email=no,adress=no">
+<meta http-equiv="Cache-Control" content="no-transform">
+
+
+<meta name="robots" content="index,follow">
+<meta name="referrer" content="origin-when-cross-origin">
+<meta name="google-site-verification" content="moDctZ0TPe6VxisyOQD_1YWrlEXu3jHdB1go5ptHRn0">
+<meta name="msvalidate.01" content="0498007A4CDA3EAB6CD23570479B29DA">
+
+
+
+
+
+<meta name="theme-color" content="#02b875">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maoqide">
+<meta name="msapplication-tooltip" content="Maoqide">
+<meta name='msapplication-navbutton-color' content="#02b875">
+<meta name="msapplication-TileColor" content="#02b875">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="manifest" href="/manifest.json">
+
+
+<link rel="preload" href="/styles/main-rendered.min.css" as="style">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css?family=Lobster" as="style">
+<link rel="preload" href="/images/golang.svg" as="image">
+<link rel="preload" href="/images/square.svg" as="image">
+
+
+<style>
+  body {
+    background: rgb(244, 243, 241) url('/images/square.svg') repeat fixed;
+  }
+</style>
+<link rel="stylesheet" href="/styles/main-rendered.min.css">
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.2/dist/medium-zoom.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video-js.min.css">
+
+
+
+  
+  
+<!--[if lte IE 8]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ie8@1.1.2/dist/videojs-ie8.min.js"></script>
+<![endif]-->
+
+<!--[if lte IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20180112/classList.min.js"></script>
+<![endif]-->
+
+
+</head>
+  <body>
+    <div class="suspension">
+      <a role="button" aria-label="Go to top" title="Go to top" class="to-top is-hide"><span class="icon icon-up" aria-hidden="true"></span></a>
+      
+        
+	<a role="button" aria-label="Go to comments" title="Go to comments" class="to-comment" href="#disqus_thread"><span class="icon icon-comment" aria-hidden="true"></span></a>
+        
+      
+    </div>
+    
+    
+  <header class="site-header">
+  <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
+  
+  <h2 class="title"><a href="">Maoqide</a></h2>
+  
+  <p class="subtitle">~ Keep Learning ~</p>
+  <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
+    <span class="icon icon-menu" aria-hidden="true"></span>
+  </button>
+
+  <nav class="site-menu collapsed">
+    <h2 class="offscreen">Main Menu</h2>
+    <ul class="menu-list">
+      
+      
+      
+      
+        <li class="menu-item
+          
+          
+           is-active">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/post/">Post</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="menu-item
+          
+          
+          ">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+  <nav class="social-menu collapsed">
+    <h2 class="offscreen">Social Networks</h2>
+    <ul class="social-list"><li class="social-item">
+          <a href="mailto:maoqidemail@gmail.com" title="Email" aria-label="Email">
+            <span class="icon icon-email" aria-hidden="true"></span>
+          </a>
+        </li><li class="social-item">
+          <a href="//github.com/maoqide" rel="me" title="GitHub" aria-label="GitHub">
+	    <span class="icon icon-github" aria-hidden="true"></span>
+          </a>
+        </li></ul>
+  </nav>
+</header>
+
+  <section class="main post-detail">
+    <header class="post-header">
+      <h1 class="post-title">Application Containerization Best Practice</h1>
+      <p class="post-meta">@Maoqide · Aug 10, 2020 · 3 min read</p>
+    </header>
+    <article class="post-content"><p>应用容器化部署最佳实践</p>
+
+<h2 id="镜像构建">镜像构建</h2>
+
+<h3 id="基本操作">基本操作</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker build -f Dockerfile -t image_name:v1 .</code></pre></div>
+<h3 id="build-context-dockerignore">build context/dockerignore</h3>
+
+<p>执行<code>docker build</code>命令时，docker client 会将当前目录下的文件打包并发送给 docker daemon，这就是 build context。<br />
+这个过程会有一定耗时，尤其是 build context 很大的时候，这时候可以用<code>.dockerignore</code>文件建不需要的大文件忽略，用法和 git 的<code>.gitignore</code>基本一致。</p>
+
+<p>下面执行<code>docker build</code>命令的目录, 使用<code>.dockerignore</code>文件忽略了文件 test1</p>
+
+<pre><code>[root@centos11 images]# ls -la
+total 102408
+drwxr-xr-x. 2 root root        70 Aug 18 22:25 .
+drwxr-xr-x. 3 root root        20 Aug 18 22:04 ..
+-rw-r--r--. 1 root root         6 Aug 18 22:11 .dockerignore
+-rw-r--r--. 1 root root        52 Aug 18 22:19 Dockerfile
+-rw-r--r--. 1 root root         0 Aug 18 22:08 test
+-rw-r--r--. 1 root root 104857600 Aug 18 22:11 test1
+</code></pre>
+
+<p>下面是 docker daemon 进行镜像构建的临时目录</p>
+
+<pre><code>[root@centos11 docker-builder226382581]# pwd
+/var/lib/docker/tmp/docker-builder226382581
+[root@centos11 docker-builder226382581]# ll
+total 4
+-rw-r--r--. 1 root root 52 Aug 18 22:19 Dockerfile
+-rw-r--r--. 1 root root  0 Aug 18 22:08 test
+</code></pre>
+
+<p>下面是使用<code>.dockerignore</code>和不使用时的区别</p>
+
+<pre><code>[root@centos11 images]# time docker build --no-cache -t test .
+Sending build context to Docker daemon  3.584kB
+Step 1/2 : FROM alpine
+ ---&gt; a24bb4013296
+Step 2/2 : ADD ./test /root
+ ---&gt; e31b37d08034
+Successfully built e31b37d08034
+Successfully tagged test:latest
+
+real	0m0.296s
+user	0m0.038s
+sys	0m0.027s
+</code></pre>
+
+<pre><code>[root@centos11 images]# time docker build --no-cache -t test .
+Sending build context to Docker daemon  104.9MB
+Step 1/2 : FROM alpine
+ ---&gt; a24bb4013296
+Step 2/2 : ADD ./test /root
+ ---&gt; 1be2b417545d
+Successfully built 1be2b417545d
+Successfully tagged test:latest
+
+real	0m2.535s
+user	0m0.069s
+sys	0m0.086s
+</code></pre>
+
+<h3 id="最佳实践">最佳实践</h3>
+
+<ul>
+<li>尽可能小的基础镜像<br /></li>
+<li>清理临时文件<br /></li>
+<li>最小层数<br /></li>
+<li>利用缓存<br />
+<br /></li>
+</ul>
+
+<p><a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/">https://docs.docker.com/develop/develop-images/dockerfile_best-practices/</a></p>
+
+<h4 id="选择体积较小的基础镜像">选择体积较小的基础镜像</h4>
+
+<p>基础镜像大小差异:</p>
+
+<pre><code>[root@centos11 ~]# docker images alpine
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+alpine              latest              a24bb4013296        2 months ago        5.57MB
+[root@centos11 ~]# docker images centos
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos              7                   7e6257c9f8d8        13 days ago         203MB
+</code></pre>
+
+<p>小的基础镜像上传和下载速度更快，由于包含的软件更少，也能够降低一定的安全漏洞风险。</p>
+
+<h4 id="清理临时文件">清理临时文件</h4>
+
+<p><code>RUN</code>指令产生的临时文件需要在当前层清理</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> alpine</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> dd <span style="color:#66d9ef">if</span><span style="color:#f92672">=</span>/dev/zero of<span style="color:#f92672">=</span>temp_file bs<span style="color:#f92672">=</span>1M count<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> rm -f temp_file</code></pre></div>
+<pre><code>[root@centos11 images]# docker images test1
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+test1               latest              e0d48f43985e        13 seconds ago      110MB
+</code></pre>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> alpine</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> dd <span style="color:#66d9ef">if</span><span style="color:#f92672">=</span>/dev/zero of<span style="color:#f92672">=</span>temp_file bs<span style="color:#f92672">=</span>1M count<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span> <span style="color:#f92672">&amp;&amp;</span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>	rm -f temp_file</code></pre></div>
+<pre><code>[root@centos11 images]# docker images test2
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+test2               latest              c31fabd926aa        7 seconds ago       5.57MB
+</code></pre>
+
+<p>另一种方式是使用多阶段构建（在 Docker 17.05 中引入）。多阶段构建可以在第一个“构建”容器中构建应用，并将结果用于其他容器，同时使用同一 Dockerfile。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:1.10 as builder</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /tmp/go</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>COPY hello.go ./<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> CGO_ENABLED<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> go build -a -ldflags <span style="color:#e6db74">&#39;-s&#39;</span> -o hello<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> scratch</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span><span style="color:#e6db74"> [ &#34;/hello&#34; ]</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>COPY --from<span style="color:#f92672">=</span>builder /tmp/go/hello /hello</code></pre></div>
+<h4 id="最小层数">最小层数</h4>
+
+<p><code>RUN</code>, <code>COPY</code>, <code>ADD</code>指令会增加镜像的层数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">RUN</span> apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get install -y <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    aufs-tools <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    automake <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    build-essential <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    curl <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    dpkg-sig <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    libcap-dev <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    libsqlite3-dev <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    mercurial <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    reprepro <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    ruby1.9.1 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    ruby1.9.1-dev <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    s3cmd<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>.1.* <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> rm -rf /var/lib/apt/lists/*</code></pre></div>
+<h4 id="利用缓存">利用缓存</h4>
+
+<p>Docker 镜像缓存可以大幅度加速容器镜像的构建。镜像是逐层构建的，在 Dockerfile 中，每条指令都会在生成的镜像中创建一层。<br />
+使用镜像缓存时，Dockerfile 的 ADD 和 COPY 指令，会同时对比指令字符串和对应的文件内容和缓存是否一致，其他指令只会比较指令字符串是否一致，并且仅当所有先前的构建步骤都使用 Docker 的构建缓存时，Docker 才会使用缓存。要充分利用 Docker 构建缓存，必须将经常更改的构建步骤置于 Dockerfile 底部。因此，添加代码的操作应该尽可能放在 Dockerfile 下层。</p>
+
+<h2 id="容器-应用">容器/应用</h2>
+
+<ul>
+<li>单进程<br /></li>
+<li>可观测<br /></li>
+<li>无状态<br /></li>
+<li>不可变<br /></li>
+<li>横向扩展<br /></li>
+</ul>
+
+<h3 id="单进程">单进程</h3>
+
+<p>由于容器与其托管的应用具有相同的生命周期，因此每个容器应仅包含一个应用。当容器启动时，应用也应该启动，当应用停止时，容器也应该停止。<br />
+<em>此处“应用”被视为具有唯一父进程且可能具有多个子进程的单个软件。</em><br />
+如果一个容器中具有多个应用，则这些应用可能具有不同的生命周期或处于不同状态。例如，到最后可能出现容器在运行但其某个核心组件崩溃或无响应的情况。如果不进行额外的运行状况检查，则整个容器管理系统（Docker 或 Kubernetes）将无法判断该容器是否运行正常。</p>
+
+<h3 id="可观测">可观测</h3>
+
+<h4 id="活跃性探测-liveness">活跃性探测(Liveness)</h4>
+
+<p>Liveness 探测的推荐方法是让应用公开 /health HTTP 端点。在此端点上收到请求后，如果认为运行状况良好，应用应发送“200 OK”响应。在 Kubernetes 中，运行状况良好意味着容器不需要终止或重启。运行状况良好的条件因应用而异，但通常意味着以下情况：<br />
+- 该应用正在运行<br />
+- 其主要依赖性得到满足（例如，它可以访问其数据库）</p>
+
+<h4 id="就绪性探测-readiness">就绪性探测(Readiness)</h4>
+
+<p>Readiness 探测的推荐方法是让应用公开 /ready HTTP 端点。当应用在此端点上收到请求时，如果其已准备好接收流量，则应发送“200 OK”响应。准备好接收流量意味着以下情况：<br />
+- 该应用运行状况良好<br />
+- 任何潜在的初始化步骤均已完成<br />
+- 发送到应用的任何有效请求都不会导致错误<br />
+Kubernetes 使用就绪性探测来编排应用的部署。如果更新应用，Kubernetes 将对属于该应用 Deployment 的 pod 进行滚动更新。 默认更新政策是一次更新一个 pod，即 Kubernetes 会在更新下一个 pod 之前等待新 pod 准备就绪（由就绪性探测指明）。<br />
+<em>在许多应用中，/health 和 /ready 端点合并为一个 /health 端点，因为实际上它们的运行状况和就绪状态之间并没有差别。</em></p>
+
+<h4 id="监控指标">监控指标</h4>
+
+<p>指标 HTTP 端点的实现方式和上面两种类似，它通常在 /metrics URI 上公开应用的内部指标。 响应如下：</p>
+
+<pre><code>http_requests_total{method=&quot;post&quot;,code=&quot;200&quot;} 1027
+http_requests_total{method=&quot;post&quot;,code=&quot;400&quot;}    3
+http_requests_total{method=&quot;get&quot;,code=&quot;200&quot;} 10892
+http_requests_total{method=&quot;get&quot;,code=&quot;400&quot;}    97
+</code></pre>
+
+<p>通过 Prometheus 客户端 SDK 可以轻松生成如上格式的 HTTP 端点。</p>
+
+<h3 id="无状态">无状态</h3>
+
+<p>无状态意味着任何状态数据（任何类型的持久性数据）均存储在容器之外。这种外部存储可以采取多种形式：<br />
+- 如需存储文件，建议使用对象存储。<br />
+- 如需存储用户会话等信息，建议使用外部低延时键值存储，例如 Redis 或 Memcached。<br />
+- 如果需要块级存储（例如对于数据库），则可以使用挂载到容器的外部磁盘。<br />
+通过以上方式，你可以从容器本身移除数据，这意味着可以随时彻底停止和销毁容器，而不必担心数据丢失。如果创建了一个新容器来替换旧容器，只需将新容器连接到同一数据存储区或绑定到同一磁盘即可。</p>
+
+<h3 id="不变性">不变性</h3>
+
+<p>不可变意味着容器在其生命周期内不会被修改，即没有更新、没有补丁程序，也没有配置更改。如果必须更新应用代码或应用补丁程序，则必须构建新镜像并重新部署。<br />
+不变性使容器部署更安全、更可重复，可在不同环境中使用同一镜像。如果需要回滚，只需重新部署旧镜像即可。<br />
+如需在不同环境中使用同一镜像，我们建议您外部化容器配置（监听端口、运行时参数等）在 Kubernetes 中，可以使用 Secrets 或 ConfigMaps 将容器中的配置作为环境变量或文件注入。<br />
+如果需要更新配置，请使用更新后的配置部署一个新容器（基于同一镜像）。</p></article>
+    <footer class="post-footer">
+      
+      <ul class="post-tags">
+        
+          <li><a href="/tags/containerize"><span class="tag">Containerize</span></a></li>
+        
+          <li><a href="/tags/best-practice"><span class="tag">Best-Practice</span></a></li>
+        
+      </ul>
+      
+      <p class="post-copyright">
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.This post was published <strong>279</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+      </p>
+    </footer>
+    
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+    
+  </section>
+  
+<footer class="site-footer">
+  <p>© 2017-2021 Maoqide</p>
+  <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
+  
+    <p><a href="http://www.miitbeian.gov.cn" title="Check ICP info" target="_blank" rel="noopener">浙ICP备19006182号</a></p>
+  
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/smooth-scroll@15.0.0/dist/smooth-scroll.min.js"></script>
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/video.js@7.3.0/dist/video.min.js"></script>
+
+
+
+
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+      extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    },
+  });
+</script>
+<script type="text/x-mathjax-config">
+  // Fix <code> tags after MathJax finishes running. This is a
+  // hack to overcome a shortcoming of Markdown. Discussion at
+  // https://github.com/mojombo/jekyll/issues/199
+  MathJax.Hub.Queue(() => {
+    MathJax.Hub.getAllJax().map(v => v.SourceElement().parentNode.className += ' has-jax');
+  });
+</script>
+
+
+
+<script src="/scripts/index.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('\/service-worker.js').then(function() {
+      console.log('[ServiceWorker] Registered');
+    });
+  }
+</script>
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-141682683-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  </body>
+</html>

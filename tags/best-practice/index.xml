@@ -13,11 +13,11 @@
     
     
     <item>
-      <title>Application Containerization</title>
-      <link>/post/cloud/kubernetes-pattern/</link>
+      <title>Application Containerization Best Practice</title>
+      <link>/post/cloud/application-containerization-best-practice/</link>
       <pubDate>Mon, 10 Aug 2020 09:18:18 +0800</pubDate>
       
-      <guid>/post/cloud/kubernetes-pattern/</guid>
+      <guid>/post/cloud/application-containerization-best-practice/</guid>
       <description>&lt;p&gt;应用容器化部署最佳实践&lt;/p&gt;</description>
     </item>
     
