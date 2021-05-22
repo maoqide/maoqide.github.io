@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
 
   
-  <title>Kubernetes Service 502</title>
+  <title>Kubernetes Service 502, IPVS 的坑</title>
 
   
   
@@ -33,7 +33,7 @@
   
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@gohugoio">
-    <meta name="twitter:title" content="Kubernetes Service 502">
+    <meta name="twitter:title" content="Kubernetes Service 502, IPVS 的坑">
     <meta name="twitter:description" content="目前部署在 Kubernetes 中的服务，通过 calico BGP 将 Service 与集群外网络打通，并在外部的 nginx 中配置 Service 地址对外进行服务暴露。经过一段时间的观察，发现在 Deployment 滚动更新中及之后一段时间，偶现服务访问 502 的问题。
 ">
     <meta name="twitter:image" content="/images/golang.svg">
@@ -41,7 +41,7 @@
 
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Kubernetes Service 502">
+  <meta property="og:title" content="Kubernetes Service 502, IPVS 的坑">
   <meta property="og:description" content="目前部署在 Kubernetes 中的服务，通过 calico BGP 将 Service 与集群外网络打通，并在外部的 nginx 中配置 Service 地址对外进行服务暴露。经过一段时间的观察，发现在 Deployment 滚动更新中及之后一段时间，偶现服务访问 502 的问题。
 ">
   <meta property="og:url" content="/post/problems/kubernetes-service-502/">
@@ -203,7 +203,7 @@
 
   <section class="main post-detail">
     <header class="post-header">
-      <h1 class="post-title">Kubernetes Service 502</h1>
+      <h1 class="post-title">Kubernetes Service 502, IPVS 的坑</h1>
       <p class="post-meta">@Maoqide · Apr 18, 2021 · 2 min read</p>
     </header>
     <article class="post-content"><p>目前部署在 Kubernetes 中的服务，通过 calico BGP 将 Service 与集群外网络打通，并在外部的 nginx 中配置 Service 地址对外进行服务暴露。经过一段时间的观察，发现在 Deployment 滚动更新中及之后一段时间，偶现服务访问 502 的问题。</p>

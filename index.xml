@@ -28,7 +28,7 @@ Keep Learning.
     </item>
     
     <item>
-      <title>Kubernetes Service 502</title>
+      <title>Kubernetes Service 502, IPVS 的坑</title>
       <link>/post/problems/kubernetes-service-502/</link>
       <pubDate>Sun, 18 Apr 2021 14:00:22 +0800</pubDate>
       
