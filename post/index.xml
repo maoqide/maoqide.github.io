@@ -22,7 +22,7 @@
     </item>
     
     <item>
-      <title>Raft</title>
+      <title>Etcd 的基础-分布式一致性算法 Raft</title>
       <link>/post/cloud/raft/</link>
       <pubDate>Mon, 22 Mar 2021 09:37:09 +0800</pubDate>
       
