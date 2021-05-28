@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
 
   
-  <title>Build Docker Image in a Pod in Kubernetes</title>
+  <title>Build Fileserver Using Nginx on K8s</title>
 
   
   
@@ -26,25 +26,25 @@
 
   
   <meta name="author" content="Maoqide">
-  <meta name="description" content="利用 kaniko 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。
+  <meta name="description" content="使用 nginx 镜像在 k8s 中搭建一个简单的文件服务器。
 ">
 
   
   
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@gohugoio">
-    <meta name="twitter:title" content="Build Docker Image in a Pod in Kubernetes">
-    <meta name="twitter:description" content="利用 kaniko 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。
+    <meta name="twitter:title" content="Build Fileserver Using Nginx on K8s">
+    <meta name="twitter:description" content="使用 nginx 镜像在 k8s 中搭建一个简单的文件服务器。
 ">
     <meta name="twitter:image" content="/images/golang.svg">
   
 
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Build Docker Image in a Pod in Kubernetes">
-  <meta property="og:description" content="利用 kaniko 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。
+  <meta property="og:title" content="Build Fileserver Using Nginx on K8s">
+  <meta property="og:description" content="使用 nginx 镜像在 k8s 中搭建一个简单的文件服务器。
 ">
-  <meta property="og:url" content="/post/cloud/build-docker-image-in-a-pod-in-kubernetes/">
+  <meta property="og:url" content="/post/practice/build-fileserver-using-nginx-on-k8s/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -53,7 +53,7 @@
 <meta name="generator" content="Hugo 0.55.6">
 
 
-<link rel="canonical" href="/post/cloud/build-docker-image-in-a-pod-in-kubernetes/">
+<link rel="canonical" href="/post/practice/build-fileserver-using-nginx-on-k8s/">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -203,94 +203,127 @@
 
   <section class="main post-detail">
     <header class="post-header">
-      <h1 class="post-title">Build Docker Image in a Pod in Kubernetes</h1>
-      <p class="post-meta">@Maoqide · Oct 27, 2019 · 2 min read</p>
+      <h1 class="post-title">Build Fileserver Using Nginx on K8s</h1>
+      <p class="post-meta">@Maoqide · May 27, 2021 · 2 min read</p>
     </header>
-    <article class="post-content"><p>利用 <a href="https://github.com/GoogleContainerTools/kaniko">kaniko</a> 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。</p>
+    <article class="post-content"><p>使用 nginx 镜像在 k8s 中搭建一个简单的文件服务器。</p>
 
-<h2 id="pre-request">pre-request</h2>
+<h2 id="镜像">镜像</h2>
 
-<ul>
-<li>kubernetes cluster<br /></li>
-<li>kaniko-executor image<br /></li>
-</ul>
+<p>在 dockerhub 的 nginx 镜像基础上，安装 openssh-client 客户端，并生成公私钥，主要是为了方便直接 scp 想要放到文件服务器上的文件，若想免密，可将镜像中生成的公钥（<code>cat ~/.ssh/id_rsa.pub</code>）拷贝到对应主机的 <code>~/.ssh/authorized_keys</code> 目录。个人认为 scp 更加方便，当然，也可以使用 nginx 的 upload 模块 <a href="https://www.nginx.com/resources/wiki/modules/upload/">nginx-upload-module</a>，这样可以直接页面上传。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> nginx:1.15</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apt-get update -y <span style="color:#f92672">&amp;&amp;</span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    apt-get install openssh-client -y <span style="color:#f92672">&amp;&amp;</span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    apt-get clean all <span style="color:#f92672">&amp;&amp;</span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    ssh-keygen -t rsa  -N <span style="color:#e6db74">&#39;&#39;</span> -f ~/.ssh/id_rsa -q</code></pre></div>
+<p><code>docker build -t maoqide/fileserver:nginx-1.15</code></p>
 
-<h2 id="构建">构建</h2>
+<h2 id="k8s-部署">k8s 部署</h2>
 
-<p>具体用法可以阅读 <a href="https://github.com/GoogleContainerTools/kaniko">kaniko</a> 项目的 README 文档，项目本身支持<code>GCS Bucket</code>、<code>S3 Bucket</code>、<code>Local Directory</code>、<code>Git Repository</code>四种 buildcontext 存储方案，在实际的使用中，感觉使用内部的文件服务器更加方便，添加了对直接 http/https 下载链接的支持，<a href="https://github.com/maoqide/kaniko。">https://github.com/maoqide/kaniko。</a></p>
+<p>创建 PVC，前提是先创建好名为 ceph-rbd 的 StorageClass。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fileserver-data
+  namespace: kube-public
+spec:
+  storageClassName: ceph-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi</code></pre></div>
+<p>创建 ConfigMap，<code>kubectl -nkube-public create configmap file-server-conf --from-file nginx.conf -oyaml --dry-run | kubectl apply -f -</code>，通过如下配置文件创建 ConfigMap。若有修改都可通过此命令进行 apply。下面的配置可将 nginx 作为文件下载服务器使用。</p>
 
-<h2 id="quick-start">quick start</h2>
-
-<h3 id="build-yourself-a-image-for-kaniko-executor">build yourself a image for kaniko executor</h3>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># build yourself a image for kaniko executor</span>
-cd $GOPATH/src/github.com/GoogleContainerTools
-git clone https://github.com/maoqide/kaniko
-make images</code></pre></div>
-<h3 id="start-a-file-server-if-using-http-https-for-buildcontext">start a file server if using http/https for buildcontext</h3>
-
-<pre><code>kaniko's build context is very similar to the build context you would send your Docker daemon for an image build; it represents a directory containing a Dockerfile which kaniko will use to build your image. For example, a COPY command in your Dockerfile should refer to a file in the build context.    
+<pre><code>user root;
+worker_processes 1;
+events {
+  worker_connections 1024;
+}
+http {
+  server {
+    listen 80;
+    server_name your.domain.com;
+    root /usr/share/nginx/files;
+    location / {
+        autoindex on;
+        autoindex_exact_size off;
+        autoindex_localtime on;
+    }
+  }
+}
 </code></pre>
 
-<p>using <a href="https://github.com/minio/minio">minio</a> as file server:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run -p <span style="color:#ae81ff">9000</span>:9000 minio/minio server /data</code></pre></div>
-<h3 id="create-context-tar-gz">create context.tar.gz</h3>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># tar your build context including Dockerfile into context.tar.gz</span>
-tar -C &lt;path to build context&gt; -zcvf context.tar.gz .</code></pre></div>
-<p>upload to minio and generate a download url.</p>
-
-<h3 id="create-secret-on-kubernetes">create secret on kubernetes</h3>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># registry can also be a harbor or other registry.</span>
-kubectl create secret docker-registry regcred --docker-server<span style="color:#f92672">=</span>&lt;your-registry-server&gt; --docker-username<span style="color:#f92672">=</span>&lt;your-name&gt; --docker-password<span style="color:#f92672">=</span>&lt;your-pword&gt; --docker-email<span style="color:#f92672">=</span>&lt;your-email&gt;</code></pre></div>
-<h3 id="create-pod">create pod</h3>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
-kind: Pod
+<p>创建 Deployment，volume 挂载上面创建好的 ConfigMap 和 PVC。PVC 指定了 StorageClass，会自动创建和绑定 PV，PV 挂载到上面 nginx.conf 中指定的文件存储目录。ConfigMap 挂载使用 subPath，仅覆盖 nginx.conf 一个文件，否则挂载会覆盖 /etc/nginx/ 整个目录。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: kaniko
+  name: fileserver
+  namespace: kube-public
+  labels:
+    app: fileserver
 spec:
-  containers:
-  - name: kaniko
-    env:
-    - name: DOCKER_CONFIG
-      value: /root/.docker/
-    image: harbor.guahao-inc.com/mqtest/executor
-    args: [ <span style="color:#e6db74">&#34;--context=http://download_url/context.tar.gz&#34;</span>,
-            <span style="color:#e6db74">&#34;--destination=maoqide/test:latest&#34;</span>,
-            <span style="color:#e6db74">&#34;--verbosity=debug&#34;</span>,
-		]
-    volumeMounts:
-      - name: kaniko-secret
-        mountPath: /root
-      - name: context
-        mountPath: /kaniko/buildcontext/
-  restartPolicy: Never
-  volumes:
-    - name: context
-      emptyDir: {}
-    - name: kaniko-secret
-      secret:
-        secretName: regcred
-        items:
-          - key: .dockerconfigjson
-            path: .docker/config.json</code></pre></div>
-<p><em>env DOCKER_CONFIG is required for regidtry authorization, otherwise you would get an UNAUTHORIZED error.</em></p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f pod.yaml</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@centos10 ~<span style="color:#f92672">]</span>$ kubectl get po
-NAME                      READY     STATUS      RESTARTS   AGE
-kaniko                    <span style="color:#ae81ff">0</span>/1       Completed   <span style="color:#ae81ff">0</span>          5h</code></pre></div>
-<p>and you can find your image pushed.</p></article>
+  replicas: <span style="color:#ae81ff">1</span>
+  selector:
+    matchLabels:
+      app: fileserver
+  template:
+    metadata:
+      labels:
+        app: fileserver
+    spec:
+      containers:
+      - name: nginx
+        image: fileserver:nginx-<span style="color:#ae81ff">1.15</span>
+        volumeMounts:
+          - name: conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: data
+            mountPath: /usr/share/nginx/files
+        ports:
+        - containerPort: <span style="color:#ae81ff">80</span>
+        readinessProbe:
+          tcpSocket:
+            port: <span style="color:#ae81ff">80</span>
+      volumes:
+        - name: conf
+          configMap:
+            name: file-server-conf
+            items:
+            - key: nginx.conf
+              path: nginx.conf
+        - name: data
+          persistentVolumeClaim:
+            claimName: fileserver-data</code></pre></div>
+<p>创建 Service，可创建 NodePort 类型用以外部访问。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: fileserver
+  namespace: kube-public
+spec:
+  ports:
+  - name: app
+    port: <span style="color:#ae81ff">80</span>
+    protocol: TCP
+    targetPort: <span style="color:#ae81ff">80</span>
+  selector:
+    app: fileserver
+  type: ClusterIP</code></pre></div>
+<p>此时访问 Service 地址，即可看到文件索引的页面，通过 scp 或上传文件到 <code>/usr/share/nginx/files</code> 目录，即可看到文件并下载。</p></article>
     <footer class="post-footer">
       
       <ul class="post-tags">
         
-          <li><a href="/tags/cloud"><span class="tag">Cloud</span></a></li>
+          <li><a href="/tags/practice"><span class="tag">Practice</span></a></li>
         
-          <li><a href="/tags/docker-image"><span class="tag">Docker Image</span></a></li>
-        
-          <li><a href="/tags/kaniko"><span class="tag">Kaniko</span></a></li>
+          <li><a href="/tags/fileserver"><span class="tag">Fileserver</span></a></li>
         
       </ul>
       
       <p class="post-copyright">
-        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.This post was published <strong>578</strong> days ago, content in the post may be inaccurate, even wrong now, please take risk yourself.
+        © This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce.
       </p>
     </footer>
     
