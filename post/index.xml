@@ -40,6 +40,15 @@
     </item>
     
     <item>
+      <title>Kubernetes Crd</title>
+      <link>/post/cloud/kubernetes-crd/</link>
+      <pubDate>Thu, 29 Oct 2020 09:00:05 +0800</pubDate>
+      
+      <guid>/post/cloud/kubernetes-crd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Application Containerization Best Practice</title>
       <link>/post/cloud/application-containerization-best-practice/</link>
       <pubDate>Mon, 10 Aug 2020 09:18:18 +0800</pubDate>

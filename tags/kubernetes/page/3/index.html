@@ -5,7 +5,11 @@
   <meta charset="utf-8" />
 
   
-  <title>Maoqide</title>
+  <title>
+  Tag → kubernetes
+  
+   | Maoqide
+</title>
 
   
   
@@ -39,7 +43,7 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Maoqide">
   <meta property="og:description" content="Maoqide is a personal blog site, recording learning about container, kuberntes, golang...">
-  <meta property="og:url" content="/">
+  <meta property="og:url" content="/tags/kubernetes/">
   <meta property="og:image" content="/images/golang.svg">
 
 
@@ -48,8 +52,8 @@
 <meta name="generator" content="Hugo 0.55.6">
 
 
-<link rel="canonical" href="/">
-<link rel="alternate" type="application/rss+xml" href="/index.xml" title="Maoqide">
+<link rel="canonical" href="/tags/kubernetes/">
+<link rel="alternate" type="application/rss+xml" href="/tags/kubernetes/index.xml" title="Maoqide">
 
 <meta name="renderer" content="webkit">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -127,10 +131,11 @@
       
     </div>
     
-     <header class="site-header">
+    
+  <header class="site-header">
   <a href=""><img class="avatar" src="/images/golang.svg" alt="Avatar"></a>
   
-  <h1 class="title"><a href="">Maoqide</a></h1>
+  <h2 class="title"><a href="">Maoqide</a></h2>
   
   <p class="subtitle">~ Keep Learning ~</p>
   <button class="menu-toggle" type="button" aria-label="Main Menu" aria-expanded="false" tab-index="0">
@@ -145,7 +150,7 @@
       
       
         <li class="menu-item
-           is-active
+          
           
           ">
           <a href="/">Home</a>
@@ -160,7 +165,7 @@
       
         <li class="menu-item
           
-          
+           is-active
           ">
           <a href="/tags/">Tags</a>
         </li>
@@ -188,146 +193,41 @@
   </nav>
 </header>
 
-<section class="main post-list">
-  <header class="list-header offscreen">
-    <h2 class="list-label">All Posts</h2>
-  </header>
-  
-  
-   <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/practice/build-fileserver-using-nginx-on-k8s/" class="post-link">Build Fileserver Using Nginx on K8s</a></h3>
-    <p class="post-meta">@Maoqide · May 27, 2021 · 2 min read</p>
-  </header>
-  
-  <p class="post-summary">使用 nginx 镜像在 k8s 中搭建一个简单的文件服务器。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/practice/build-fileserver-using-nginx-on-k8s/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/problems/kubernetes-service-502/" class="post-link">Kubernetes Service 502, IPVS 的坑</a></h3>
-    <p class="post-meta">@Maoqide · Apr 18, 2021 · 2 min read</p>
-  </header>
-  
-  <p class="post-summary">目前部署在 Kubernetes 中的服务，通过 calico BGP 将 Service 与集群外网络打通，并在外部的 nginx 中配置 Service 地址对外进行服务暴露。经过一段时间的观察，发现在 Deployment 滚动更新中及之后一段时间，偶现服务访问 502 的问题。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/problems/kubernetes-service-502/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/raft/" class="post-link">Etcd 的基础-分布式一致性算法 Raft</a></h3>
-    <p class="post-meta">@Maoqide · Mar 22, 2021 · 3 min read</p>
-  </header>
-  
-  <p class="post-summary">Raft 是一个管理复制日志的分布式一致性算法，也是 ETCD 实现分布式一致性的基础，保证 ETCD 集群中各节点数据的强一致性。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/raft/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/kubernetes-crd/" class="post-link">Kubernetes Crd</a></h3>
-    <p class="post-meta">@Maoqide · Oct 29, 2020 · 3 min read</p>
-  </header>
-  
-  <p class="post-summary"></p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/kubernetes-crd/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/application-containerization-best-practice/" class="post-link">Application Containerization Best Practice</a></h3>
-    <p class="post-meta">@Maoqide · Aug 10, 2020 · 3 min read</p>
-  </header>
-  
-  <p class="post-summary">应用容器化部署最佳实践
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/application-containerization-best-practice/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/practice/monitor-system/" class="post-link">监控系统的设计</a></h3>
-    <p class="post-meta">@Maoqide · Jul 3, 2020 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary">本文为个人对监控系统的设计调研后的总结及个人理解，如有偏差，欢迎指正。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/practice/monitor-system/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/sample-operator/" class="post-link">Sample Operator</a></h3>
-    <p class="post-meta">@Maoqide · Jun 29, 2020 · 5 min read</p>
-  </header>
-  
-  <p class="post-summary">用 kubebuilder 开发 operator 实现 sample-controller
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/sample-operator/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/cloud/kubernetes-events/" class="post-link">Kubernetes Events</a></h3>
-    <p class="post-meta">@Maoqide · Apr 25, 2020 · 18 min read</p>
-  </header>
-  
-  <p class="post-summary">通过源码探究 kubernetes 如何记录和存储集群中的大量事件信息。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/cloud/kubernetes-events/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/algorithm/bfs-and-dfs/" class="post-link">Bfs and Dfs</a></h3>
-    <p class="post-meta">@Maoqide · Mar 28, 2020 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary">golang 深度优先搜索和广度优先搜索。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/algorithm/bfs-and-dfs/">Read More →</a>
-  </footer>
-</article>
-  <article class="post-entry">
-  <header class="post-header">
-    <h3 class="post-title"><a href="/post/golang/golang-gc-memory-allocation/" class="post-link">Golang Gc &amp; Memory Allocation</a></h3>
-    <p class="post-meta">@Maoqide · Feb 18, 2020 · 1 min read</p>
-  </header>
-  
-  <p class="post-summary">关于 Golang GC 和内存管理相关的流程和原理的一些总结。
-</p>
-  <footer class="post-footer">
-    <a class="read-more" href="/post/golang/golang-gc-memory-allocation/">Read More →</a>
-  </footer>
-</article>
- 
-   
-  <footer class="list-footer">
-    <nav class="pagination">
-      <h3 class="offscreen">Pagination</h3>
-       
-      <a class="pagination-next" href="/page/2/"
-        >Older Posts →</a
-      >
+  <section class="main post-list">
+    <header class="list-header offscreen">
+      <h2 class="list-label">Posts List</h2>
+    </header>
+    
+    
       
-    </nav>
-  </footer>
+        <article class="post-entry">
+  <header class="post-header">
+    <h3 class="post-title"><a href="/post/cloud/deploy-kubernetes-on-aliyun/" class="post-link">阿里云主机搭建 K8S 集群</a></h3>
+    <p class="post-meta">@Maoqide · Nov 14, 2018 · 2 min read</p>
+  </header>
   
-</section>
+  <p class="post-summary">通过阿里云ECS实例搭建K8S集群
+</p>
+  <footer class="post-footer">
+    <a class="read-more" href="/post/cloud/deploy-kubernetes-on-aliyun/">Read More →</a>
+  </footer>
+</article>
 
+      
+    
+    
+      <footer class="list-footer">
+        <nav class="pagination">
+          <h3 class="offscreen">Pagination</h3>
+          
+            <a class="pagination-previous" href="/tags/kubernetes/page/2/">← Newer Posts</a>
+          
+          
+        </nav>
+      </footer>
+    
+  </section>
+  
 <footer class="site-footer">
   <p>© 2017-2021 Maoqide</p>
   <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> with theme <a href="https://github.com/laozhu/hugo-nuo" target="_blank" rel="noopener">Nuo</a>.</p>
@@ -384,6 +284,7 @@ var _hmt = _hmt || [];
 })();
 </script>
 
- 
+
+
   </body>
 </html>
