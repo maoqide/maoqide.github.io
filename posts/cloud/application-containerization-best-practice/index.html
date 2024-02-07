@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Application Containerization Best Practice · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="应用容器化部署最佳实践">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Application Containerization Best Practice"/>
+<meta name="twitter:description" content="应用容器化部署最佳实践"/>
+
+<meta property="og:title" content="Application Containerization Best Practice" />
+<meta property="og:description" content="应用容器化部署最佳实践" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/cloud/application-containerization-best-practice/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-08-10T09:18:18+08:00" />
+<meta property="article:modified_time" content="2020-08-10T09:18:18+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/cloud/application-containerization-best-practice/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/cloud/application-containerization-best-practice/">
+              Application Containerization Best Practice
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2020-08-10T09:18:18&#43;08:00">
+                August 10, 2020
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              3-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/containerize/">containerize</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/best-practice/">best-practice</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>应用容器化部署最佳实践</p>
+<h2 id="镜像构建">
+  镜像构建
+  <a class="heading-link" href="#%e9%95%9c%e5%83%8f%e6%9e%84%e5%bb%ba">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="基本操作">
+  基本操作
+  <a class="heading-link" href="#%e5%9f%ba%e6%9c%ac%e6%93%8d%e4%bd%9c">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker build -f Dockerfile -t image_name:v1 .
+</span></span></code></pre></div><h3 id="build-contextdockerignore">
+  build context/dockerignore
+  <a class="heading-link" href="#build-contextdockerignore">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>执行<code>docker build</code>命令时，docker client 会将当前目录下的文件打包并发送给 docker daemon，这就是 build context。 <br>
+这个过程会有一定耗时，尤其是 build context 很大的时候，这时候可以用<code>.dockerignore</code>文件建不需要的大文件忽略，用法和 git 的<code>.gitignore</code>基本一致。</p>
+<p>下面执行<code>docker build</code>命令的目录, 使用<code>.dockerignore</code>文件忽略了文件 test1</p>
+<pre tabindex="0"><code>[root@centos11 images]# ls -la
+total 102408
+drwxr-xr-x. 2 root root        70 Aug 18 22:25 .
+drwxr-xr-x. 3 root root        20 Aug 18 22:04 ..
+-rw-r--r--. 1 root root         6 Aug 18 22:11 .dockerignore
+-rw-r--r--. 1 root root        52 Aug 18 22:19 Dockerfile
+-rw-r--r--. 1 root root         0 Aug 18 22:08 test
+-rw-r--r--. 1 root root 104857600 Aug 18 22:11 test1
+</code></pre><p>下面是 docker daemon 进行镜像构建的临时目录</p>
+<pre tabindex="0"><code>[root@centos11 docker-builder226382581]# pwd
+/var/lib/docker/tmp/docker-builder226382581
+[root@centos11 docker-builder226382581]# ll
+total 4
+-rw-r--r--. 1 root root 52 Aug 18 22:19 Dockerfile
+-rw-r--r--. 1 root root  0 Aug 18 22:08 test
+</code></pre><p>下面是使用<code>.dockerignore</code>和不使用时的区别</p>
+<pre tabindex="0"><code>[root@centos11 images]# time docker build --no-cache -t test .
+Sending build context to Docker daemon  3.584kB
+Step 1/2 : FROM alpine
+ ---&gt; a24bb4013296
+Step 2/2 : ADD ./test /root
+ ---&gt; e31b37d08034
+Successfully built e31b37d08034
+Successfully tagged test:latest
+
+real	0m0.296s
+user	0m0.038s
+sys	0m0.027s
+</code></pre><pre tabindex="0"><code>[root@centos11 images]# time docker build --no-cache -t test .
+Sending build context to Docker daemon  104.9MB
+Step 1/2 : FROM alpine
+ ---&gt; a24bb4013296
+Step 2/2 : ADD ./test /root
+ ---&gt; 1be2b417545d
+Successfully built 1be2b417545d
+Successfully tagged test:latest
+
+real	0m2.535s
+user	0m0.069s
+sys	0m0.086s
+</code></pre><h3 id="最佳实践">
+  最佳实践
+  <a class="heading-link" href="#%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>尽可能小的基础镜像</li>
+<li>清理临时文件</li>
+<li>最小层数</li>
+<li>利用缓存</li>
+</ul>
+<p><a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"  class="external-link" target="_blank" rel="noopener">https://docs.docker.com/develop/develop-images/dockerfile_best-practices/</a></p>
+<h4 id="选择体积较小的基础镜像">
+  选择体积较小的基础镜像
+  <a class="heading-link" href="#%e9%80%89%e6%8b%a9%e4%bd%93%e7%a7%af%e8%be%83%e5%b0%8f%e7%9a%84%e5%9f%ba%e7%a1%80%e9%95%9c%e5%83%8f">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>基础镜像大小差异:</p>
+<pre tabindex="0"><code>[root@centos11 ~]# docker images alpine
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+alpine              latest              a24bb4013296        2 months ago        5.57MB
+[root@centos11 ~]# docker images centos
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos              7                   7e6257c9f8d8        13 days ago         203MB
+</code></pre><p>小的基础镜像上传和下载速度更快，由于包含的软件更少，也能够降低一定的安全漏洞风险。</p>
+<h4 id="清理临时文件">
+  清理临时文件
+  <a class="heading-link" href="#%e6%b8%85%e7%90%86%e4%b8%b4%e6%97%b6%e6%96%87%e4%bb%b6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p><code>RUN</code>指令产生的临时文件需要在当前层清理</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#ff7b72">FROM</span><span style="color:#a5d6ff"> alpine</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> dd <span style="color:#ff7b72">if</span><span style="color:#ff7b72;font-weight:bold">=</span>/dev/zero <span style="color:#79c0ff">of</span><span style="color:#ff7b72;font-weight:bold">=</span>temp_file <span style="color:#79c0ff">bs</span><span style="color:#ff7b72;font-weight:bold">=</span>1M <span style="color:#79c0ff">count</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">100</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> rm -f temp_file<span style="color:#f85149">
+</span></span></span></code></pre></div><pre tabindex="0"><code>[root@centos11 images]# docker images test1
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+test1               latest              e0d48f43985e        13 seconds ago      110MB
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#ff7b72">FROM</span><span style="color:#a5d6ff"> alpine</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> dd <span style="color:#ff7b72">if</span><span style="color:#ff7b72;font-weight:bold">=</span>/dev/zero <span style="color:#79c0ff">of</span><span style="color:#ff7b72;font-weight:bold">=</span>temp_file <span style="color:#79c0ff">bs</span><span style="color:#ff7b72;font-weight:bold">=</span>1M <span style="color:#79c0ff">count</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">100</span> <span style="color:#ff7b72;font-weight:bold">&amp;&amp;</span><span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>	rm -f temp_file<span style="color:#f85149">
+</span></span></span></code></pre></div><pre tabindex="0"><code>[root@centos11 images]# docker images test2
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+test2               latest              c31fabd926aa        7 seconds ago       5.57MB
+</code></pre><p>另一种方式是使用多阶段构建（在 Docker 17.05 中引入）。多阶段构建可以在第一个“构建”容器中构建应用，并将结果用于其他容器，同时使用同一 Dockerfile。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#ff7b72">FROM</span><span style="color:#a5d6ff"> golang:1.10 as builder</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">WORKDIR</span><span style="color:#a5d6ff"> /tmp/go</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">COPY</span> hello.go ./<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> <span style="color:#79c0ff">CGO_ENABLED</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">0</span> go build -a -ldflags <span style="color:#a5d6ff">&#39;-s&#39;</span> -o hello<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">FROM</span><span style="color:#a5d6ff"> scratch</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">CMD</span> [ <span style="color:#a5d6ff">&#34;/hello&#34;</span> ]<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">COPY</span> --from<span style="color:#ff7b72;font-weight:bold">=</span>builder /tmp/go/hello /hello<span style="color:#f85149">
+</span></span></span></code></pre></div><h4 id="最小层数">
+  最小层数
+  <a class="heading-link" href="#%e6%9c%80%e5%b0%8f%e5%b1%82%e6%95%b0">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p><code>RUN</code>, <code>COPY</code>, <code>ADD</code>指令会增加镜像的层数</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#ff7b72">RUN</span> apt-get update <span style="color:#ff7b72;font-weight:bold">&amp;&amp;</span> apt-get install -y <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    aufs-tools <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    automake <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    build-essential <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    curl <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    dpkg-sig <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    libcap-dev <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    libsqlite3-dev <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    mercurial <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    reprepro <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    ruby1.9.1 <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    ruby1.9.1-dev <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    <span style="color:#79c0ff">s3cmd</span><span style="color:#ff7b72;font-weight:bold">=</span>1.1.* <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span> <span style="color:#ff7b72;font-weight:bold">&amp;&amp;</span> rm -rf /var/lib/apt/lists/*<span style="color:#f85149">
+</span></span></span></code></pre></div><h4 id="利用缓存">
+  利用缓存
+  <a class="heading-link" href="#%e5%88%a9%e7%94%a8%e7%bc%93%e5%ad%98">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Docker 镜像缓存可以大幅度加速容器镜像的构建。镜像是逐层构建的，在 Dockerfile 中，每条指令都会在生成的镜像中创建一层。 <br>
+使用镜像缓存时，Dockerfile 的 ADD 和 COPY 指令，会同时对比指令字符串和对应的文件内容和缓存是否一致，其他指令只会比较指令字符串是否一致，并且仅当所有先前的构建步骤都使用 Docker 的构建缓存时，Docker 才会使用缓存。要充分利用 Docker 构建缓存，必须将经常更改的构建步骤置于 Dockerfile 底部。因此，添加代码的操作应该尽可能放在 Dockerfile 下层。</p>
+<h2 id="容器应用">
+  容器/应用
+  <a class="heading-link" href="#%e5%ae%b9%e5%99%a8%e5%ba%94%e7%94%a8">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<ul>
+<li>单进程</li>
+<li>可观测</li>
+<li>无状态</li>
+<li>不可变</li>
+<li>横向扩展</li>
+</ul>
+<h3 id="单进程">
+  单进程
+  <a class="heading-link" href="#%e5%8d%95%e8%bf%9b%e7%a8%8b">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>由于容器与其托管的应用具有相同的生命周期，因此每个容器应仅包含一个应用。当容器启动时，应用也应该启动，当应用停止时，容器也应该停止。 <br>
+<em>此处“应用”被视为具有唯一父进程且可能具有多个子进程的单个软件。</em> <br>
+如果一个容器中具有多个应用，则这些应用可能具有不同的生命周期或处于不同状态。例如，到最后可能出现容器在运行但其某个核心组件崩溃或无响应的情况。如果不进行额外的运行状况检查，则整个容器管理系统（Docker 或 Kubernetes）将无法判断该容器是否运行正常。</p>
+<h3 id="可观测">
+  可观测
+  <a class="heading-link" href="#%e5%8f%af%e8%a7%82%e6%b5%8b">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<h4 id="活跃性探测liveness">
+  活跃性探测(Liveness)
+  <a class="heading-link" href="#%e6%b4%bb%e8%b7%83%e6%80%a7%e6%8e%a2%e6%b5%8bliveness">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Liveness 探测的推荐方法是让应用公开 /health HTTP 端点。在此端点上收到请求后，如果认为运行状况良好，应用应发送“200 OK”响应。在 Kubernetes 中，运行状况良好意味着容器不需要终止或重启。运行状况良好的条件因应用而异，但通常意味着以下情况：</p>
+<ul>
+<li>该应用正在运行</li>
+<li>其主要依赖性得到满足（例如，它可以访问其数据库）</li>
+</ul>
+<h4 id="就绪性探测readiness">
+  就绪性探测(Readiness)
+  <a class="heading-link" href="#%e5%b0%b1%e7%bb%aa%e6%80%a7%e6%8e%a2%e6%b5%8breadiness">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Readiness 探测的推荐方法是让应用公开 /ready HTTP 端点。当应用在此端点上收到请求时，如果其已准备好接收流量，则应发送“200 OK”响应。准备好接收流量意味着以下情况：</p>
+<ul>
+<li>该应用运行状况良好</li>
+<li>任何潜在的初始化步骤均已完成</li>
+<li>发送到应用的任何有效请求都不会导致错误 <br>
+Kubernetes 使用就绪性探测来编排应用的部署。如果更新应用，Kubernetes 将对属于该应用 Deployment 的 pod 进行滚动更新。 默认更新政策是一次更新一个 pod，即 Kubernetes 会在更新下一个 pod 之前等待新 pod 准备就绪（由就绪性探测指明）。 <br>
+<em>在许多应用中，/health 和 /ready 端点合并为一个 /health 端点，因为实际上它们的运行状况和就绪状态之间并没有差别。</em></li>
+</ul>
+<h4 id="监控指标">
+  监控指标
+  <a class="heading-link" href="#%e7%9b%91%e6%8e%a7%e6%8c%87%e6%a0%87">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>指标 HTTP 端点的实现方式和上面两种类似，它通常在 /metrics URI 上公开应用的内部指标。 响应如下：</p>
+<pre tabindex="0"><code>http_requests_total{method=&#34;post&#34;,code=&#34;200&#34;} 1027
+http_requests_total{method=&#34;post&#34;,code=&#34;400&#34;}    3
+http_requests_total{method=&#34;get&#34;,code=&#34;200&#34;} 10892
+http_requests_total{method=&#34;get&#34;,code=&#34;400&#34;}    97
+</code></pre><p>通过 Prometheus 客户端 SDK 可以轻松生成如上格式的 HTTP 端点。</p>
+<h3 id="无状态">
+  无状态
+  <a class="heading-link" href="#%e6%97%a0%e7%8a%b6%e6%80%81">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>无状态意味着任何状态数据（任何类型的持久性数据）均存储在容器之外。这种外部存储可以采取多种形式：</p>
+<ul>
+<li>如需存储文件，建议使用对象存储。</li>
+<li>如需存储用户会话等信息，建议使用外部低延时键值存储，例如 Redis 或 Memcached。</li>
+<li>如果需要块级存储（例如对于数据库），则可以使用挂载到容器的外部磁盘。 <br>
+通过以上方式，你可以从容器本身移除数据，这意味着可以随时彻底停止和销毁容器，而不必担心数据丢失。如果创建了一个新容器来替换旧容器，只需将新容器连接到同一数据存储区或绑定到同一磁盘即可。</li>
+</ul>
+<h3 id="不变性">
+  不变性
+  <a class="heading-link" href="#%e4%b8%8d%e5%8f%98%e6%80%a7">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>不可变意味着容器在其生命周期内不会被修改，即没有更新、没有补丁程序，也没有配置更改。如果必须更新应用代码或应用补丁程序，则必须构建新镜像并重新部署。 <br>
+不变性使容器部署更安全、更可重复，可在不同环境中使用同一镜像。如果需要回滚，只需重新部署旧镜像即可。 <br>
+如需在不同环境中使用同一镜像，我们建议您外部化容器配置（监听端口、运行时参数等）在 Kubernetes 中，可以使用 Secrets 或 ConfigMaps 将容器中的配置作为环境变量或文件注入。 <br>
+如果需要更新配置，请使用更新后的配置部署一个新容器（基于同一镜像）。</p>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

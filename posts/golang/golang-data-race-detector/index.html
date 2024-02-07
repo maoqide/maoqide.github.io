@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Golang Data Race Detector · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="[译] https://golang.google.cn/doc/articles/race_detector.html
+golang 中的几种 Data Race 场景及 Data Race 检测工具。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Golang Data Race Detector"/>
+<meta name="twitter:description" content="[译] https://golang.google.cn/doc/articles/race_detector.html
+golang 中的几种 Data Race 场景及 Data Race 检测工具。"/>
+
+<meta property="og:title" content="Golang Data Race Detector" />
+<meta property="og:description" content="[译] https://golang.google.cn/doc/articles/race_detector.html
+golang 中的几种 Data Race 场景及 Data Race 检测工具。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/golang/golang-data-race-detector/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-06-18T09:26:13+08:00" />
+<meta property="article:modified_time" content="2019-06-18T09:26:13+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/golang/golang-data-race-detector/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/golang/golang-data-race-detector/">
+              Golang Data Race Detector
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2019-06-18T09:26:13&#43;08:00">
+                June 18, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              4-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/golang/">golang</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>[译] <a href="https://golang.google.cn/doc/articles/race_detector.html"  class="external-link" target="_blank" rel="noopener">https://golang.google.cn/doc/articles/race_detector.html</a></p>
+<p>golang 中的几种 Data Race 场景及 Data Race 检测工具。</p>
+<h2 id="introduction">
+  Introduction
+  <a class="heading-link" href="#introduction">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>数据竞争是并发系统中最常见和最难 debug 的 bug 类型之一，当两个 goroutine 同时访问同一个变量并且至少有一个是写入时，就会发生 data race(数据竞争)。详细内容可以阅读<a href="https://golang.google.cn/ref/mem/"  class="external-link" target="_blank" rel="noopener">The Go Memory Model</a>。 <br>
+以下是可能导致崩溃和内存损坏的 data race 示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	c <span style="color:#ff7b72;font-weight:bold">:=</span> make(<span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">bool</span>)
+</span></span><span style="display:flex;"><span>	m <span style="color:#ff7b72;font-weight:bold">:=</span> make(<span style="color:#ff7b72">map</span>[<span style="color:#ff7b72">string</span>]<span style="color:#ff7b72">string</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>		m[<span style="color:#a5d6ff">&#34;1&#34;</span>] = <span style="color:#a5d6ff">&#34;a&#34;</span> <span style="color:#8b949e;font-style:italic">// First conflicting access.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		c <span style="color:#ff7b72;font-weight:bold">&lt;-</span> <span style="color:#79c0ff">true</span>
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>	m[<span style="color:#a5d6ff">&#34;2&#34;</span>] = <span style="color:#a5d6ff">&#34;b&#34;</span> <span style="color:#8b949e;font-style:italic">// Second conflicting access.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72;font-weight:bold">&lt;-</span>c
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">for</span> k, v <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72">range</span> m {
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#d2a8ff;font-weight:bold">Println</span>(k, v)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="usage">
+  Usage
+  <a class="heading-link" href="#usage">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>为了帮助诊断此类错误，Go 包含一个内置的 data race detector。要使用它，请在go命令中添加-race标志：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ go test -race mypkg    // to test the package
+</span></span><span style="display:flex;"><span>$ go run -race mysrc.go  // to run the source file
+</span></span><span style="display:flex;"><span>$ go build -race mycmd   // to build the command
+</span></span><span style="display:flex;"><span>$ go install -race mypkg // to install the package
+</span></span></code></pre></div><h1 id="report-format">
+  Report Format
+  <a class="heading-link" href="#report-format">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>当 data race detector 在程序中发现有 data race 时，它会打印一个报告。该报告包含冲突访问的堆栈跟踪，以及创建相关 goroutine 的堆栈。以下一个例子：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>WARNING: DATA RACE
+</span></span><span style="display:flex;"><span>Read by goroutine 185:
+</span></span><span style="display:flex;"><span>  net.<span style="color:#ff7b72;font-weight:bold">(</span>*pollServer<span style="color:#ff7b72;font-weight:bold">)</span>.AddFD<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/fd_unix.go:89 +0x398
+</span></span><span style="display:flex;"><span>  net.<span style="color:#ff7b72;font-weight:bold">(</span>*pollServer<span style="color:#ff7b72;font-weight:bold">)</span>.WaitWrite<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/fd_unix.go:247 +0x45
+</span></span><span style="display:flex;"><span>  net.<span style="color:#ff7b72;font-weight:bold">(</span>*netFD<span style="color:#ff7b72;font-weight:bold">)</span>.Write<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/fd_unix.go:540 +0x4d4
+</span></span><span style="display:flex;"><span>  net.<span style="color:#ff7b72;font-weight:bold">(</span>*conn<span style="color:#ff7b72;font-weight:bold">)</span>.Write<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/net.go:129 +0x101
+</span></span><span style="display:flex;"><span>  net.func·060<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/timeout_test.go:603 +0xaf
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Previous write by goroutine 184:
+</span></span><span style="display:flex;"><span>  net.setWriteDeadline<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/sockopt_posix.go:135 +0xdf
+</span></span><span style="display:flex;"><span>  net.setDeadline<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/sockopt_posix.go:144 +0x9c
+</span></span><span style="display:flex;"><span>  net.<span style="color:#ff7b72;font-weight:bold">(</span>*conn<span style="color:#ff7b72;font-weight:bold">)</span>.SetDeadline<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/net.go:161 +0xe3
+</span></span><span style="display:flex;"><span>  net.func·061<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/timeout_test.go:616 +0x3ed
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Goroutine <span style="color:#a5d6ff">185</span> <span style="color:#ff7b72;font-weight:bold">(</span>running<span style="color:#ff7b72;font-weight:bold">)</span> created at:
+</span></span><span style="display:flex;"><span>  net.func·061<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/timeout_test.go:609 +0x288
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Goroutine <span style="color:#a5d6ff">184</span> <span style="color:#ff7b72;font-weight:bold">(</span>running<span style="color:#ff7b72;font-weight:bold">)</span> created at:
+</span></span><span style="display:flex;"><span>  net.TestProlongTimeout<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/net/timeout_test.go:618 +0x298
+</span></span><span style="display:flex;"><span>  testing.tRunner<span style="color:#ff7b72;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      src/testing/testing.go:301 +0xe8
+</span></span></code></pre></div><h2 id="options">
+  Options
+  <a class="heading-link" href="#options">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>环境变量 <code>GORACE</code> 用来设置 data race detector 选项，格式如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#79c0ff">GORACE</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;option1=val1 option2=val2&#34;</span>
+</span></span></code></pre></div><p>option 有：</p>
+<ul>
+<li><code>log_path</code> (default <code>stderr</code>): race detector 将其报告写入名为<code>log_path.pid</code>的文件。<code>stdout</code>和<code>stderr</code> 分别让报告写入标准输出和标准错误。</li>
+<li><code>exitcode</code> (default <code>66</code>): 检测到的 race 后使用的退出状态码。</li>
+<li><code>strip_path_prefix</code> (default <code>&quot;&quot;</code>): 从所有报告的文件路径中删除此前缀，以使报告更简洁。</li>
+<li><code>history_size</code> (default <code>1</code>): 每个 goroutine 内存访问历史记录是<code>32K * 2**history_size elements</code>。加大此值可以避免“无法还原堆栈”错误报告，但会增加内存使用量。</li>
+<li><code>halt_on_error</code> (default <code>0</code>): 控制在报告第一次数据竞争后程序是否退出。</li>
+</ul>
+<p>示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ <span style="color:#79c0ff">GORACE</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;log_path=/tmp/race/report strip_path_prefix=/my/go/sources/&#34;</span> go test -race
+</span></span></code></pre></div><h2 id="excluding-tests">
+  Excluding Tests
+  <a class="heading-link" href="#excluding-tests">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>当使用 <code>-race</code> 标志构建时，go 命令定义了额外的<a href="https://golang.google.cn/pkg/go/build/#hdr-Build_Constraints"  class="external-link" target="_blank" rel="noopener">构建参数</a><code>race</code>。运行 race detector 时，你可以使用此标记排除某些代码和测试。下面是一些实例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// +build !race
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">package</span> foo
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// The test contains a data race. See issue 123.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">TestFoo</span>(t <span style="color:#ff7b72;font-weight:bold">*</span>testing.T) {
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// The test fails under the race detector due to timeouts.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">TestBar</span>(t <span style="color:#ff7b72;font-weight:bold">*</span>testing.T) {
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// The test takes too long under the race detector.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">TestBaz</span>(t <span style="color:#ff7b72;font-weight:bold">*</span>testing.T) {
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>}
+</span></span></code></pre></div><p>To start, run your tests using the race detector (go test -race). The race detector only finds races that happen at runtime, so it can&rsquo;t find races in code paths that are not executed. If your tests have incomplete coverage, you may find more races by running a binary built with -race under a realistic workload.</p>
+<h2 id="how-to-use">
+  How To Use
+  <a class="heading-link" href="#how-to-use">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>首先，使用 race detector 运行测试(<code>go test -race</code>)。race detector 仅查找运行时发生的 race，因此无法在未执行的代码路径中找到 race，如果你的测试覆盖率不完全，在实际工作负载下运行使用<code>-race</code>构建的二进制文件，你可能会发现更多的 race。</p>
+<h2 id="typical-data-races">
+  Typical Data Races
+  <a class="heading-link" href="#typical-data-races">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>以下是一些典型的 data race 场景。所有这些都可以通过 race detector 检测到：</p>
+<h3 id="race-on-loop-counter循环计数器竞争">
+  Race on loop counter(循环计数器竞争)
+  <a class="heading-link" href="#race-on-loop-counter%e5%be%aa%e7%8e%af%e8%ae%a1%e6%95%b0%e5%99%a8%e7%ab%9e%e4%ba%89">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#d2a8ff;font-weight:bold">Add</span>(<span style="color:#a5d6ff">5</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">for</span> i <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#a5d6ff">0</span>; i &lt; <span style="color:#a5d6ff">5</span>; i<span style="color:#ff7b72;font-weight:bold">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>			fmt.<span style="color:#d2a8ff;font-weight:bold">Println</span>(i) <span style="color:#8b949e;font-style:italic">// Not the &#39;i&#39; you are looking for.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			wg.<span style="color:#d2a8ff;font-weight:bold">Done</span>()
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#d2a8ff;font-weight:bold">Wait</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>函数传参中的变量<code>i</code>与 for 循环使用的变量相同，因此 goroutine 中的读取与循环的自增产生 race（此程序通常会打印出 55555，而不是 01234）。zhegewenti可以通过对变量<code>i</code>进行复制来修复；</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#d2a8ff;font-weight:bold">Add</span>(<span style="color:#a5d6ff">5</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">for</span> i <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#a5d6ff">0</span>; i &lt; <span style="color:#a5d6ff">5</span>; i<span style="color:#ff7b72;font-weight:bold">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>(j <span style="color:#ff7b72">int</span>) {
+</span></span><span style="display:flex;"><span>			fmt.<span style="color:#d2a8ff;font-weight:bold">Println</span>(j) <span style="color:#8b949e;font-style:italic">// Good. Read local copy of the loop counter.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			wg.<span style="color:#d2a8ff;font-weight:bold">Done</span>()
+</span></span><span style="display:flex;"><span>		}(i)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#d2a8ff;font-weight:bold">Wait</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="accidentally-shared-variable意外的共享变量">
+  Accidentally shared variable(意外的共享变量)
+  <a class="heading-link" href="#accidentally-shared-variable%e6%84%8f%e5%a4%96%e7%9a%84%e5%85%b1%e4%ba%ab%e5%8f%98%e9%87%8f">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// ParallelWrite writes data to file1 and file2, returns the errors.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">ParallelWrite</span>(data []<span style="color:#ff7b72">byte</span>) <span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">error</span> {
+</span></span><span style="display:flex;"><span>	res <span style="color:#ff7b72;font-weight:bold">:=</span> make(<span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">error</span>, <span style="color:#a5d6ff">2</span>)
+</span></span><span style="display:flex;"><span>	f1, err <span style="color:#ff7b72;font-weight:bold">:=</span> os.<span style="color:#d2a8ff;font-weight:bold">Create</span>(<span style="color:#a5d6ff">&#34;file1&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">if</span> err <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> {
+</span></span><span style="display:flex;"><span>		res <span style="color:#ff7b72;font-weight:bold">&lt;-</span> err
+</span></span><span style="display:flex;"><span>	} <span style="color:#ff7b72">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// This err is shared with the main goroutine,
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#8b949e;font-style:italic">// so the write races with the write below.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#8b949e;font-style:italic">// 此 err 变量和主 goroutine 共享，所以此写入和下面的写入产生 race。
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			_, err = f1.<span style="color:#d2a8ff;font-weight:bold">Write</span>(data)
+</span></span><span style="display:flex;"><span>			res <span style="color:#ff7b72;font-weight:bold">&lt;-</span> err
+</span></span><span style="display:flex;"><span>			f1.<span style="color:#d2a8ff;font-weight:bold">Close</span>()
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	f2, err <span style="color:#ff7b72;font-weight:bold">:=</span> os.<span style="color:#d2a8ff;font-weight:bold">Create</span>(<span style="color:#a5d6ff">&#34;file2&#34;</span>) <span style="color:#8b949e;font-style:italic">// The second conflicting write to err.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">if</span> err <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> {
+</span></span><span style="display:flex;"><span>		res <span style="color:#ff7b72;font-weight:bold">&lt;-</span> err
+</span></span><span style="display:flex;"><span>	} <span style="color:#ff7b72">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>			_, err = f2.<span style="color:#d2a8ff;font-weight:bold">Write</span>(data)
+</span></span><span style="display:flex;"><span>			res <span style="color:#ff7b72;font-weight:bold">&lt;-</span> err
+</span></span><span style="display:flex;"><span>			f2.<span style="color:#d2a8ff;font-weight:bold">Close</span>()
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">return</span> res
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>修复方法是在 goroutines 中引入新变量（注意使用 :=）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span>			<span style="color:#ff7b72;font-weight:bold">...</span>
+</span></span><span style="display:flex;"><span>			_, err <span style="color:#ff7b72;font-weight:bold">:=</span> f1.<span style="color:#d2a8ff;font-weight:bold">Write</span>(data)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72;font-weight:bold">...</span>
+</span></span><span style="display:flex;"><span>			_, err <span style="color:#ff7b72;font-weight:bold">:=</span> f2.<span style="color:#d2a8ff;font-weight:bold">Write</span>(data)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72;font-weight:bold">...</span>
+</span></span></code></pre></div><h3 id="unprotected-global-variable无保护的全局变量">
+  Unprotected global variable(无保护的全局变量)
+  <a class="heading-link" href="#unprotected-global-variable%e6%97%a0%e4%bf%9d%e6%8a%a4%e7%9a%84%e5%85%a8%e5%b1%80%e5%8f%98%e9%87%8f">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>如果有多个 goroutine 调用以下代码，则会导致 map类型的变量<code>service</code>产生 race。并发读取和写入同一个 map 是不安全的：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> service <span style="color:#ff7b72">map</span>[<span style="color:#ff7b72">string</span>]net.Addr
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">RegisterService</span>(name <span style="color:#ff7b72">string</span>, addr net.Addr) {
+</span></span><span style="display:flex;"><span>	service[name] = addr
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">LookupService</span>(name <span style="color:#ff7b72">string</span>) net.Addr {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">return</span> service[name]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>为了使代码安全，用互斥锁<code>mutex</code>来保护访问权限：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> (
+</span></span><span style="display:flex;"><span>	service   <span style="color:#ff7b72">map</span>[<span style="color:#ff7b72">string</span>]net.Addr
+</span></span><span style="display:flex;"><span>	serviceMu sync.Mutex
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">RegisterService</span>(name <span style="color:#ff7b72">string</span>, addr net.Addr) {
+</span></span><span style="display:flex;"><span>	serviceMu.<span style="color:#d2a8ff;font-weight:bold">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">defer</span> serviceMu.<span style="color:#d2a8ff;font-weight:bold">Unlock</span>()
+</span></span><span style="display:flex;"><span>	service[name] = addr
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">LookupService</span>(name <span style="color:#ff7b72">string</span>) net.Addr {
+</span></span><span style="display:flex;"><span>	serviceMu.<span style="color:#d2a8ff;font-weight:bold">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">defer</span> serviceMu.<span style="color:#d2a8ff;font-weight:bold">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">return</span> service[name]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="primitive-unprotected-variable原始无保护变量">
+  Primitive unprotected variable(原始无保护变量)
+  <a class="heading-link" href="#primitive-unprotected-variable%e5%8e%9f%e5%a7%8b%e6%97%a0%e4%bf%9d%e6%8a%a4%e5%8f%98%e9%87%8f">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>data race 也可能发生在原始类型的变量上（bool，int，int64 等），如下例所示：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">type</span> Watchdog <span style="color:#ff7b72">struct</span>{ last <span style="color:#ff7b72">int64</span> }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (w <span style="color:#ff7b72;font-weight:bold">*</span>Watchdog) <span style="color:#d2a8ff;font-weight:bold">KeepAlive</span>() {
+</span></span><span style="display:flex;"><span>	w.last = time.<span style="color:#d2a8ff;font-weight:bold">Now</span>().<span style="color:#d2a8ff;font-weight:bold">UnixNano</span>() <span style="color:#8b949e;font-style:italic">// First conflicting access.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (w <span style="color:#ff7b72;font-weight:bold">*</span>Watchdog) <span style="color:#d2a8ff;font-weight:bold">Start</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">for</span> {
+</span></span><span style="display:flex;"><span>			time.<span style="color:#d2a8ff;font-weight:bold">Sleep</span>(time.Second)
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// Second conflicting access.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#ff7b72">if</span> w.last &lt; time.<span style="color:#d2a8ff;font-weight:bold">Now</span>().<span style="color:#d2a8ff;font-weight:bold">Add</span>(<span style="color:#ff7b72;font-weight:bold">-</span><span style="color:#a5d6ff">10</span><span style="color:#ff7b72;font-weight:bold">*</span>time.Second).<span style="color:#d2a8ff;font-weight:bold">UnixNano</span>() {
+</span></span><span style="display:flex;"><span>				fmt.<span style="color:#d2a8ff;font-weight:bold">Println</span>(<span style="color:#a5d6ff">&#34;No keepalives for 10 seconds. Dying.&#34;</span>)
+</span></span><span style="display:flex;"><span>				os.<span style="color:#d2a8ff;font-weight:bold">Exit</span>(<span style="color:#a5d6ff">1</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>即使是这种“无辜的” data race 也会导致难以调试的问题，这些问题是由存储器访问的非原子性，编译器优化的干扰或访问处理器存储的重新排序问题引起的。</p>
+<p>这种 data race 的典型修复方法是使用 channel 或 mutex。为了保持无锁行为，还可以使用<code>sync/atomic</code>包。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">type</span> Watchdog <span style="color:#ff7b72">struct</span>{ last <span style="color:#ff7b72">int64</span> }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (w <span style="color:#ff7b72;font-weight:bold">*</span>Watchdog) <span style="color:#d2a8ff;font-weight:bold">KeepAlive</span>() {
+</span></span><span style="display:flex;"><span>	atomic.<span style="color:#d2a8ff;font-weight:bold">StoreInt64</span>(<span style="color:#ff7b72;font-weight:bold">&amp;</span>w.last, time.<span style="color:#d2a8ff;font-weight:bold">Now</span>().<span style="color:#d2a8ff;font-weight:bold">UnixNano</span>())
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (w <span style="color:#ff7b72;font-weight:bold">*</span>Watchdog) <span style="color:#d2a8ff;font-weight:bold">Start</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">for</span> {
+</span></span><span style="display:flex;"><span>			time.<span style="color:#d2a8ff;font-weight:bold">Sleep</span>(time.Second)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">if</span> atomic.<span style="color:#d2a8ff;font-weight:bold">LoadInt64</span>(<span style="color:#ff7b72;font-weight:bold">&amp;</span>w.last) &lt; time.<span style="color:#d2a8ff;font-weight:bold">Now</span>().<span style="color:#d2a8ff;font-weight:bold">Add</span>(<span style="color:#ff7b72;font-weight:bold">-</span><span style="color:#a5d6ff">10</span><span style="color:#ff7b72;font-weight:bold">*</span>time.Second).<span style="color:#d2a8ff;font-weight:bold">UnixNano</span>() {
+</span></span><span style="display:flex;"><span>				fmt.<span style="color:#d2a8ff;font-weight:bold">Println</span>(<span style="color:#a5d6ff">&#34;No keepalives for 10 seconds. Dying.&#34;</span>)
+</span></span><span style="display:flex;"><span>				os.<span style="color:#d2a8ff;font-weight:bold">Exit</span>(<span style="color:#a5d6ff">1</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="supported-systems">
+  Supported Systems
+  <a class="heading-link" href="#supported-systems">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Trace detector 可以运行在 darwin/amd64, freebsd/amd64, linux/amd64 和 windows/amd64.</p>
+<h2 id="runtime-overhead">
+  Runtime Overhead
+  <a class="heading-link" href="#runtime-overhead">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>竞争检测的成本因程序而异，但对于一个典型的程序，内存使用量可能增加5-10倍，执行时间增加2-20倍。</p>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

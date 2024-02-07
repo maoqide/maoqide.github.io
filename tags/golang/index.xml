@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>golang on maoqide</title>
+    <link>/tags/golang/</link>
+    <description>Recent content in golang on maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 18 Feb 2020 17:20:47 +0800</lastBuildDate>
+    <atom:link href="/tags/golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Golang Gc &amp; Memory Allocation</title>
+      <link>/posts/golang/golang-gc--memory-allocation/</link>
+      <pubDate>Tue, 18 Feb 2020 17:20:47 +0800</pubDate>
+      <guid>/posts/golang/golang-gc--memory-allocation/</guid>
+      <description>&lt;p&gt;关于 Golang GC 和内存管理相关的流程和原理的一些总结。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Collection 4</title>
+      <link>/posts/awesome-post/collection-4/</link>
+      <pubDate>Tue, 18 Feb 2020 12:13:08 +0800</pubDate>
+      <guid>/posts/awesome-post/collection-4/</guid>
+      <description>&lt;p&gt;golang GC &amp;amp; 内存管理&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Golang Websocket Message Pushing</title>
+      <link>/posts/golang/golang-websocket-message-pushing/</link>
+      <pubDate>Sat, 11 Jan 2020 20:49:24 +0800</pubDate>
+      <guid>/posts/golang/golang-websocket-message-pushing/</guid>
+      <description>&lt;p&gt;使用 golang 的 websocket 框架 &lt;a href=&#34;https://github.com/olahol/melody&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;melody&lt;/a&gt;，实现通用的消息分组推送服务。针对同一推送对象，只起一个后端协程进行广播推送，减少资源消耗，并提供监控接口查询当前的协程和websocket连接。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Collection 3</title>
+      <link>/posts/awesome-post/collection-3/</link>
+      <pubDate>Tue, 07 Jan 2020 21:57:36 +0800</pubDate>
+      <guid>/posts/awesome-post/collection-3/</guid>
+      <description>&lt;ul&gt;&#xA;&lt;li&gt;golang GC&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>Go Concurrency</title>
+      <link>/posts/golang/go-concurrency/</link>
+      <pubDate>Sat, 20 Jul 2019 21:38:08 +0800</pubDate>
+      <guid>/posts/golang/go-concurrency/</guid>
+      <description>&lt;p&gt;go 语言相比其他语言的一大优势，就是便捷，高效的并发代码的编写。本文具体介绍 go 语言的并发机制和使用 go 语言作并发编程的方法。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>The Go Memory Model</title>
+      <link>/posts/golang/the-go-memory-model/</link>
+      <pubDate>Wed, 19 Jun 2019 09:10:37 +0800</pubDate>
+      <guid>/posts/golang/the-go-memory-model/</guid>
+      <description>&lt;p&gt;[译]https://golang.google.cn/ref/mem&lt;/p&gt;&#xA;&lt;p&gt;Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Golang Data Race Detector</title>
+      <link>/posts/golang/golang-data-race-detector/</link>
+      <pubDate>Tue, 18 Jun 2019 09:26:13 +0800</pubDate>
+      <guid>/posts/golang/golang-data-race-detector/</guid>
+      <description>&lt;p&gt;[译] &lt;a href=&#34;https://golang.google.cn/doc/articles/race_detector.html&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://golang.google.cn/doc/articles/race_detector.html&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;golang 中的几种 Data Race 场景及 Data Race 检测工具。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Golang Mutex</title>
+      <link>/posts/golang/golang-mutex/</link>
+      <pubDate>Mon, 11 Mar 2019 16:35:20 +0800</pubDate>
+      <guid>/posts/golang/golang-mutex/</guid>
+      <description>&lt;p&gt;golang 的&lt;code&gt;sync&lt;/code&gt;包中有两种锁，互斥锁&lt;code&gt;sync.Mutex&lt;/code&gt; 和读写锁&lt;code&gt;sync.RWMutex&lt;/code&gt;。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Awesome Post Collection 2</title>
+      <link>/posts/awesome-post/collection-2/</link>
+      <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
+      <guid>/posts/awesome-post/collection-2/</guid>
+      <description>&lt;ul&gt;&#xA;&lt;li&gt;goroutine 调度器。&lt;/li&gt;&#xA;&lt;li&gt;Golang &lt;code&gt;for range&lt;/code&gt;性能分析及优化。&lt;/li&gt;&#xA;&lt;li&gt;一致性哈希算法。&lt;/li&gt;&#xA;&lt;li&gt;ETCD的一些使用场景及原理分析。&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>Goroutine 的管理</title>
+      <link>/posts/golang/goroutine/</link>
+      <pubDate>Fri, 28 Dec 2018 16:29:32 +0800</pubDate>
+      <guid>/posts/golang/goroutine/</guid>
+      <description>&lt;p&gt;goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 &lt;a href=&#34;https://golang.org/pkg/net/http/pprof/&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;pprof&lt;/a&gt; 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

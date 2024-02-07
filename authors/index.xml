@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Authors on maoqide</title>
+    <link>/authors/</link>
+    <description>Recent content in Authors on maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 07 Feb 2024 14:36:46 +0800</lastBuildDate>
+    <atom:link href="/authors/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Maoqide</title>
+      <link>/authors/maoqide/</link>
+      <pubDate>Wed, 07 Feb 2024 14:36:46 +0800</pubDate>
+      <guid>/authors/maoqide/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

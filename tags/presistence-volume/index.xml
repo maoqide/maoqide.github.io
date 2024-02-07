@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>presistence volume on maoqide</title>
+    <link>/tags/presistence-volume/</link>
+    <description>Recent content in presistence volume on maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 06 Sep 2019 08:46:14 +0800</lastBuildDate>
+    <atom:link href="/tags/presistence-volume/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Glusterfs Kubernetes</title>
+      <link>/posts/cloud/glusterfs-kubernetes/</link>
+      <pubDate>Fri, 06 Sep 2019 08:46:14 +0800</pubDate>
+      <guid>/posts/cloud/glusterfs-kubernetes/</guid>
+      <description>&lt;p&gt;在 kubernetes 中使用 glusterfs 作为 pv。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

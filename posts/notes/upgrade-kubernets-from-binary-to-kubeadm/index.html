@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Upgrade Kubernets From Binary to Kubeadm · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。 
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Upgrade Kubernets From Binary to Kubeadm"/>
+<meta name="twitter:description" content="记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。 
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。"/>
+
+<meta property="og:title" content="Upgrade Kubernets From Binary to Kubeadm" />
+<meta property="og:description" content="记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。 
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-08-06T13:55:04+08:00" />
+<meta property="article:modified_time" content="2019-08-06T13:55:04+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/">
+              Upgrade Kubernets From Binary to Kubeadm
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2019-08-06T13:55:04&#43;08:00">
+                August 6, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              2-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/kubernetes/">kubernetes</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/kubeadm/">kubeadm</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/etcd/">etcd</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。 <br>
+原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。</p>
+<h2 id="部署新的-master-集群">
+  部署新的 master 集群
+  <a class="heading-link" href="#%e9%83%a8%e7%bd%b2%e6%96%b0%e7%9a%84-master-%e9%9b%86%e7%be%a4">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="etcd-数据迁移">
+  etcd 数据迁移
+  <a class="heading-link" href="#etcd-%e6%95%b0%e6%8d%ae%e8%bf%81%e7%a7%bb">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>为了完全不影响原有集群的运行，将 etcd 也做迁移，新的 master 连接新的 etcd，不对老集群造成影响。 <br>
+首先新建一个 etcd，并使用 etcd 的 make-mirror 功能将原有集群的 etcd 数据同步到新的etcd中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 新起一个 etcd，为了方便这里新建不带证书的 http 端口</span>
+</span></span><span style="display:flex;"><span>docker run -d <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>        --name etcd <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>	--net host <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>	-v /data/etcd:/var/lib/etcd <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>	quay.io/coreos/etcd:v3.3.13 <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>	etcd --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">#  迁移数据</span>
+</span></span><span style="display:flex;"><span>export <span style="color:#79c0ff">ETCDCTL_API</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">3</span>
+</span></span><span style="display:flex;"><span>etcdctl --endpoints<span style="color:#ff7b72;font-weight:bold">=</span>https://etcd-ip:2379 --cert<span style="color:#ff7b72;font-weight:bold">=</span>/etc/kubernetes/ssl/etcd.pem --cacert<span style="color:#ff7b72;font-weight:bold">=</span>/etc/kubernetes/ssl/ca.pem --key<span style="color:#ff7b72;font-weight:bold">=</span>/etc/kubernetes/ssl/etcd-key.pem make-mirror http://destination-ip:2379
+</span></span></code></pre></div><p>由于 kubeadm 会自动新建 dns，所以在新的 etcd 中，将导入过来的 kube-dns 相关数据手动删掉。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 执行如下命令知道删掉所有 kube-dns 相关的key</span>
+</span></span><span style="display:flex;"><span>echo  <span style="color:#ff7b72">$(</span>etcdctl get / --prefix --keys-only | grep <span style="color:#a5d6ff">&#39;kube-dns&#39;</span><span style="color:#ff7b72">)</span> | awk -F <span style="color:#a5d6ff">&#39; &#39;</span> <span style="color:#a5d6ff">&#39;{ print $1}&#39;</span> | xargs etcdctl del
+</span></span></code></pre></div><h3 id="新建-master-集群">
+  新建 master 集群
+  <a class="heading-link" href="#%e6%96%b0%e5%bb%ba-master-%e9%9b%86%e7%be%a4">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>使用 kubeadm 新建集群，要注意集群配置要和之前一致，如 serviceSubnet, netSubnet 等，并指定 etcd 为刚才新建的 etcd，以下为 kubeadm 配置文件(用的老版本配置，最新版本的 kubeadm 已经不支持)。</p>
+<pre tabindex="0"><code>apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+api:
+  advertiseAddress: 172.27.32.165
+etcd:
+  endpoints:
+    - http://172.27.32.165:2379
+networking:
+  serviceSubnet: 10.254.0.0/16
+  podSubnet: 172.41.0.0/16
+kubernetesVersion: 1.10.13
+imageRepository: harbor.guahao-inc.com/kubernetes
+apiServerExtraArgs:
+  insecure-bind-address: 172.27.32.165
+kubeletConfiguration:
+  baseConfig:
+    clusterDNS:
+    - 10.254.0.2
+nodeName: 172.27.32.165
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># kubelet.service 加上如下配置</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">Environment</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;KUBELET_EXTRA_ARGS=--pod-infra-container-image=harbor.guahao-inc.com/kubernetes/pause-amd64:3.1 --hostname-override=172.27.32.165&#34;</span>
+</span></span></code></pre></div><p><em>kubeadm 配置文件中设置了nodeName，要同时在 kubelet 的 kubelet.service文件中加上 &ndash;hostname-override 参事，否则 kubelet 注册 apiserver 时会出现node forbidden 错误</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 使用配置文件新建 master 节点，目前所用 k8s 集群版本较老，不支持新版本docker，忽略docker版本校验</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 创建之前可以先 dryrun 进行校验，没问题再真正执行，dryrun 会将需要做的步骤模拟执行并输出，不会真正操作</span>
+</span></span><span style="display:flex;"><span>kubeadm init --dry-run  --config kubeadm.yaml --ignore-preflight-errors<span style="color:#ff7b72;font-weight:bold">=</span>SystemVerification
+</span></span><span style="display:flex;"><span>kubeadm init --config kubeadm.yaml --ignore-preflight-errors<span style="color:#ff7b72;font-weight:bold">=</span>SystemVerification
+</span></span></code></pre></div><p>完成后会提示新建成功，并提示后续操作命令，及node节点加入集群的命令。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 配置 kubectl</span>
+</span></span><span style="display:flex;"><span>mkdir -p <span style="color:#79c0ff">$HOME</span>/.kube
+</span></span><span style="display:flex;"><span>sudo cp -i /etc/kubernetes/admin.conf <span style="color:#79c0ff">$HOME</span>/.kube/config
+</span></span><span style="display:flex;"><span>sudo chown <span style="color:#ff7b72">$(</span>id -u<span style="color:#ff7b72">)</span>:<span style="color:#ff7b72">$(</span>id -g<span style="color:#ff7b72">)</span> <span style="color:#79c0ff">$HOME</span>/.kube/config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 加入集群的命令可以用 kubeadm 重新生成</span>
+</span></span><span style="display:flex;"><span>kubeadm token create --print-join-command
+</span></span></code></pre></div><p>此时已经建好新的 master 节点，并且使用 kubectl get no 可以看到原有集群的节点信息，但这时只是导过来的 etcd，实际上此时 master 节点并未控制 node 节点，node 节点的 kubelet 依然是注册到老的 master 节点，想要将原来的 node 节点迁移到新的 master 节点下，还需要逐台修改每台 node 节点的配置。</p>
+<h3 id="迁移-node-节点">
+  迁移 node 节点
+  <a class="heading-link" href="#%e8%bf%81%e7%a7%bb-node-%e8%8a%82%e7%82%b9">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>迁移 node 节点要注意首先要备份原node节点的 <code>/etc/kubernetes/</code>、<code>/var/lib/kubelet/</code> 和 <code>/etc/systemd/system/kubelet.service</code>、<code>/etc/systemd/system/kubelet.service.d/</code>文件及目录，以便出现异常时可以快速回滚恢复。 <br>
+做好备份后，将当前节点<code>kubelet</code>、<code>kube-proxy</code>停掉，并执行如下命令，由于节点上 kebelet 已经启动且已有 pod 在运行，需要加上 <code>--ignore-preflight-errors=all</code> 强制执行，主要是为了生成 kubelet 相关证书及配置文件，并重启 kubelet 注册到新的 master 节点的 apiserver，此时 <code>--node-name</code> 要指定和之前一样的节点名称，如果 kubelet.service 配置不正确的话，需要手动修改相关配置（参考 kubeadm 新建节点的配置）。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubeadm join  --node-name 192.168.l96.31 172.27.32.165:6443 --token qfr5ff.sd7qn0tlx2a3kxtl --discovery-token-ca-cert-hash sha256:0f7175e3cf8e40d41983688aeb8e80153c2502cd375629379a5abb53f71bce0d --ignore-preflight-errors<span style="color:#ff7b72;font-weight:bold">=</span>all
+</span></span></code></pre></div><p>成功的话，在新的 master 节点执行<code>kubectl get no</code>会能够看到迁移的节点已经变成 ready 状态。  <br>
+若出现异常，将之前备份的目录和文件还原，并重启<code>kubelet</code>和<code>kube-proxy</code>，即可恢复节点。</p>
+<hr>
+<p>以上是经测试验证过的一种思路，但是在实际生产中，用这种方式进行迁移，还是会对在运行容器产生影响，若要应用到生产环境，还需更严谨详细的测试，并且此种方式的迁移风险较大，测试中遇到很多坑，应尽量避免。</p>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

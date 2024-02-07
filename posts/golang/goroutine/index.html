@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Goroutine 的管理 · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 pprof 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Goroutine 的管理"/>
+<meta name="twitter:description" content="goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 pprof 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。"/>
+
+<meta property="og:title" content="Goroutine 的管理" />
+<meta property="og:description" content="goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 pprof 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/golang/goroutine/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-12-28T16:29:32+08:00" />
+<meta property="article:modified_time" content="2018-12-28T16:29:32+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/golang/goroutine/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/golang/goroutine/">
+              Goroutine 的管理
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2018-12-28T16:29:32&#43;08:00">
+                December 28, 2018
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/golang/">golang</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 <a href="https://golang.org/pkg/net/http/pprof/"  class="external-link" target="_blank" rel="noopener">pprof</a> 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。</p>
+<h2 id="几点原则">
+  几点原则
+  <a class="heading-link" href="#%e5%87%a0%e7%82%b9%e5%8e%9f%e5%88%99">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><a href="https://github.com/codeship/go-best-practices/tree/master/concurrency"  class="external-link" target="_blank" rel="noopener">go-best-practices-concurrency</a> <br>
+在 github上的 <a href="https://github.com/codeship/go-best-practices"  class="external-link" target="_blank" rel="noopener">go-best-practices</a> 项目中，提到了几点最佳实践，这里记录下。</p>
+<h3 id="不要和-goroutine-失去联系">
+  不要和 goroutine 失去联系
+  <a class="heading-link" href="#%e4%b8%8d%e8%a6%81%e5%92%8c-goroutine-%e5%a4%b1%e5%8e%bb%e8%81%94%e7%b3%bb">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<blockquote>
+<p>Don&rsquo;t loose contact with your goroutines</p>
+</blockquote>
+<p>如何避免? 使用<code>make(chan struct{})</code>/<code>sync.WaitGroup</code>/<code>context.Context</code>或<code>select</code>。 <br>
+你可能需要这样：</p>
+<ol>
+<li>当必要的时候可以<em>中断</em>创建的 goroutine。</li>
+<li>等待直到产生的所有 goroutine 都完成了。</li>
+</ol>
+<p><strong>中断(Interruption)</strong> <br>
+可以用以下方式实现：</p>
+<ol>
+<li>共享一个无缓冲的空结构体通道（<code>make（chan struct {}）</code>），由 goroutine 的创建者发出关闭信号以关闭。</li>
+<li>一个可取消的<code>context.Context</code>。</li>
+<li>确保你的 goroutine 使用<code>select</code>来不时检查他们的信号，而不会无限期地阻塞住。</li>
+</ol>
+<p><strong>等待 goroutine 完成(Waiting for goroutines to finish)</strong> <br>
+实现的最简单方法是使用<code>sync.WaitGroup</code>。在创建 goroutine 之前，请确保调用了<code>wg.Add(1)</code>。在运行 goroutine 之后，但在它 return 之前，请确保<code>wg.Done()</code>。这种场景下，<code>defer</code>是很好的选择。</p>
+<h3 id="不要用-waitgroup-来计数多种类型的-goroutine">
+  不要用 WaitGroup 来计数多种类型的 goroutine
+  <a class="heading-link" href="#%e4%b8%8d%e8%a6%81%e7%94%a8-waitgroup-%e6%9d%a5%e8%ae%a1%e6%95%b0%e5%a4%9a%e7%a7%8d%e7%b1%bb%e5%9e%8b%e7%9a%84-goroutine">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<blockquote>
+<p>Don&rsquo;t use wait groups to count more than one type of goroutine</p>
+</blockquote>
+<p>这里说的 gouroutine 的类型和被作为 gouroutine 调用的函数相关联，此函数可以是另一种类型的成员函数，可以是包中的命名函数，也可以是匿名函数。重要的一点是，你不应该在作为goroutine 调用的不同函数之间共享 WaitGroup。保持简单，如果你需要对一个不同类型的函数使用<code>go</code>关键字，创建一个新的 WaitGroup，并对它正确命名。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">type</span> Parent <span style="color:#ff7b72">struct</span> {
+</span></span><span style="display:flex;"><span>  wgFoo sync.WaitGroup
+</span></span><span style="display:flex;"><span>  wgBar sync.WaitGroup
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (p <span style="color:#ff7b72;font-weight:bold">*</span>Parent) <span style="color:#d2a8ff;font-weight:bold">foo</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">defer</span> p.wgFoo.<span style="color:#d2a8ff;font-weight:bold">Done</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (p <span style="color:#ff7b72;font-weight:bold">*</span>Parent) <span style="color:#d2a8ff;font-weight:bold">bar</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">defer</span> p.wgBar.<span style="color:#d2a8ff;font-weight:bold">Done</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (p <span style="color:#ff7b72;font-weight:bold">*</span>Parent) <span style="color:#d2a8ff;font-weight:bold">Go</span>() {
+</span></span><span style="display:flex;"><span>  p.wgFoo.<span style="color:#d2a8ff;font-weight:bold">Add</span>(<span style="color:#a5d6ff">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">go</span> p.<span style="color:#d2a8ff;font-weight:bold">foo</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p.wgBar.<span style="color:#d2a8ff;font-weight:bold">Add</span>(<span style="color:#a5d6ff">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">go</span>.<span style="color:#d2a8ff;font-weight:bold">bar</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>虽然共享一个 WaitGroup 可能是正确的解决方案，但是当下一位工程师接受时，它会增加问题的认知复杂性。</p>
+<h3 id="不要让一个-channel-的消费者说什么时候结束">
+  不要让一个 channel 的消费者说什么时候结束
+  <a class="heading-link" href="#%e4%b8%8d%e8%a6%81%e8%ae%a9%e4%b8%80%e4%b8%aa-channel-%e7%9a%84%e6%b6%88%e8%b4%b9%e8%80%85%e8%af%b4%e4%bb%80%e4%b9%88%e6%97%b6%e5%80%99%e7%bb%93%e6%9d%9f">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<blockquote>
+<p>Don&rsquo;t let a channel consumer say when it is done</p>
+</blockquote>
+<p><em>对一个已关闭的 channel 发送会导致 panic</em> <br>
+首先且最重要的是，代码是基于 channel 的消费者和生产者模型的实现，这本身就是一种很好的做法。这是一个明显的关注点分离。 <br>
+golang 给你在编译时定义一个 channel 的方向的能力<code>recvOnly &lt;-chan Thing := make(chan Thing)</code>。这在定义变量时很少有用，但是，在定义函数的接收参数时非常有用。比如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">consume</span>(things <span style="color:#ff7b72;font-weight:bold">&lt;-</span><span style="color:#ff7b72">chan</span> Thing) {
+</span></span><span style="display:flex;"><span>  <span style="color:#8b949e;font-style:italic">// will do work until close
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>  <span style="color:#ff7b72">for</span> thing <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72">range</span> things {
+</span></span><span style="display:flex;"><span>    <span style="color:#8b949e;font-style:italic">// do work
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这强制（在编译时）消费者 goroutine 无法在对 channel 发送数据，包括关闭该 channel 的能力。 <br>
+这强制顶一个租户(goroutine)安全管理 channel。只有当所有生产者停止发送，才关闭 channel。谨记对<strong>一个已关闭的 channel 发送会导致 panic</strong>。</p>
+<p><strong>关闭 channel 的代码必须选保证不会再对此 channel 发送</strong></p>
+<blockquote>
+<p>The piece of code which closes a channel must first guarantee that nothing else will produce on it</p>
+</blockquote>
+<p>如果所有对 channel 的发送都在关闭前同步发生，只要你不重试并再次发送，那就是安全的。 <br>
+如果该 channel 上的生产(production)被放弃到其他 goroutine，那么你需要能够与这些 goroutine 同步退出。</p>
+<p>如果我们可以保证对 goroutine 进行计数并等待它们退出，那么我们可以确定关闭 channel 不会在其他地方引起 panic。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">doConcurrently</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">var</span> (
+</span></span><span style="display:flex;"><span>    things   = make(<span style="color:#ff7b72">chan</span> Thing)
+</span></span><span style="display:flex;"><span>    finished = make(<span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">struct</span>{})
+</span></span><span style="display:flex;"><span>    wg       sync.WaitGroup
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#8b949e;font-style:italic">// will consume until close
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#d2a8ff;font-weight:bold">consume</span>(things)
+</span></span><span style="display:flex;"><span>    <span style="color:#8b949e;font-style:italic">// signal consumption has finished
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    close(finished)
+</span></span><span style="display:flex;"><span>  }()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">for</span> i <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#a5d6ff">0</span>; i &lt; noOfThingsWeWantToDo; i<span style="color:#ff7b72;font-weight:bold">++</span> {
+</span></span><span style="display:flex;"><span>    wg.<span style="color:#d2a8ff;font-weight:bold">Add</span>(<span style="color:#a5d6ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>      <span style="color:#ff7b72">defer</span> wg.<span style="color:#d2a8ff;font-weight:bold">Done</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      things <span style="color:#ff7b72;font-weight:bold">&lt;-</span> Thing{}
+</span></span><span style="display:flex;"><span>    }()
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#8b949e;font-style:italic">// wait until all producers have stopped
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>  wg.<span style="color:#d2a8ff;font-weight:bold">Wait</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8b949e;font-style:italic">// then you can close
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>  close(things)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8b949e;font-style:italic">// wait until finished consuming
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>  <span style="color:#ff7b72;font-weight:bold">&lt;-</span>finished
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="总结">
+  总结
+  <a class="heading-link" href="#%e6%80%bb%e7%bb%93">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ol>
+<li>确保消费者只能消费。使用<code>recvOnly &lt;-chan Thing</code> 。</li>
+<li>跟踪 gouroutine 的完成。使用<code>sync.WaitGroup</code>。</li>
+<li>只有在确认生产者 goroutine 不能再对 channel 进行发送的情况下，再关闭channel。</li>
+</ol>
+<h2 id="从外部结束一个-goroutine">
+  从外部结束一个 goroutine
+  <a class="heading-link" href="#%e4%bb%8e%e5%a4%96%e9%83%a8%e7%bb%93%e6%9d%9f%e4%b8%80%e4%b8%aa-goroutine">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>[参考]<a href="https://gulu-dev.com/post/2016-02-02-kill-goroutine#toc_3"  class="external-link" target="_blank" rel="noopener">从外部结束一个 goroutine</a></p>
+<p><strong>可响应 channel 的 goroutine</strong> <br>
+最直接的方法是关闭与这个 goroutine 通信的 channel close(ch)。如果这个 goroutine 此时阻塞在 read 上，那么阻塞会失效，并在第二个返回值中返回 false (此时可以检测并退出)；如果阻塞在 write 上，那么会 panic，这时合理的做法是在 goroutine 的顶层 recover 并退出。
+更健壮的设计一般会把 data channel (用于传递业务逻辑的数据) 和 signal channel (用于管理 goroutine 的状态) 分开。不会让 goroutine 直接读写 data channel，而是通过 select-default 或 select-timeout 来避免完全阻塞，同时周期性地在 signal channel 检查是否有结束的请求。</p>
+<p><strong>不可响应的 goroutine</strong></p>
+<ol>
+<li>尽量使用 Non-blocking IO (正如 go runtime 那样)</li>
+<li>尽量使用阻塞粒度较小的 sys calls (对外部调用也一样)</li>
+<li>业务逻辑总是考虑退出机制，编码时避免潜在的死循环</li>
+<li>在合适的地方插入响应 channel 的代码，保持一定频率的 channel 响应能力</li>
+</ol>
+<h2 id="使用-context">
+  使用 context
+  <a class="heading-link" href="#%e4%bd%bf%e7%94%a8-context">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><a href="https://blog.golang.org/context"  class="external-link" target="_blank" rel="noopener">GO Context blog</a> <br>
+<a href="https://golang.org/pkg/context/"  class="external-link" target="_blank" rel="noopener">GO Context pkg</a> <br>
+对上面两篇文章的整理翻译。</p>
+<h3 id="context">
+  context
+  <a class="heading-link" href="#context">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>对一个 Go 服务，处理传入请求时应该创建一个<code>Context</code>，外部调用时应该接受一个<code>Context</code>。它们间的函数调用链必须传递<code>Context</code>，传递的 Context 也可以是使用<code>WithCancel</code>, <code>WithDeadline</code>, <code>WithTimeout</code>, or <code>WithValue</code>创建的继承来的<code>Context</code>。当一个<code>Context</code>被取消，所有继承它的<code>Context</code>也都会取消。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// A Context carries a deadline, cancelation signal, and request-scoped values
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// across API boundaries. Its methods are safe for simultaneous use by multiple
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// goroutines.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">type</span> Context <span style="color:#ff7b72">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#8b949e;font-style:italic">// Done returns a channel that is closed when this Context is canceled
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#8b949e;font-style:italic">// or times out.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#d2a8ff;font-weight:bold">Done</span>() <span style="color:#ff7b72;font-weight:bold">&lt;-</span><span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">struct</span>{}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8b949e;font-style:italic">// Err indicates why this context was canceled, after the Done channel
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#8b949e;font-style:italic">// is closed.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#d2a8ff;font-weight:bold">Err</span>() <span style="color:#ff7b72">error</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8b949e;font-style:italic">// Deadline returns the time when this Context will be canceled, if any.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#d2a8ff;font-weight:bold">Deadline</span>() (deadline time.Time, ok <span style="color:#ff7b72">bool</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8b949e;font-style:italic">// Value returns the value associated with key or nil if none.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#d2a8ff;font-weight:bold">Value</span>(key <span style="color:#ff7b72">interface</span>{}) <span style="color:#ff7b72">interface</span>{}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li><code>Done</code> 返回一个只读信道（channel），它是表示 Context 是否已关闭(cancel)的信号。</li>
+<li><code>Err</code> 返回<code>Context</code>被关闭的原因。</li>
+<li><code>Deadline</code> 让方法可以决定是否应该开始工作，如果剩下的时间太少，可能不需要运行。也可以使用 deadline 来设置IO操作的超时时间。</li>
+<li><code>Value</code> 方法允许<code>Context</code>绑定一个请求范围内(<code>request-scoped</code>)的数据。这个数据一定是线程安全的。</li>
+</ul>
+<p><code>Context</code>没有 cancel 方法和<code>Done</code> 信道是只读的原因一样：接收关闭信号(signal)的方法(function)通常不是发送信号的方法，尤其是，当父操作为子操作启动 goroutine 时，这些子操作的 goroutine 不应该能够关闭父操作。相反，<code>WithCancel</code>方法提供了关闭新<code>Context</code>的方式。</p>
+<p>多个 goroutine 同时使用一个<code>Context</code>是安全的。代码可以将单个<code>Context</code>传递给任意数量的 goroutine，并关闭该<code>Conetxt</code>以向所有这些 goroutine 发出信号。</p>
+<h3 id="derived-contexts">
+  Derived contexts
+  <a class="heading-link" href="#derived-contexts">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><code>context</code>包提供了从现有<code>Context</code>中继承新的<code>Context</code>的方法。这些<code>Context</code>构成一个树：当一个<code>Context</code>被关闭(cancel)时，继承自它的所有<code>Context</code>都会被关闭。</p>
+<p><code>Background</code> 是所有 Context 树的根，它永远不会关闭(cancel)：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// Background returns an empty Context. It is never canceled, has no deadline,
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// and has no values. Background is typically used in main, init, and tests,
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// and as the top-level Context for incoming requests.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">Background</span>() Context
+</span></span></code></pre></div><p><code>WithCancel</code>和<code>WithTimeout</code>返回派生的<code>Context</code>，这些值可以比父<code>Context</code>更早取消。通常在请求处理程序返回时关闭与传入请求相关联的<code>Context</code>。<code>WithCancel</code>对于在使用多个副本时关闭冗余请求很有用。<code>WithTimeout</code>对设置后端服务器请求的截止日期时很有用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">/</span> WithCancel returns a copy of parent whose Done channel is closed as soon as
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// parent.Done is closed or cancel is called.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">WithCancel</span>(parent Context) (ctx Context, cancel CancelFunc)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// A CancelFunc cancels a Context.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">type</span> CancelFunc <span style="color:#ff7b72">func</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// WithTimeout returns a copy of parent whose Done channel is closed as soon as
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// parent.Done is closed, cancel is called, or timeout elapses. The new
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// Context&#39;s Deadline is the sooner of now+timeout and the parent&#39;s deadline, if
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// any. If the timer is still running, the cancel function releases its
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// resources.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">WithTimeout</span>(parent Context, timeout time.Duration) (Context, CancelFunc)
+</span></span></code></pre></div><p><code>WithValue</code>提供了一种将请求范围的值与<code>Context</code>绑定的方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// WithValue returns a copy of parent whose Value method returns val for key.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">WithValue</span>(parent Context, key <span style="color:#ff7b72">interface</span>{}, val <span style="color:#ff7b72">interface</span>{}) Context
+</span></span></code></pre></div><h3 id="使用原则">
+  使用原则
+  <a class="heading-link" href="#%e4%bd%bf%e7%94%a8%e5%8e%9f%e5%88%99">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><em>Programs that use Contexts should follow these rules to keep interfaces consistent across packages and enable static analysis tools to check context propagation:</em> <br>
+使用Context的程序包需要遵循如下的原则来满足接口的一致性以及便于静态分析:     <br>
+<em>Do not store Contexts inside a struct type; instead, pass a Context explicitly to each function that needs it. The Context should be the first parameter, typically named ctx</em> <br>
+<strong>不要把 Context 存在一个结构体当中，显式地传入函数。Context变量需要作为第一个参数使用，一般命名为ctx</strong>  <br>
+<em>Do not pass a nil Context, even if a function permits it. Pass context.TODO if you are unsure about which Context to use</em> <br>
+<strong>即使方法允许，也不要传入一个 nil 的 Context，如果你不确定你要用什么 Context 的时候传一个 context.TODO</strong> <br>
+<em>Use context Values only for request-scoped data that transits processes and APIs, not for passing optional parameters to functions</em> <br>
+<strong>使用context的Value相关方法只应该用于在程序和接口中传递的和请求相关的元数据，不要用它来传递一些可选的参数</strong> <br>
+<em>The same Context may be passed to functions running in different goroutines; Contexts are safe for simultaneous use by multiple goroutines.</em> <br>
+<strong>同样的Context可以用来传递到不同的goroutine中，Context在多个goroutine中是安全的。</strong></p>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

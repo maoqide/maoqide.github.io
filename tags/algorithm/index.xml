@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>algorithm on maoqide</title>
+    <link>/tags/algorithm/</link>
+    <description>Recent content in algorithm on maoqide</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 28 Mar 2020 11:23:38 +0800</lastBuildDate>
+    <atom:link href="/tags/algorithm/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bfs and Dfs</title>
+      <link>/posts/algorithm/bfs-and-dfs/</link>
+      <pubDate>Sat, 28 Mar 2020 11:23:38 +0800</pubDate>
+      <guid>/posts/algorithm/bfs-and-dfs/</guid>
+      <description>&lt;p&gt;golang 深度优先搜索和广度优先搜索。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Basic Data Structure</title>
+      <link>/posts/algorithm/basic-data-structure/</link>
+      <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
+      <guid>/posts/algorithm/basic-data-structure/</guid>
+      <description>&lt;p&gt;基础的数据结构和一些基本操作，及其 golang 语言的实现。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

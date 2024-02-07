@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Controller Manager 源码阅读 · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="k8s controller-manager 源码阅读笔记">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Controller Manager 源码阅读"/>
+<meta name="twitter:description" content="k8s controller-manager 源码阅读笔记"/>
+
+<meta property="og:title" content="Controller Manager 源码阅读" />
+<meta property="og:description" content="k8s controller-manager 源码阅读笔记" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-02-23T16:52:30+08:00" />
+<meta property="article:modified_time" content="2019-02-23T16:52:30+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
+              Controller Manager 源码阅读
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2019-02-23T16:52:30&#43;08:00">
+                February 23, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/cloud/">cloud</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/kubernetes/">kubernetes</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/source-code/">source-code</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>k8s controller-manager 源码阅读笔记</p>
+<h2 id="代码结构">
+  代码结构
+  <a class="heading-link" href="#%e4%bb%a3%e7%a0%81%e7%bb%93%e6%9e%84">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<pre><code>本部分用于记录 kube-controller-manager 代码整体结构及关键方法，便于到源码中查找，个人阅读记录，读者可跳过。本文所有代码均基于 kubernetes release-1.13。        
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// cmd/kube-controller-manager/controller-manager.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#d2a8ff;font-weight:bold">main</span>()
+</span></span><span style="display:flex;"><span>		command <span style="color:#ff7b72;font-weight:bold">:=</span> app.<span style="color:#d2a8ff;font-weight:bold">NewControllerManagerCommand</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// cmd/kube-controller-manager/app/controllermanager.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#d2a8ff;font-weight:bold">NewControllerManagerCommand</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">		**	指定 port，所有默认 port 在 pkg/master/ports/ports.go 这个文件中
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">		**	将默认配置传入 Options，设置每个 controller 基础配置（证书，同步间隔...）
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">		**	设置 gcIgnoredResources
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">		**	var ignoredResources = map[schema.GroupResource]struct{}{
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">		**		{Group: &#34;&#34;, Resource: &#34;events&#34;}: {},
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">		**	}
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">		*/</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#d2a8ff;font-weight:bold">NewKubeControllerManagerOptions</span>()		<span style="color:#8b949e;font-style:italic">// creates a new KubeControllerManagerOptions with a default config.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		cmd <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72;font-weight:bold">&amp;</span>cobra.Command{
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>			Run: <span style="color:#ff7b72">func</span> (cmd <span style="color:#ff7b72;font-weight:bold">*</span>cobra.Command, args []<span style="color:#ff7b72">string</span>) {}
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>				s.<span style="color:#d2a8ff;font-weight:bold">Config</span>(<span style="color:#d2a8ff;font-weight:bold">KnownControllers</span>(), ControllersDisabledByDefault.<span style="color:#d2a8ff;font-weight:bold">List</span>())
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">// ControllersDisabledByDefault = sets.NewString(&#34;bootstrapsigner&#34;, &#34;tokencleaner&#34;,)
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					s.<span style="color:#d2a8ff;font-weight:bold">Validate</span>(allControllers, disabledByDefaultControllers)	<span style="color:#8b949e;font-style:italic">// validate all controllers options and config
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					client, err <span style="color:#ff7b72;font-weight:bold">:=</span> clientset.<span style="color:#d2a8ff;font-weight:bold">NewForConfig</span>(restclient.<span style="color:#d2a8ff;font-weight:bold">AddUserAgent</span>(kubeconfig, KubeControllerManagerUserAgent))
+</span></span><span style="display:flex;"><span>					leaderElectionClient <span style="color:#ff7b72;font-weight:bold">:=</span> clientset.<span style="color:#d2a8ff;font-weight:bold">NewForConfigOrDie</span>(restclient.<span style="color:#d2a8ff;font-weight:bold">AddUserAgent</span>(<span style="color:#ff7b72;font-weight:bold">&amp;</span>config, <span style="color:#a5d6ff">&#34;leader-election&#34;</span>))
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// an EventRecorder can be used to send events to this EventBroadcaster
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					<span style="color:#8b949e;font-style:italic">// with the event source set to the given event source.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					eventRecorder <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#d2a8ff;font-weight:bold">createRecorder</span>(client, KubeControllerManagerUserAgent)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">createRecorder</span>(kubeClient clientset.Interface, userAgent <span style="color:#ff7b72">string</span>) record.EventRecorder {}
+</span></span><span style="display:flex;"><span>							eventBroadcaster.<span style="color:#d2a8ff;font-weight:bold">StartRecordingToSink</span>(<span style="color:#ff7b72;font-weight:bold">&amp;</span>v1core.EventSinkImpl{Interface: kubeClient.<span style="color:#d2a8ff;font-weight:bold">CoreV1</span>().<span style="color:#d2a8ff;font-weight:bold">Events</span>(<span style="color:#a5d6ff">&#34;&#34;</span>)})
+</span></span><span style="display:flex;"><span>							<span style="color:#ff7b72">return</span> eventBroadcaster.<span style="color:#d2a8ff;font-weight:bold">NewRecorder</span>(clientgokubescheme.Scheme, v1.EventSource{Component: userAgent})
+</span></span><span style="display:flex;"><span>					c <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72;font-weight:bold">&amp;</span>kubecontrollerconfig.Config{
+</span></span><span style="display:flex;"><span>						Client:               client,
+</span></span><span style="display:flex;"><span>						Kubeconfig:           kubeconfig,
+</span></span><span style="display:flex;"><span>						EventRecorder:        eventRecorder,
+</span></span><span style="display:flex;"><span>						LeaderElectionClient: leaderElectionClient,
+</span></span><span style="display:flex;"><span>					}				
+</span></span><span style="display:flex;"><span>				<span style="color:#d2a8ff;font-weight:bold">KnownControllers</span>()
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// NewControllerInitializers is a public map of named controller groups (you can start more than one in an init func)
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					<span style="color:#8b949e;font-style:italic">// paired to their InitFunc. 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					<span style="color:#d2a8ff;font-weight:bold">NewControllerInitializers</span>(loopMode ControllerLoopMode) <span style="color:#ff7b72">map</span>[<span style="color:#ff7b72">string</span>]InitFunc {}
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;endpoint&#34;</span>] = startEndpointController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;replicationcontroller&#34;</span>] = startReplicationController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;podgc&#34;</span>] = startPodGCController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;resourcequota&#34;</span>] = startResourceQuotaController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;namespace&#34;</span>] = startNamespaceController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;serviceaccount&#34;</span>] = startServiceAccountController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;garbagecollector&#34;</span>] = startGarbageCollectorController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;daemonset&#34;</span>] = startDaemonSetController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;job&#34;</span>] = startJobController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;deployment&#34;</span>] = startDeploymentController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;replicaset&#34;</span>] = startReplicaSetController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;horizontalpodautoscaling&#34;</span>] = startHPAController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;disruption&#34;</span>] = startDisruptionController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;statefulset&#34;</span>] = startStatefulSetController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;cronjob&#34;</span>] = startCronJobController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;csrsigning&#34;</span>] = startCSRSigningController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;csrapproving&#34;</span>] = startCSRApprovingController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;csrcleaner&#34;</span>] = startCSRCleanerController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;ttl&#34;</span>] = startTTLController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;bootstrapsigner&#34;</span>] = startBootstrapSignerController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;tokencleaner&#34;</span>] = startTokenCleanerController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;nodeipam&#34;</span>] = startNodeIpamController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;nodelifecycle&#34;</span>] = startNodeLifecycleController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;persistentvolume-binder&#34;</span>] = startPersistentVolumeBinderController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;attachdetach&#34;</span>] = startAttachDetachController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;persistentvolume-expander&#34;</span>] = startVolumeExpandController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;clusterrole-aggregation&#34;</span>] = startClusterRoleAggregrationController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;pvc-protection&#34;</span>] = startPVCProtectionController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;pv-protection&#34;</span>] = startPVProtectionController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;ttl-after-finished&#34;</span>] = startTTLAfterFinishedController
+</span></span><span style="display:flex;"><span>						controllers[<span style="color:#a5d6ff">&#34;root-ca-cert-publisher&#34;</span>] = startRootCACertPublisher
+</span></span><span style="display:flex;"><span>				<span style="color:#d2a8ff;font-weight:bold">Run</span>(c.<span style="color:#d2a8ff;font-weight:bold">Complete</span>(), wait.NeverStop)
+</span></span><span style="display:flex;"><span>					configz.<span style="color:#d2a8ff;font-weight:bold">New</span>(ConfigzName)	<span style="color:#8b949e;font-style:italic">// ConfigzName=&#34;kubecontrollermanager.config.k8s.io&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					<span style="color:#8b949e;font-style:italic">// Start the controller manager HTTP server. insecure as example.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					unsecuredMux = genericcontrollermanager.<span style="color:#d2a8ff;font-weight:bold">NewBaseHandler</span>(<span style="color:#ff7b72;font-weight:bold">&amp;</span>c.ComponentConfig.Generic.Debugging, checks<span style="color:#ff7b72;font-weight:bold">...</span>)
+</span></span><span style="display:flex;"><span>					insecureSuperuserAuthn <span style="color:#ff7b72;font-weight:bold">:=</span> server.AuthenticationInfo{Authenticator: <span style="color:#ff7b72;font-weight:bold">&amp;</span>server.InsecureSuperuser{}}
+</span></span><span style="display:flex;"><span>					handler <span style="color:#ff7b72;font-weight:bold">:=</span> genericcontrollermanager.<span style="color:#d2a8ff;font-weight:bold">BuildHandlerChain</span>(unsecuredMux, <span style="color:#79c0ff">nil</span>, <span style="color:#ff7b72;font-weight:bold">&amp;</span>insecureSuperuserAuthn)
+</span></span><span style="display:flex;"><span>					InsecureServing.<span style="color:#d2a8ff;font-weight:bold">Serve</span>(handler, <span style="color:#a5d6ff">0</span>, stopCh)
+</span></span><span style="display:flex;"><span>						<span style="color:#d2a8ff;font-weight:bold">RunServer</span>(insecureServer, s.Listener, shutdownTimeout, stopCh)
+</span></span><span style="display:flex;"><span>					run <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72">func</span>(ctx context.Context) {}
+</span></span><span style="display:flex;"><span>						rootClientBuilder <span style="color:#ff7b72;font-weight:bold">:=</span> controller.SimpleControllerClientBuilder{
+</span></span><span style="display:flex;"><span>							ClientConfig: c.Kubeconfig,
+</span></span><span style="display:flex;"><span>						}
+</span></span><span style="display:flex;"><span>						controllerContext, err <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#d2a8ff;font-weight:bold">CreateControllerContext</span>(c, rootClientBuilder, clientBuilder, ctx.<span style="color:#d2a8ff;font-weight:bold">Done</span>())
+</span></span><span style="display:flex;"><span>						<span style="color:#8b949e;font-style:italic">// CreateControllerContext creates a context struct containing references to resources needed by the
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						<span style="color:#8b949e;font-style:italic">// controllers such as the cloud provider and clientBuilder. rootClientBuilder is only used for
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						<span style="color:#8b949e;font-style:italic">// the shared-informers client and token controller.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						<span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">CreateControllerContext</span>(s <span style="color:#ff7b72;font-weight:bold">*</span>config.CompletedConfig, rootClientBuilder, clientBuilder controller.ControllerClientBuilder, stop <span style="color:#ff7b72;font-weight:bold">&lt;-</span><span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">struct</span>{}) (ControllerContext, <span style="color:#ff7b72">error</span>) {}
+</span></span><span style="display:flex;"><span>							versionedClient <span style="color:#ff7b72;font-weight:bold">:=</span> rootClientBuilder.<span style="color:#d2a8ff;font-weight:bold">ClientOrDie</span>(<span style="color:#a5d6ff">&#34;shared-informers&#34;</span>)
+</span></span><span style="display:flex;"><span>							sharedInformers <span style="color:#ff7b72;font-weight:bold">:=</span> informers.<span style="color:#d2a8ff;font-weight:bold">NewSharedInformerFactory</span>(versionedClient, <span style="color:#d2a8ff;font-weight:bold">ResyncPeriod</span>(s)())
+</span></span><span style="display:flex;"><span>							
+</span></span><span style="display:flex;"><span>							<span style="color:#8b949e;font-style:italic">// If apiserver is not running we should wait for some time and fail only then. This is particularly
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>							<span style="color:#8b949e;font-style:italic">// important when we start apiserver and controller manager at the same time.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>							genericcontrollermanager.<span style="color:#d2a8ff;font-weight:bold">WaitForAPIServer</span>(versionedClient, <span style="color:#a5d6ff">10</span><span style="color:#ff7b72;font-weight:bold">*</span>time.Second)
+</span></span><span style="display:flex;"><span>							<span style="color:#8b949e;font-style:italic">// returns the supported resources for all groups and versions, by request &#34;/apis/.......&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>							availableResources, err <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#d2a8ff;font-weight:bold">GetAvailableResources</span>(rootClientBuilder)
+</span></span><span style="display:flex;"><span>							ctx <span style="color:#ff7b72;font-weight:bold">:=</span> ControllerContext{
+</span></span><span style="display:flex;"><span>								ClientBuilder:      clientBuilder,
+</span></span><span style="display:flex;"><span>								InformerFactory:    sharedInformers,
+</span></span><span style="display:flex;"><span>								ComponentConfig:    s.ComponentConfig,
+</span></span><span style="display:flex;"><span>								RESTMapper:         restMapper,
+</span></span><span style="display:flex;"><span>								AvailableResources: availableResources,
+</span></span><span style="display:flex;"><span>								Cloud:              cloud,
+</span></span><span style="display:flex;"><span>								LoopMode:           loopMode,
+</span></span><span style="display:flex;"><span>								Stop:               stop,
+</span></span><span style="display:flex;"><span>								InformersStarted:   make(<span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">struct</span>{}),
+</span></span><span style="display:flex;"><span>								ResyncPeriod:       <span style="color:#d2a8ff;font-weight:bold">ResyncPeriod</span>(s),
+</span></span><span style="display:flex;"><span>							}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#8b949e;font-style:italic">// serviceAccountTokenControllerStarter is special because it must run first to set up permissions for other controllers.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						<span style="color:#8b949e;font-style:italic">// It cannot use the &#34;normal&#34; client builder, so it tracks its own. It must also avoid being included in the &#34;normal&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						<span style="color:#8b949e;font-style:italic">// init map so that it can always run first.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						saTokenControllerInitFunc <span style="color:#ff7b72;font-weight:bold">:=</span> serviceAccountTokenControllerStarter{rootClientBuilder: rootClientBuilder}.startServiceAccountTokenController
+</span></span><span style="display:flex;"><span>						<span style="color:#d2a8ff;font-weight:bold">startServiceAccountTokenController</span>() {}
+</span></span><span style="display:flex;"><span>							<span style="color:#8b949e;font-style:italic">// 获取相关证书
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>							<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>							controller, err <span style="color:#ff7b72;font-weight:bold">:=</span> serviceaccountcontroller.<span style="color:#d2a8ff;font-weight:bold">NewTokensController</span>(
+</span></span><span style="display:flex;"><span>								ctx.InformerFactory.<span style="color:#d2a8ff;font-weight:bold">Core</span>().<span style="color:#d2a8ff;font-weight:bold">V1</span>().<span style="color:#d2a8ff;font-weight:bold">ServiceAccounts</span>(),
+</span></span><span style="display:flex;"><span>								ctx.InformerFactory.<span style="color:#d2a8ff;font-weight:bold">Core</span>().<span style="color:#d2a8ff;font-weight:bold">V1</span>().<span style="color:#d2a8ff;font-weight:bold">Secrets</span>(),
+</span></span><span style="display:flex;"><span>								c.rootClientBuilder.<span style="color:#d2a8ff;font-weight:bold">ClientOrDie</span>(<span style="color:#a5d6ff">&#34;tokens-controller&#34;</span>),
+</span></span><span style="display:flex;"><span>								serviceaccountcontroller.TokensControllerOptions{
+</span></span><span style="display:flex;"><span>									TokenGenerator: tokenGenerator,
+</span></span><span style="display:flex;"><span>									RootCA:         rootCA,
+</span></span><span style="display:flex;"><span>								},
+</span></span><span style="display:flex;"><span>							)
+</span></span><span style="display:flex;"><span>							<span style="color:#d2a8ff;font-weight:bold">NewTokensController</span>() {}	<span style="color:#8b949e;font-style:italic">// watch queueServiceAccountSync event 和 queueSecretSync event
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>						<span style="color:#d2a8ff;font-weight:bold">StartControllers</span>(controllerContext, saTokenControllerInitFunc, <span style="color:#d2a8ff;font-weight:bold">NewControllerInitializers</span>(controllerContext.LoopMode), unsecuredMux)
+</span></span><span style="display:flex;"><span>							<span style="color:#d2a8ff;font-weight:bold">startSATokenController</span>(ctx)	<span style="color:#8b949e;font-style:italic">// 先启动 SATokenController
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>							<span style="color:#ff7b72">for</span> controllerName, initFn <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72">range</span> controllers {
+</span></span><span style="display:flex;"><span>								IsControllerEnabled	<span style="color:#8b949e;font-style:italic">// 判断是否启用 controller
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>								<span style="color:#8b949e;font-style:italic">// Jitter returns a time.Duration between duration and duration + maxFactor * duration.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>								<span style="color:#8b949e;font-style:italic">// This allows clients to avoid converging on periodic behavior. If maxFactor
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>								<span style="color:#8b949e;font-style:italic">// is 0.0, a suggested default value will be chosen.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>								time.<span style="color:#d2a8ff;font-weight:bold">Sleep</span>(wait.<span style="color:#d2a8ff;font-weight:bold">Jitter</span>(ctx.ComponentConfig.Generic.ControllerStartInterval.Duration, ControllerStartJitter))
+</span></span><span style="display:flex;"><span>								debugHandler, started, err <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#d2a8ff;font-weight:bold">initFn</span>(ctx)
+</span></span><span style="display:flex;"><span>								<span style="color:#8b949e;font-style:italic">// 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>								<span style="color:#ff7b72">if</span> debugHandler <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> <span style="color:#ff7b72;font-weight:bold">&amp;&amp;</span> unsecuredMux <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> {
+</span></span><span style="display:flex;"><span>									basePath <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#a5d6ff">&#34;/debug/controllers/&#34;</span> <span style="color:#ff7b72;font-weight:bold">+</span> controllerName
+</span></span><span style="display:flex;"><span>									unsecuredMux.<span style="color:#d2a8ff;font-weight:bold">UnlistedHandle</span>(basePath, http.<span style="color:#d2a8ff;font-weight:bold">StripPrefix</span>(basePath, debugHandler))
+</span></span><span style="display:flex;"><span>									unsecuredMux.<span style="color:#d2a8ff;font-weight:bold">UnlistedHandlePrefix</span>(basePath<span style="color:#ff7b72;font-weight:bold">+</span><span style="color:#a5d6ff">&#34;/&#34;</span>, http.<span style="color:#d2a8ff;font-weight:bold">StripPrefix</span>(basePath, debugHandler))
+</span></span><span style="display:flex;"><span>								}
+</span></span><span style="display:flex;"><span>							}
+</span></span><span style="display:flex;"><span>						controllerContext.InformerFactory.<span style="color:#d2a8ff;font-weight:bold">Start</span>(controllerContext.Stop)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#8b949e;font-style:italic">// InformersStarted is closed after all of the controllers have been initialized and are running.  After this point it is safe,
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						<span style="color:#8b949e;font-style:italic">// for an individual controller to start the shared informers. Before it is closed, they should not.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						close(controllerContext.InformersStarted)	<span style="color:#8b949e;font-style:italic">// !!!!!
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// leader 选举，通过获取锁成为 leader
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					leaderelection.<span style="color:#d2a8ff;font-weight:bold">RunOrDie</span>(context.<span style="color:#d2a8ff;font-weight:bold">TODO</span>(), leaderelection.LeaderElectionConfig{
+</span></span><span style="display:flex;"><span>						Lock:          rl,
+</span></span><span style="display:flex;"><span>						<span style="color:#8b949e;font-style:italic">// ... ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>						Callbacks: leaderelection.LeaderCallbacks{
+</span></span><span style="display:flex;"><span>							OnStartedLeading: run,
+</span></span><span style="display:flex;"><span>							OnStoppedLeading: <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>								klog.<span style="color:#d2a8ff;font-weight:bold">Fatalf</span>(<span style="color:#a5d6ff">&#34;leaderelection lost&#34;</span>)
+</span></span><span style="display:flex;"><span>							},
+</span></span><span style="display:flex;"><span>						},
+</span></span><span style="display:flex;"><span>						WatchDog: electionChecker,
+</span></span><span style="display:flex;"><span>						Name:     <span style="color:#a5d6ff">&#34;kube-controller-manager&#34;</span>,
+</span></span><span style="display:flex;"><span>					})
+</span></span><span style="display:flex;"><span>		}
+</span></span></code></pre></div><h2 id="cmdrun">
+  cmd.Run
+  <a class="heading-link" href="#cmdrun">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>目前的 kubernetes 组件全都采用 <a href="https://github.com/spf13/cobra"  class="external-link" target="_blank" rel="noopener">cobra</a> 构建。核心的启动流程都在生成的 <code>cobra.Command</code> 实例 <code>cmd</code> 的 <code>Run()</code> 方法中。 <br>
+<code>Run</code> 方法执行了两个方法，<code>s.Config(KnownControllers(), ControllersDisabledByDefault.List())</code>, <code>Run(c.Complete(), wait.NeverStop)</code>。</p>
+<h2 id="sconfigknowncontrollers-controllersdisabledbydefaultlist">
+  s.Config(KnownControllers(), ControllersDisabledByDefault.List())
+  <a class="heading-link" href="#sconfigknowncontrollers-controllersdisabledbydefaultlist">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><code>KnownControllers()</code> 方法调用了 <code>NewControllerInitializers()</code>, 生成一个 <code>map[string]InitFunc{}</code> 的map，保存了 controller 和对应的启动方法的映射。<code>s.Config</code> 方法返回了 controller-manager 的配置，首先对所有 controllers 进行 validate，然后会构建一个 k8s clientset 和 一个 <code>EventRecorder</code> 对象，具体事件记录的方式，会在后面分析。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// EventRecorder knows how to record events on behalf of an EventSource.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// an EventRecorder can be used to send events to this EventBroadcaster
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// with the event source set to the given event source.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">type</span> EventRecorder <span style="color:#ff7b72">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// Event constructs an event from the given information and puts it in the queue for sending.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// The resulting event will be created in the same namespace as the reference object.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#d2a8ff;font-weight:bold">Event</span>(object runtime.Object, eventtype, reason, message <span style="color:#ff7b72">string</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// Eventf is just like Event, but with Sprintf for the message field.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#d2a8ff;font-weight:bold">Eventf</span>(object runtime.Object, eventtype, reason, messageFmt <span style="color:#ff7b72">string</span>, args <span style="color:#ff7b72;font-weight:bold">...</span><span style="color:#ff7b72">interface</span>{})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// PastEventf is just like Eventf, but with an option to specify the event&#39;s &#39;timestamp&#39; field.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#d2a8ff;font-weight:bold">PastEventf</span>(object runtime.Object, timestamp metav1.Time, eventtype, reason, messageFmt <span style="color:#ff7b72">string</span>, args <span style="color:#ff7b72;font-weight:bold">...</span><span style="color:#ff7b72">interface</span>{})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// AnnotatedEventf is just like eventf, but with annotations attached
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#d2a8ff;font-weight:bold">AnnotatedEventf</span>(object runtime.Object, annotations <span style="color:#ff7b72">map</span>[<span style="color:#ff7b72">string</span>]<span style="color:#ff7b72">string</span>, eventtype, reason, messageFmt <span style="color:#ff7b72">string</span>, args <span style="color:#ff7b72;font-weight:bold">...</span><span style="color:#ff7b72">interface</span>{})
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="runccomplete-waitneverstop">
+  Run(c.Complete(), wait.NeverStop)
+  <a class="heading-link" href="#runccomplete-waitneverstop">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>首先<code>configz.New(ConfigzName)</code>生成 controller-manager 的配置对象，用名称<code>kubecontrollermanager.config.k8s.io</code>注册到注册到路由<code>/configz</code>上，可以直接通过 controller-manager 的地址访问到。接着，会新建一个 BaseHandler 实例并启动 HTTP server，用来注册 controller manager 的 <code>/metric</code> 和 <code>/healthz</code> 接口。接下来，定义了一个内部方法<code>run()</code>, 启动 controller-manager 的主要操作，都在这个方法中完成。 <br>
+<code>run()</code>方法首先创建一个<code>ControllerContext</code>, 结构体如下，主要包含 controllers 所需要资源的引用，如 kubernetes 的 clientset 和informer。AvailableResources 由<code>GetAvailableResources</code>方法获取，通过 apiserver 的<code>/api/...</code>接口获取集群支持的所有 group 和 version 资源。然后开始启动 controllers，在启动其他 controller 前，一定先启动 SATokenController，因为它必须先为其他 controller 创建所需的 token 授权，所以启动<code>SATokenController</code>的方法独立于启动其他 controller 的循环之外，作为最先启动的一个。<code>startServiceAccountTokenController</code> watch 了<code>ServiceAccount</code>和<code>secret</code>的增删改事件，并同步本地的 queue 缓存。接下来才会调用<code>StartControllers</code>方法依次调用其他 controller 的 <code>InitFunc</code> 启动 controllers。最后启动 <code>controllerContext</code> 的 InformerFactory 并执行<code>close(controllerContext.InformersStarted)</code>。这里的<code>controllerContext.InformersStarted</code>是<code>chan struct{}</code>类型，当这个 channel 被关闭了，代表所有 controllers 都被初始化并运行起来了，独立的 controller 应该在他关闭后再启动 sharedInformer。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">type</span> ControllerContext <span style="color:#ff7b72">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ClientBuilder will provide a client for this controller to use
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	ClientBuilder controller.ControllerClientBuilder
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// InformerFactory gives access to informers for the controller.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	InformerFactory informers.SharedInformerFactory
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ComponentConfig provides access to init options for a given controller
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	ComponentConfig kubectrlmgrconfig.KubeControllerManagerConfiguration
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// DeferredDiscoveryRESTMapper is a RESTMapper that will defer
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// initialization of the RESTMapper until the first mapping is
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// requested.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	RESTMapper <span style="color:#ff7b72;font-weight:bold">*</span>restmapper.DeferredDiscoveryRESTMapper
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// AvailableResources is a map listing currently available resources
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	AvailableResources <span style="color:#ff7b72">map</span>[schema.GroupVersionResource]<span style="color:#ff7b72">bool</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// Cloud is the cloud provider interface for the controllers to use.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// It must be initialized and ready to use.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	Cloud cloudprovider.Interface
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// Control for which control loops to be run
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// IncludeCloudLoops is for a kube-controller-manager running all loops
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// ExternalLoops is for a kube-controller-manager running with a cloud-controller-manager
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	LoopMode ControllerLoopMode
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// Stop is the stop channel
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	Stop <span style="color:#ff7b72;font-weight:bold">&lt;-</span><span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">struct</span>{}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// InformersStarted is closed after all of the controllers have been initialized and are running.  After this point it is safe,
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// for an individual controller to start the shared informers. Before it is closed, they should not.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	InformersStarted <span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">struct</span>{}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ResyncPeriod generates a duration each time it is invoked; this is so that
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// multiple controllers don&#39;t get into lock-step and all hammer the apiserver
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// with list requests simultaneously.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	ResyncPeriod <span style="color:#ff7b72">func</span>() time.Duration
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>最后，会执行<code>leaderelection.RunOrDie</code>方法不断尝试获取或更新(<code>tryAcquireOrRenew</code>) leader lease，成功获取到的即为 leader，并执行上面的<code>run()</code>方法。实际上就是去获取一个锁并有一定有效期，当一个 contoller-manager 实例获取到锁并且超出了有效期，那么这个实例就会成为leader，成为 leader 的实例仍然会不断执行<code>tryAcquireOrRenew</code>来更新获取时间<code>AcquireTime</code>以延长有效期。(leader 选举的逻辑在 k8s.io\client-go\tools\leaderelection\leaderelection.go)</p>
+<h2 id="controllers">
+  controllers
+  <a class="heading-link" href="#controllers">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>上面就是 controller-manager 的整体启动流程和代码结构。接下来会具体分析几个核心的 controller。</p>
+<h3 id="replicasetcontroller">
+  replicasetcontroller
+  <a class="heading-link" href="#replicasetcontroller">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>kubernetes\pkg\controller\replicaset\replica_set.go</p>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

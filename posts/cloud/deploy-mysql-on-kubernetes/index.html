@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Deploy Mysql on Kubernetes · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="本文通过 mysql-operator 在kubernetes集群部署高可用的mysql statefulset。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Deploy Mysql on Kubernetes"/>
+<meta name="twitter:description" content="本文通过 mysql-operator 在kubernetes集群部署高可用的mysql statefulset。"/>
+
+<meta property="og:title" content="Deploy Mysql on Kubernetes" />
+<meta property="og:description" content="本文通过 mysql-operator 在kubernetes集群部署高可用的mysql statefulset。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/cloud/deploy-mysql-on-kubernetes/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-05-16T14:06:37+08:00" />
+<meta property="article:modified_time" content="2019-05-16T14:06:37+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/cloud/deploy-mysql-on-kubernetes/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/cloud/deploy-mysql-on-kubernetes/">
+              Deploy Mysql on Kubernetes
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2019-05-16T14:06:37&#43;08:00">
+                May 16, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/cloud/">cloud</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/kubernetes/">kubernetes</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/kubernetes-operator/">kubernetes-operator</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/mysql-operator/">mysql-operator</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>本文通过 <a href="https://github.com/oracle/mysql-operator"  class="external-link" target="_blank" rel="noopener">mysql-operator</a> 在kubernetes集群部署高可用的mysql statefulset。</p>
+<h2 id="环境准备">
+  环境准备
+  <a class="heading-link" href="#%e7%8e%af%e5%a2%83%e5%87%86%e5%a4%87">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>本文使用的开源 operator 项目 <a href="https://github.com/oracle/mysql-operator"  class="external-link" target="_blank" rel="noopener">mysql-operator</a> 配死只支持 mysql 8.0.11 以上的版本，改了下代码，支持 5.7.0 以上版本，<a href="https://github.com/maoqide/mysql-operator"  class="external-link" target="_blank" rel="noopener">项目地址</a>，本文部署的是 mysql-5.7.26，使用的 dockerhub 上的镜像 mysql/mysql-server:5.7.26。</p>
+<h2 id="代码编译">
+  代码编译
+  <a class="heading-link" href="#%e4%bb%a3%e7%a0%81%e7%bc%96%e8%af%91">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>git clone 下载该项目，进入到代码目录，执行<code>sh hack/build.sh</code>，编译代码得到二进制文件 mysql-agent 和 mysql-operator，将二进制文件放入 <code>bin/linux_amd64</code>，执行<code>docker build -f docker/mysql-agent/Dockerfile -t $IMAGE_NAME_AGENT .</code>，<code>docker build -f docker/mysql-operator/Dockerfile -t $IMAGE_NAME_OPERATOR .</code>构建镜像，mysql-operator 生成的镜像为 operator 的镜像，mysql-agent 生成的是镜像，在创建mysql服务时，作为sidecar和mysql-server容器起在同一个pod中。</p>
+<h2 id="部署-operator">
+  部署 operator
+  <a class="heading-link" href="#%e9%83%a8%e7%bd%b2-operator">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>先根据 <a href="https://github.com/maoqide/mysql-operator/blob/master/docs/tutorial.md"  class="external-link" target="_blank" rel="noopener">文档</a> 部署 mysql-operator 的 Deployment，文档中是使用 helm 安装，不希望安装 helm 和 tiller 的话，可以只安装一个 helm 客户端，进入到代码目录，再执行<code>helm template --name mysql-operator mysql-operator</code>生成部署所需要的yaml文件，然后直接执行<code>kubectl apply -f mysql-operator.yaml</code>创建 operator。这个yaml创建了operator所需的CRD类型，operator 的 Deployment 和 operator 所需的 RBAC 权限等。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># change directory into mysql-operator</span>
+</span></span><span style="display:flex;"><span>cd mysql-operator
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># generate mysql-operator.yaml</span>
+</span></span><span style="display:flex;"><span>helm template --name mysql-operator mysql-operator &gt; mysql-operator.yaml
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># deploy on kubernetes</span>
+</span></span><span style="display:flex;"><span>kubectl apply -f mysql-operator.yaml
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># deployed.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@localhost<span style="color:#ff7b72;font-weight:bold">]</span>$ kubectl get deploy -n mysql-operator
+</span></span><span style="display:flex;"><span>NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+</span></span><span style="display:flex;"><span>mysql-operator   1/1     <span style="color:#a5d6ff">1</span>            <span style="color:#a5d6ff">1</span>           2d5h
+</span></span></code></pre></div><h2 id="创建-mysql-集群">
+  创建 mysql 集群
+  <a class="heading-link" href="#%e5%88%9b%e5%bb%ba-mysql-%e9%9b%86%e7%be%a4">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>本文创建的集群为3节点的 mysql，一个节点为 master，二个为 slave，master节点可读写，slave节点为只读，使用 kubernetes Local PV 作持久化存储。 <br>
+首先，为每个节点创建一个PV，Local PV 需要定义<code>nodeAffinity</code>，约束创建的节点。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">PersistentVolume</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mypv0</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">capacity</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">storage</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1Gi</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">volumeMode</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Filesystem</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">accessModes</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">ReadWriteOnce</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">persistentVolumeReclaimPolicy</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">storageClassName</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-storage</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">local</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">path</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">/data/mysql-data</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">nodeAffinity</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">required</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">nodeSelectorTerms</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">matchExpressions</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">key</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">kubernetes.io/hostname</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">operator</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">In</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">values</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span>- <span style="color:#a5d6ff">192.168.0.1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">PersistentVolume</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mypv1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">capacity</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">storage</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1Gi</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">volumeMode</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Filesystem</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">accessModes</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">ReadWriteOnce</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">persistentVolumeReclaimPolicy</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">storageClassName</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-storage</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">local</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">path</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">/data/mysql-data</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">nodeAffinity</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">required</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">nodeSelectorTerms</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">matchExpressions</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">key</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">kubernetes.io/hostname</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">operator</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">In</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">values</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span>- <span style="color:#a5d6ff">192.168.0.2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">PersistentVolume</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mypv2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">capacity</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">storage</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1Gi</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">volumeMode</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Filesystem</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">accessModes</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">ReadWriteOnce</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">persistentVolumeReclaimPolicy</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">storageClassName</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-storage</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">local</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">path</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">/data/mysql-data</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">nodeAffinity</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">required</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">nodeSelectorTerms</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">matchExpressions</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">key</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">kubernetes.io/hostname</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">operator</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">In</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">values</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span>- <span style="color:#a5d6ff">192.168.0.3</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># create pv</span>
+</span></span><span style="display:flex;"><span>kubectl create -f pv.yaml
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># get presistence volume</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@localhost<span style="color:#ff7b72;font-weight:bold">]</span>$ kubectl get pv
+</span></span><span style="display:flex;"><span>mypv-0               1Gi        RWO            Delete           Available                                                                     mysql-storage               4s
+</span></span><span style="display:flex;"><span>mypv-1               1Gi        RWO            Delete           Available                                                                     mysql-storage               4s
+</span></span><span style="display:flex;"><span>mypv-2               1Gi        RWO            Delete           Available                                                                     mysql-storage               4s
+</span></span></code></pre></div><p>接着，需要在创建 mysql 的 namespace 下，为要创建的 mysql 创建对应的 RBAC 权限。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-agent</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">RoleBinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-agent</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">roleRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-agent</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">subjects</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-agent</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>如果需要自定义 mysql 的密码，需要为其创建一个 secret，密码需要使用base64加密。linux 下执行 <code>echo -n 'password' | base64</code> 为密码加密。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">data</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">password</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">cm9vdA==</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Secret</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">labels</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">v1alpha1.mysql.oracle.com/cluster</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-pv-root-password</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f rbac.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f secret.yaml
+</span></span></code></pre></div><p>在创建 operator 的时候，已经创建了如下的crd类型，部署mysql集群所需创建的就是 mysqlclusters 类型的资源。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@localhost<span style="color:#ff7b72;font-weight:bold">]</span>$ kubectl get crd  | grep mysql
+</span></span><span style="display:flex;"><span>mysqlbackups.mysql.oracle.com                2019-05-14T02:51:11Z
+</span></span><span style="display:flex;"><span>mysqlbackupschedules.mysql.oracle.com        2019-05-14T02:51:11Z
+</span></span><span style="display:flex;"><span>mysqlclusters.mysql.oracle.com               2019-05-14T02:51:11Z
+</span></span><span style="display:flex;"><span>mysqlrestores.mysql.oracle.com               2019-05-14T02:51:11Z
+</span></span></code></pre></div><p>接下来开始创建 operator 自定义资源类型(CRD)的实例 mysqlclusters。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql.oracle.com/v1alpha1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Cluster</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">  
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#8b949e;font-style:italic"># 和mysql-server镜像版本的tag一直</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">version</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">5.7.26</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">repository</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">20.26.28.56</span><span style="color:#a5d6ff">/dcos/mysql-server</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#8b949e;font-style:italic"># 节点数量</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">members</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">3</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#8b949e;font-style:italic"># 指定 mysql 密码，和之前创建的secret名称一致</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">rootPasswordSecret</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-pv-root-password</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">agent</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">limits</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">cpu</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">500m</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">memory</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">200Mi</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">requests</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">cpu</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">300m</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">memory</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">100Mi</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">server</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">limits</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">cpu</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1000m</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">memory</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1000Mi</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">requests</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">cpu</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">500m</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">memory</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">500Mi</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">volumeClaimTemplate</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-pv</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">accessModes</span>:<span style="color:#6e7681"> </span>[<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;ReadWriteOnce&#34;</span><span style="color:#6e7681"> </span>]<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">storageClassName</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;mysql-storage&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">requests</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">storage</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1Gi</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f mysql.yaml
+</span></span></code></pre></div><p>执行后，会看到 kubernetes 在该 namespace 下开始拉起 mysql 的 statefulset，并会创建一个 headless service。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@localhost<span style="color:#ff7b72;font-weight:bold">]</span>$ kubectl get all -n mysql2
+</span></span><span style="display:flex;"><span>NAME                                                      READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>pod/mysql-0                                               2/2     Running   <span style="color:#a5d6ff">0</span>          8h
+</span></span><span style="display:flex;"><span>pod/mysql-1                                               2/2     Running   <span style="color:#a5d6ff">0</span>          8h
+</span></span><span style="display:flex;"><span>pod/mysql-2                                               2/2     Running   <span style="color:#a5d6ff">0</span>          8h
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT<span style="color:#ff7b72;font-weight:bold">(</span>S<span style="color:#ff7b72;font-weight:bold">)</span>    AGE
+</span></span><span style="display:flex;"><span>service/mysql     ClusterIP   None            &lt;none&gt;        3306/TCP   21h
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>NAME                     READY   AGE
+</span></span><span style="display:flex;"><span>statefulset.apps/mysql   1/1     21h
+</span></span></code></pre></div><p>此时执行<code>hack/cluster-status.sh</code>脚本，会得到如下集群信息：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;clusterName&#34;</span>: <span style="color:#a5d6ff">&#34;Cluster&#34;</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;defaultReplicaSet&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;name&#34;</span>: <span style="color:#a5d6ff">&#34;default&#34;</span>, 
+</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;primary&#34;</span>: <span style="color:#a5d6ff">&#34;mysql-0.mysql:3306&#34;</span>, 
+</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;ssl&#34;</span>: <span style="color:#a5d6ff">&#34;DISABLED&#34;</span>, 
+</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;status&#34;</span>: <span style="color:#a5d6ff">&#34;OK_NO_TOLERANCE&#34;</span>, 
+</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;statusText&#34;</span>: <span style="color:#a5d6ff">&#34;Cluster is NOT tolerant to any failures. 2 members are not active&#34;</span>, 
+</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;topology&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#7ee787">&#34;mysql-0.mysql:3306&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;address&#34;</span>: <span style="color:#a5d6ff">&#34;mysql-0.mysql:3306&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;mode&#34;</span>: <span style="color:#a5d6ff">&#34;R/W&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;readReplicas&#34;</span>: {}, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;role&#34;</span>: <span style="color:#a5d6ff">&#34;HA&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;status&#34;</span>: <span style="color:#a5d6ff">&#34;ONLINE&#34;</span>
+</span></span><span style="display:flex;"><span>            }, 
+</span></span><span style="display:flex;"><span>            <span style="color:#7ee787">&#34;mysql-1.mysql:3306&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;address&#34;</span>: <span style="color:#a5d6ff">&#34;mysql-1.mysql:3306&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;mode&#34;</span>: <span style="color:#a5d6ff">&#34;n/a&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;readReplicas&#34;</span>: {}, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;role&#34;</span>: <span style="color:#a5d6ff">&#34;HA&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;status&#34;</span>: <span style="color:#a5d6ff">&#34;ONLINE&#34;</span>
+</span></span><span style="display:flex;"><span>            }, 
+</span></span><span style="display:flex;"><span>            <span style="color:#7ee787">&#34;mysql-2.mysql:3306&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;address&#34;</span>: <span style="color:#a5d6ff">&#34;mysql-2.mysql:3306&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;mode&#34;</span>: <span style="color:#a5d6ff">&#34;n/a&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;readReplicas&#34;</span>: {}, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;role&#34;</span>: <span style="color:#a5d6ff">&#34;HA&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#7ee787">&#34;status&#34;</span>: <span style="color:#a5d6ff">&#34;ONLINE&#34;</span>
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }, 
+</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;topologyMode&#34;</span>: <span style="color:#a5d6ff">&#34;Single-Primary&#34;</span>
+</span></span><span style="display:flex;"><span>    }, 
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;groupInformationSourceMember&#34;</span>: <span style="color:#a5d6ff">&#34;mysql-0.mysql:3306&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>通过DNS地址 <code>mysql-0.mysql.mysql2.svc.cluster.local:3306</code> 可以连接到数据库进行读写操作。此时一个多节点的mysql集群已经部署完成，但是，集群外部的服务还无法访问数据库。</p>
+<h2 id="通过-haproxy-ingress-允许外部访问">
+  通过 haproxy-ingress 允许外部访问
+  <a class="heading-link" href="#%e9%80%9a%e8%bf%87-haproxy-ingress-%e5%85%81%e8%ae%b8%e5%a4%96%e9%83%a8%e8%ae%bf%e9%97%ae">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>首先，headless service只能通过集群内 DNS 访问服务，要外部访问，还需要另外创建一个 Service。为了让外部可以访问到 mysql-0 的服务，我们为 mysql-0 创建一个ClusterIP 类型的服务。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Service</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-0</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">selector</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#8b949e;font-style:italic"># 通过 selector 将 pod 约束到 mysql-0</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">   </span><span style="color:#7ee787">statefulset.kubernetes.io/pod-name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-0</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">ports</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span>- <span style="color:#7ee787">protocol</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">TCP</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">port</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">3306</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">targetPort</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">3306</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>接着，需要创建一个ingress-controller，本文选用的是 <a href="https://github.com/jcmoraisjr/haproxy-ingress"  class="external-link" target="_blank" rel="noopener">haproxy-ingress</a>。 <br>
+由于 mysql 服务通过 TCP 协议通信，kubernetes ingress 默认只支持 http 和 https，haproxy-ingress 提供了通过 configmap 的方法，配置 TCP 服务的端口，需要先创建一个 configmap，configmap的data中，key为HAProxy监听的端口，value 为需要转发的 service 的服务和端口。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ConfigMap</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-tcp</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">data</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">&#34;3306&#34;: </span><span style="color:#a5d6ff">&#34;mysql2/mysql-0:3306&#34;</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f mysql-0.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f tcp-svc.yaml
+</span></span></code></pre></div><p>接下来创建 ingress-controller，</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">extensions/v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Deployment</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">labels</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">run</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">haproxy-ingress</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">haproxy-ingress-192.168.0.1-30080</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">replicas</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">selector</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">matchLabels</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">run</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">haproxy-ingress</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">strategy</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">type</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">RollingUpdate</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">template</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">labels</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">run</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">haproxy-ingress</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">tolerations</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">key</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">app </span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">operator</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Equal </span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">value</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">haproxy</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">effect</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">NoSchedule</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">serviceAccount</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller      </span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">nodeSelector</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">kubernetes.io/hostname</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">192.168.0.1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">containers</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">args</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- --<span style="color:#a5d6ff">tcp-services-configmap=$(POD_NAMESPACE)/mysql-tcp</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- --<span style="color:#a5d6ff">default-backend-service=$(POD_NAMESPACE)/mysql</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- --<span style="color:#a5d6ff">default-ssl-certificate=$(POD_NAMESPACE)/tls-secret</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- --<span style="color:#a5d6ff">ingress-class=ha-mysql</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">env</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">POD_NAME</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">valueFrom</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">            </span><span style="color:#7ee787">fieldRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">              </span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">              </span><span style="color:#7ee787">fieldPath</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">metadata.name</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">POD_NAMESPACE</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">valueFrom</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">            </span><span style="color:#7ee787">fieldRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">              </span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">              </span><span style="color:#7ee787">fieldPath</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">metadata.namespace</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">image</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">jcmoraisjr/haproxy-ingress</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">haproxy-ingress</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">ports</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#8b949e;font-style:italic"># 和 configmap 中定义的端口对应</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">containerPort</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">3306</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">hostPort</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">3306</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">http</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">protocol</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">TCP</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">containerPort</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">443</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">https</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">protocol</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">TCP</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span>- <span style="color:#7ee787">containerPort</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1936</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">hostPort</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">30081</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">stat</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">protocol</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">TCP</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Role</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">rules</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">configmaps</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">pods</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">secrets</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">namespaces</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">configmaps</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">configmaps</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">endpoints</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">RoleBinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">roleRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Role</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">subjects</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">User</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">rules</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">configmaps</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">endpoints</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">nodes</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">pods</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">secrets</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">nodes</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">services</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;extensions&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">ingresses</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">events</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">patch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">&#34;extensions&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">ingresses/status</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRoleBinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">roleRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">subjects</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql2</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">User</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ingress-controller</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f ingress-controller.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f ingress-rbac.yaml -n mysql2
+</span></span></code></pre></div><p>最后创建 ingress 规则：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">extensions/v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Ingress</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">annotations</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">ingress.kubernetes.io/ssl-redirect</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;false&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">kubernetes.io/ingress.class</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ha-mysql</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ha-mysql</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">rules</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#7ee787">http</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">paths</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">backend</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">serviceName</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mysql-0</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">servicePort</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">3306</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">path</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">/</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>此时可以通过 haproxy 的 IP + 映射端口访问到 mysql 集群。</p>
+<h2 id="附件">
+  附件
+  <a class="heading-link" href="#%e9%99%84%e4%bb%b6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>以下是上面用到的 yaml 文件：</p>
+<ul>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/rbac.yaml" >rbac.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/mysql.yaml" >mysql.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/secret.yaml" >secret.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/pv.yaml" >pv.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/mysql-0-svc.yaml" >mysql-0-svc.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/tcp-svc.yaml" >tcp-svc.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/ingress-controller.yaml" >ingress-controller.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/ingress-rbac.yaml" >ingress-rbac.yaml</a></li>
+<li><a href="/media/posts/cloud/deploy-mysql-on-kubernetes/ingress.yaml" >ingress.yaml</a></li>
+</ul>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

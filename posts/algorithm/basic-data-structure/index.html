@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Basic Data Structure · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="基础的数据结构和一些基本操作，及其 golang 语言的实现。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Basic Data Structure"/>
+<meta name="twitter:description" content="基础的数据结构和一些基本操作，及其 golang 语言的实现。"/>
+
+<meta property="og:title" content="Basic Data Structure" />
+<meta property="og:description" content="基础的数据结构和一些基本操作，及其 golang 语言的实现。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/algorithm/basic-data-structure/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-12-07T16:31:03+08:00" />
+<meta property="article:modified_time" content="2018-12-07T16:31:03+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/algorithm/basic-data-structure/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/algorithm/basic-data-structure/">
+              Basic Data Structure
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2018-12-07T16:31:03&#43;08:00">
+                December 7, 2018
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              One-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/algorithm/">algorithm</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/data-structure/">data-structure</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>基础的数据结构和一些基本操作，及其 golang 语言的实现。</p>
+<h2 id="array">
+  Array
+  <a class="heading-link" href="#array">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>数组 是线性表数据结构。用一组连续存储空间，储存一组相同类型的数据。支持<em>随机访问</em> O(1)。 <br>
+低效插入和删除 O(n)，需要数据搬移。优化：删除操作延后(JVM垃圾回收算法)。</p>
+<h2 id="linked-list">
+  Linked list
+  <a class="heading-link" href="#linked-list">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>链表 插入删除 O(1)，随机访问O(n)。 <br>
+单链表：插入删除时需要查找前驱节点 O(n)。 <br>
+双向链表：插入删除时查找前驱结点 O(1)。</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>链表代码实现</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>单链表字符串回文判断</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>单链表反转</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>链表中环的检测</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>两个有序的链表合并</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>删除链表倒数第 n 个结点</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>求链表中间节点</strong></li>
+</ul>
+<h2 id="stack">
+  Stack
+  <a class="heading-link" href="#stack">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>栈 后进先出，先进后出。入栈出栈 O(1) <br>
+顺序栈：数组。动态扩容（动态扩容数组，数据搬移O(n)） <br>
+链式栈：链表。</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>ArrayStack 实现</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>LinkedListStack 实现</strong></li>
+</ul>
+<h2 id="queue">
+  Queue
+  <a class="heading-link" href="#queue">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>队列 先进先出，后进后出。 入队出队O(1)</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>数组实现(数据搬移)</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>链表实现</strong></li>
+<li><input checked="" disabled="" type="checkbox"> <strong>循环链表数组实现</strong></li>
+</ul>
+<h2 id="skip-list">
+  Skip list
+  <a class="heading-link" href="#skip-list">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>跳表 链表加多级索引的数据结构。查找 O(logn)。Redis 中有序集合 Sorted Set 用跳表实现。 <br>
+<img src="/media/posts/algorithm/basic-data-structure/skip-list.jpg" alt=""> <br>
+插入删除 O(logn)。 平衡性维护-随机函数。</p>
+<ul>
+<li><input disabled="" type="checkbox"> <strong>实现</strong></li>
+</ul>
+<h2 id="hash-table">
+  Hash Table
+  <a class="heading-link" href="#hash-table">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>散列表 通过散列函数把元素的键值映射为下标，然后将数据存储在数组中对应下标的位置。支持随机访问 O(1)。</p>
+<p>散列函数。 <br>
+装载因子 = 填入表中的元素个数 / 散列表的长度</p>
+<p>解决散列冲突：</p>
+<ul>
+<li>开放寻址法<br>
+优点：可以有效利用CPU缓存加快查询速度；便于序列化。 <br>
+缺点：删除时不能直接删除，需要特使标记已删除的数据；冲突代价高。
+<ul>
+<li>线性探测(ThreadLocalMap)：当往散列表中插入数据时，如果某个数据经过散列函数散列之后，存储位置已经被占用了，就从当前位置开始，依次往后查找，看是否有空闲位置，直到找到为止。(hash(key)+n)</li>
+<li>二次探测：hash(key)+n^2</li>
+<li>双重散列：使用多组散列函数(hash1(key)，hash2(key)，hash3(key))</li>
+</ul>
+</li>
+<li>链表法(LinkedHashMap) <br>
+优点：内存利用率高，链表节点不需要提前申请；大装载因子容忍度高。 <br>
+缺点：CPU缓存不友好；由于要存储指针，存储小对象时内存消耗大。</li>
+</ul>
+<p>动态扩容：避免一次性搬移大量数据。扩容时只申请新空间，新的数据插入新的散列表，同时将小部分老数据搬移至新散列表，将扩容消耗均摊至每次插入。</p>
+<p>散列表+双向链表 查找删除添加 O(1):</p>
+<blockquote>
+<p>LRU 缓存淘汰算法/Redis 有序集合/Java LinkedHashMap</p>
+</blockquote>
+<p>散列表是通过链表法解决散列冲突的，所以每个结点会在两条链中。一个链是刚刚我们提到的双向链表，另一个链是散列表中的拉链。前驱和后继指针是为了将结点串在双向链表中，hnext 指针是为了将结点串在散列表的拉链中。 <br>
+<img src="/media/posts/algorithm/basic-data-structure/lru.jpg" alt=""></p>
+<p>哈希算法： <br>
+将任意长度的二进制值串映射为固定长度的二进制值串的算法。 <br>
+应用：</p>
+<ol>
+<li>安全加密(MD5/SHA/AES)</li>
+<li>唯一标识</li>
+<li>数据校验</li>
+<li>散列函数</li>
+<li>负载均衡(会话粘滞, 对IP或会话ID哈希)</li>
+<li>数据分片(大文件关键词分片)</li>
+<li>分布式存储(机器扩容导致重新计算哈希值，一致性哈希算法)</li>
+</ol>
+<hr>
+<p><a href="https://github.com/maoqide/algorithm-test"  class="external-link" target="_blank" rel="noopener">practice-code</a></p>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

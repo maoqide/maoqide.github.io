@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Golang Gc &amp; Memory Allocation · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="关于 Golang GC 和内存管理相关的流程和原理的一些总结。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Golang Gc &amp; Memory Allocation"/>
+<meta name="twitter:description" content="关于 Golang GC 和内存管理相关的流程和原理的一些总结。"/>
+
+<meta property="og:title" content="Golang Gc &amp; Memory Allocation" />
+<meta property="og:description" content="关于 Golang GC 和内存管理相关的流程和原理的一些总结。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/golang/golang-gc--memory-allocation/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-02-18T17:20:47+08:00" />
+<meta property="article:modified_time" content="2020-02-18T17:20:47+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/golang/golang-gc--memory-allocation/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/golang/golang-gc--memory-allocation/">
+              Golang Gc &amp; Memory Allocation
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2020-02-18T17:20:47&#43;08:00">
+                February 18, 2020
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              One-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/golang/">golang</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/gc/">gc</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/memory/">memory</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>关于 Golang GC 和内存管理相关的流程和原理的一些总结。</p>
+<h2 id="gc-流程">
+  GC 流程
+  <a class="heading-link" href="#gc-%e6%b5%81%e7%a8%8b">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>golang GC 采用基于标记-清除的三色标记法，下图为 golang 一轮完整的 GC 的过程： <br>
+<img src="/media/posts/golang/golang-gc/GC-Algorithm-Phases.png" alt=""></p>
+<p>一轮完整的 GC，总是从 Off，如果不是 Off 状态，则代表上一轮GC还未完成，如果这时修改指针的值，是直接修改的。</p>
+<p>Stack scan: 收集根对象（全局变量和 goroutine 栈上的变量），该阶段会开启写屏障(Write Barrier)。</p>
+<p>Mark: 标记对象，直到标记完所有根对象和根对象可达对象。此时写屏障会记录所有指针的更改(通过 mutator)。</p>
+<p>Mark Termination: 重新扫描部分全局变量和发生更改的栈变量，完成标记，该阶段会STW(Stop The World)，也是 gc 时造成 go 程序停顿的主要阶段。</p>
+<p>Sweep: 并发的清除未标记的对象。</p>
+<h2 id="三色标记">
+  三色标记
+  <a class="heading-link" href="#%e4%b8%89%e8%89%b2%e6%a0%87%e8%ae%b0">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>以上 Mark 阶段，采用的是三色标记法，是传统标记-清除算法的一种优化，主要思想是增加了一种中间状态，即灰色对象，以减少 STW 时间。 <br>
+三色标记将对象分为黑色、白色、灰色三种：</p>
+<ul>
+<li>黑色：已标记的对象，表示对象是根对象可达的。</li>
+<li>白色：未标记对象，gc开始时所有对象为白色，当gc结束时，如果仍为白色，说明对象不可达，在 sweep 阶段会被清除。</li>
+<li>灰色：被黑色对象引用到的对象，但其引用的自对象还未被扫描，灰色为标记过程的中间状态，当灰色对象全部被标记完成代表本次标记阶段结束。</li>
+</ul>
+<p>三色标记的主要过程即：</p>
+<ol>
+<li>开始时所有对象为白色</li>
+<li>将所有<strong>根对象</strong>标记为灰色，放入队列</li>
+<li>遍历灰色对象，将其标记为黑色，并将他们引用的对象标记为灰色，放入队列</li>
+<li>重复步骤 <em>3</em> 持续遍历灰色对象，直至队列为空</li>
+<li>此时只剩下黑色对象和白色对象，白色对象即为下一步需要清除的对象</li>
+</ol>
+<h2 id="stw">
+  STW
+  <a class="heading-link" href="#stw">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>传统的标记-清除算法，为了防止在标记过程中，对象引用发生变化，导致清除仍在使用的对象，需要 STW(Stop The World)，这会造成程序的停顿。在三色标记的过程中，由于引入了灰色对象这一中间状态，标记过程和用户的 golang 代码中可以并发执行，不需要 STW，这极大的减少了应用的停顿时间。 <br>
+三色标记具体如何避免在标记过程中对象应用的改变呢，这里用到了写屏障(Write Barrier)。</p>
+<h2 id="写屏障">
+  写屏障
+  <a class="heading-link" href="#%e5%86%99%e5%b1%8f%e9%9a%9c">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>在 GC 的流程中，Stack scan 这一步骤，启用了写屏障。写屏障的主要思想，是在标记的过程中，通过写屏障记录发生变化的指针，然后在 Mark termination 的 rescan 过程中，重新进行扫描，因为在这一步骤会 STW，所以在这一步骤完成后的白色对象，不会再被引用，可以直接清除。关于写屏障具体原理和实现，这里不再展开。</p>
+<h2 id="gc触发">
+  GC触发
+  <a class="heading-link" href="#gc%e8%a7%a6%e5%8f%91">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>golang 程序的执行过程中，如下几种情况下会触发 GC:</p>
+<ul>
+<li>主动触发，用户代码中调用 <code>runtime.GC</code> 会主动触发 GC</li>
+<li>默认每 2min 未产生 GC 时，golang 的守护协程 sysmon 会强制触发 GC</li>
+<li>当 go 程序分配的内存增长超过阈值时，会触发 GC</li>
+</ul>
+<h2 id="内存分配">
+  内存分配
+  <a class="heading-link" href="#%e5%86%85%e5%ad%98%e5%88%86%e9%85%8d">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>golang 内存分配分为堆内存和栈内存。 <br>
+栈：一般函数内部执行中声明的变量，函数返回直接释放，不会引起垃圾回收，对性能无影响。 <br>
+堆：有引用到的内存空间，靠 GC 回收，会影响程序进程。</p>
+<h2 id="内存逃逸">
+  内存逃逸
+  <a class="heading-link" href="#%e5%86%85%e5%ad%98%e9%80%83%e9%80%b8">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>逃逸分析是指由编译器决定内存分配的位置，不需要程序员指定。即由编译器决定新申请的对象会分配到堆上还是栈上。 <br>
+逃逸分析场景：</p>
+<ol>
+<li>指针逃逸 <br>
+go 将函数内定义的变量返回到函数外，会将本应分配到栈上的内存分配到堆上。</li>
+<li>栈空间不足逃逸 <br>
+当栈空间不足或无法判断当前切片长度时会将对象分配到堆上。</li>
+<li>动态类型逃逸 <br>
+当函数参数为 interface 类型，编译期间无法确定参数的具体类型，也可能会产生逃逸。</li>
+</ol>
+<p><a href="http://maoqide.live/post/awesome-post/collection-4/"  class="external-link" target="_blank" rel="noopener">参考列表</a></p>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
