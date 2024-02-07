@@ -5,7 +5,7 @@
     <loc>/about/</loc>
     <lastmod>2019-06-08T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/posts/self/2023/</loc>
+    <loc>/post/self/2023/</loc>
     <lastmod>2024-02-07T14:36:46+08:00</lastmod>
   </url><url>
     <loc>/authors/</loc>
@@ -20,7 +20,7 @@
     <loc>/authors/maoqide/</loc>
     <lastmod>2024-02-07T14:36:46+08:00</lastmod>
   </url><url>
-    <loc>/posts/</loc>
+    <loc>/post/</loc>
     <lastmod>2024-02-07T14:36:46+08:00</lastmod>
   </url><url>
     <loc>/tags/self/</loc>
@@ -32,7 +32,7 @@
     <loc>/tags/work/</loc>
     <lastmod>2024-02-07T14:36:46+08:00</lastmod>
   </url><url>
-    <loc>/posts/practice/build-fileserver-using-nginx-on-k8s/</loc>
+    <loc>/post/practice/build-fileserver-using-nginx-on-k8s/</loc>
     <lastmod>2021-05-27T13:52:43+08:00</lastmod>
   </url><url>
     <loc>/tags/fileserver/</loc>
@@ -47,7 +47,7 @@
     <loc>/tags/kubernetes/</loc>
     <lastmod>2021-04-18T14:00:22+08:00</lastmod>
   </url><url>
-    <loc>/posts/problems/kubernetes-service-502/</loc>
+    <loc>/post/problems/kubernetes-service-502/</loc>
     <lastmod>2021-04-18T14:00:22+08:00</lastmod>
   </url><url>
     <loc>/tags/problem/</loc>
@@ -59,7 +59,7 @@
     <loc>/tags/etcd/</loc>
     <lastmod>2021-03-22T09:37:09+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/raft/</loc>
+    <loc>/post/cloud/raft/</loc>
     <lastmod>2021-03-22T09:37:09+08:00</lastmod>
   </url><url>
     <loc>/tags/raft/</loc>
@@ -68,10 +68,10 @@
     <loc>/tags/crd/</loc>
     <lastmod>2020-10-29T09:00:05+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/kubernetes-crd/</loc>
+    <loc>/post/cloud/kubernetes-crd/</loc>
     <lastmod>2020-10-29T09:00:05+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/application-containerization-best-practice/</loc>
+    <loc>/post/cloud/application-containerization-best-practice/</loc>
     <lastmod>2020-08-10T09:18:18+08:00</lastmod>
   </url><url>
     <loc>/tags/best-practice/</loc>
@@ -86,13 +86,13 @@
     <loc>/tags/monitor/</loc>
     <lastmod>2020-07-03T11:27:06+08:00</lastmod>
   </url><url>
-    <loc>/posts/practice/monitor-system/</loc>
+    <loc>/post/practice/monitor-system/</loc>
     <lastmod>2020-07-03T11:27:06+08:00</lastmod>
   </url><url>
     <loc>/tags/operator/</loc>
     <lastmod>2020-06-29T15:40:29+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/sample-operator/</loc>
+    <loc>/post/cloud/sample-operator/</loc>
     <lastmod>2020-06-29T15:40:29+08:00</lastmod>
   </url><url>
     <loc>/tags/sample-controller/</loc>
@@ -104,7 +104,7 @@
     <loc>/tags/kubernetes-event/</loc>
     <lastmod>2020-04-25T16:38:17+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/kubernetes-events/</loc>
+    <loc>/post/cloud/kubernetes-events/</loc>
     <lastmod>2020-04-25T16:38:17+08:00</lastmod>
   </url><url>
     <loc>/tags/source-code/</loc>
@@ -116,7 +116,7 @@
     <loc>/tags/bfs/</loc>
     <lastmod>2020-03-28T11:23:38+08:00</lastmod>
   </url><url>
-    <loc>/posts/algorithm/bfs-and-dfs/</loc>
+    <loc>/post/algorithm/bfs-and-dfs/</loc>
     <lastmod>2020-03-28T11:23:38+08:00</lastmod>
   </url><url>
     <loc>/tags/dfs/</loc>
@@ -131,7 +131,7 @@
     <loc>/tags/golang/</loc>
     <lastmod>2020-02-18T17:20:47+08:00</lastmod>
   </url><url>
-    <loc>/posts/golang/golang-gc--memory-allocation/</loc>
+    <loc>/post/golang/golang-gc--memory-allocation/</loc>
     <lastmod>2020-02-18T17:20:47+08:00</lastmod>
   </url><url>
     <loc>/tags/memory/</loc>
@@ -140,16 +140,16 @@
     <loc>/tags/awesome/</loc>
     <lastmod>2020-02-18T12:13:08+08:00</lastmod>
   </url><url>
-    <loc>/posts/awesome-post/collection-4/</loc>
+    <loc>/post/awesome-post/collection-4/</loc>
     <lastmod>2020-02-18T12:13:08+08:00</lastmod>
   </url><url>
-    <loc>/posts/golang/golang-websocket-message-pushing/</loc>
+    <loc>/post/golang/golang-websocket-message-pushing/</loc>
     <lastmod>2020-01-11T20:49:24+08:00</lastmod>
   </url><url>
     <loc>/tags/websocket/</loc>
     <lastmod>2020-01-11T20:49:24+08:00</lastmod>
   </url><url>
-    <loc>/posts/awesome-post/collection-3/</loc>
+    <loc>/post/awesome-post/collection-3/</loc>
     <lastmod>2020-01-07T21:57:36+08:00</lastmod>
   </url><url>
     <loc>/tags/kubeadm/</loc>
@@ -158,10 +158,10 @@
     <loc>/tags/upgrade/</loc>
     <lastmod>2019-10-31T09:50:41+08:00</lastmod>
   </url><url>
-    <loc>/posts/notes/upgrade-kubeadm-cluster/</loc>
+    <loc>/post/notes/upgrade-kubeadm-cluster/</loc>
     <lastmod>2019-10-31T09:50:41+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/build-docker-image-in-a-pod-in-kubernetes/</loc>
+    <loc>/post/cloud/build-docker-image-in-a-pod-in-kubernetes/</loc>
     <lastmod>2019-10-27T11:24:01+08:00</lastmod>
   </url><url>
     <loc>/tags/cloud/</loc>
@@ -173,7 +173,7 @@
     <loc>/tags/kaniko/</loc>
     <lastmod>2019-10-27T11:24:01+08:00</lastmod>
   </url><url>
-    <loc>/posts/practice/kubernetes-monitoring/</loc>
+    <loc>/post/practice/kubernetes-monitoring/</loc>
     <lastmod>2019-09-25T10:15:26+08:00</lastmod>
   </url><url>
     <loc>/tags/monitoring/</loc>
@@ -185,13 +185,13 @@
     <loc>/tags/glusterfs/</loc>
     <lastmod>2019-09-06T08:46:14+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/glusterfs-kubernetes/</loc>
+    <loc>/post/cloud/glusterfs-kubernetes/</loc>
     <lastmod>2019-09-06T08:46:14+08:00</lastmod>
   </url><url>
     <loc>/tags/presistence-volume/</loc>
     <lastmod>2019-09-06T08:46:14+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/kubernetes-webshell/</loc>
+    <loc>/post/cloud/kubernetes-webshell/</loc>
     <lastmod>2019-08-11T11:32:17+08:00</lastmod>
   </url><url>
     <loc>/tags/webshell/</loc>
@@ -200,13 +200,13 @@
     <loc>/tags/xterm/</loc>
     <lastmod>2019-08-11T11:32:17+08:00</lastmod>
   </url><url>
-    <loc>/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/</loc>
+    <loc>/post/notes/upgrade-kubernets-from-binary-to-kubeadm/</loc>
     <lastmod>2019-08-06T13:55:04+08:00</lastmod>
   </url><url>
     <loc>/tags/concurrency/</loc>
     <lastmod>2019-07-20T21:38:08+08:00</lastmod>
   </url><url>
-    <loc>/posts/golang/go-concurrency/</loc>
+    <loc>/post/golang/go-concurrency/</loc>
     <lastmod>2019-07-20T21:38:08+08:00</lastmod>
   </url><url>
     <loc>/tags/goroutine/</loc>
@@ -215,16 +215,16 @@
     <loc>/tags/pprof/</loc>
     <lastmod>2019-07-20T21:38:08+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/kubelet-1-what-do-kubelet-do/</loc>
+    <loc>/post/cloud/kubelet-1-what-do-kubelet-do/</loc>
     <lastmod>2019-07-14T11:30:24+08:00</lastmod>
   </url><url>
-    <loc>/posts/golang/the-go-memory-model/</loc>
+    <loc>/post/golang/the-go-memory-model/</loc>
     <lastmod>2019-06-19T09:10:37+08:00</lastmod>
   </url><url>
-    <loc>/posts/golang/golang-data-race-detector/</loc>
+    <loc>/post/golang/golang-data-race-detector/</loc>
     <lastmod>2019-06-18T09:26:13+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/deploy-mysql-on-kubernetes/</loc>
+    <loc>/post/cloud/deploy-mysql-on-kubernetes/</loc>
     <lastmod>2019-05-16T14:06:37+08:00</lastmod>
   </url><url>
     <loc>/tags/kubernetes-operator/</loc>
@@ -233,22 +233,22 @@
     <loc>/tags/mysql-operator/</loc>
     <lastmod>2019-05-16T14:06:37+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/sample-controller/</loc>
+    <loc>/post/cloud/sample-controller/</loc>
     <lastmod>2019-03-18T12:53:41+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</loc>
+    <loc>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</loc>
     <lastmod>2019-03-16T21:34:46+08:00</lastmod>
   </url><url>
-    <loc>/posts/golang/golang-mutex/</loc>
+    <loc>/post/golang/golang-mutex/</loc>
     <lastmod>2019-03-11T16:35:20+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
+    <loc>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
     <lastmod>2019-03-07T20:00:30+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
+    <loc>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
     <lastmod>2019-02-23T16:52:30+08:00</lastmod>
   </url><url>
-    <loc>/posts/awesome-post/collection-2/</loc>
+    <loc>/post/awesome-post/collection-2/</loc>
     <lastmod>2019-02-20T10:51:58+08:00</lastmod>
   </url><url>
     <loc>/tags/container-network/</loc>
@@ -260,10 +260,10 @@
     <loc>/tags/flannel/</loc>
     <lastmod>2019-01-22T17:28:28+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/container-network/</loc>
+    <loc>/post/cloud/container-network/</loc>
     <lastmod>2019-01-22T17:28:28+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/docker-%E5%8E%9F%E7%90%86/</loc>
+    <loc>/post/cloud/docker-%E5%8E%9F%E7%90%86/</loc>
     <lastmod>2019-01-17T14:08:37+08:00</lastmod>
   </url><url>
     <loc>/tags/blog/</loc>
@@ -272,34 +272,34 @@
     <loc>/tags/notes/</loc>
     <lastmod>2019-01-01T17:04:25+08:00</lastmod>
   </url><url>
-    <loc>/posts/notes/publish-your-site-on-k8s/</loc>
+    <loc>/post/notes/publish-your-site-on-k8s/</loc>
     <lastmod>2019-01-01T17:04:25+08:00</lastmod>
   </url><url>
-    <loc>/posts/golang/goroutine/</loc>
+    <loc>/post/golang/goroutine/</loc>
     <lastmod>2018-12-28T16:29:32+08:00</lastmod>
   </url><url>
-    <loc>/posts/algorithm/basic-data-structure/</loc>
+    <loc>/post/algorithm/basic-data-structure/</loc>
     <lastmod>2018-12-07T16:31:03+08:00</lastmod>
   </url><url>
     <loc>/tags/data-structure/</loc>
     <lastmod>2018-12-07T16:31:03+08:00</lastmod>
   </url><url>
-    <loc>/posts/notes/build-blog-with-hugo/</loc>
+    <loc>/post/notes/build-blog-with-hugo/</loc>
     <lastmod>2018-12-04T18:37:11+08:00</lastmod>
   </url><url>
-    <loc>/posts/awesome-post/collection-1/</loc>
+    <loc>/post/awesome-post/collection-1/</loc>
     <lastmod>2018-12-03T21:38:12+08:00</lastmod>
   </url><url>
     <loc>/tags/mesos/</loc>
     <lastmod>2018-12-03T21:38:12+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
+    <loc>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
     <lastmod>2018-11-21T19:46:06+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
+    <loc>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
     <lastmod>2018-11-21T18:48:01+08:00</lastmod>
   </url><url>
-    <loc>/posts/cloud/deploy-kubernetes-on-aliyun/</loc>
+    <loc>/post/cloud/deploy-kubernetes-on-aliyun/</loc>
     <lastmod>2018-11-14T14:31:38+08:00</lastmod>
   </url><url>
     <loc>/categories/</loc>

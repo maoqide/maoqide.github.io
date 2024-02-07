@@ -10,9 +10,9 @@
     <atom:link href="/tags/sample-controller/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Sample Operator</title>
-      <link>/posts/cloud/sample-operator/</link>
+      <link>/post/cloud/sample-operator/</link>
       <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
-      <guid>/posts/cloud/sample-operator/</guid>
+      <guid>/post/cloud/sample-operator/</guid>
       <description>&lt;p&gt;用 kubebuilder 开发 operator 实现 sample-controller&lt;/p&gt;</description>
     </item>
   </channel>

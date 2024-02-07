@@ -10,9 +10,9 @@
     <atom:link href="/tags/mesos/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Awesome Post Collection 1</title>
-      <link>/posts/awesome-post/collection-1/</link>
+      <link>/post/awesome-post/collection-1/</link>
       <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
-      <guid>/posts/awesome-post/collection-1/</guid>
+      <guid>/post/awesome-post/collection-1/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;Mesos 的资源分配。&lt;/li&gt;&#xA;&lt;li&gt;Kubernetes调度详解。&lt;/li&gt;&#xA;&lt;li&gt;Istio 调用链埋点/tracing。&lt;/li&gt;&#xA;&lt;li&gt;kubernetes informer 解析。&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
   </channel>

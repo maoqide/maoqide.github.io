@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  阿里云主机搭建 K8S 集群 · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="通过阿里云ECS实例搭建K8S集群">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="阿里云主机搭建 K8S 集群"/>
+<meta name="twitter:description" content="通过阿里云ECS实例搭建K8S集群"/>
+
+<meta property="og:title" content="阿里云主机搭建 K8S 集群" />
+<meta property="og:description" content="通过阿里云ECS实例搭建K8S集群" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/cloud/deploy-kubernetes-on-aliyun/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2018-11-14T14:31:38+08:00" />
+<meta property="article:modified_time" content="2018-11-14T14:31:38+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/post/cloud/deploy-kubernetes-on-aliyun/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/post/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="/post/cloud/deploy-kubernetes-on-aliyun/">
+          阿里云主机搭建 K8S 集群
+        </a>
+      </h1>
+    </header>
+
+    <p>通过阿里云ECS实例搭建K8S集群</p>
+<h2 id="环境">
+  环境
+  <a class="heading-link" href="#%e7%8e%af%e5%a2%83">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<ul>
+<li>阿里云ECS * 2</li>
+<li>centos7.4</li>
+<li>阿里云两台机器需要内网互通（同一k可用区可以创建免费VPC高速通道实现）</li>
+</ul>
+<h2 id="安装-docker">
+  安装 docker
+  <a class="heading-link" href="#%e5%ae%89%e8%a3%85-docker">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><a href="https://docs.docker.com/install/linux/docker-ce/centos/"  class="external-link" target="_blank" rel="noopener">官方文档</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo yum install -y yum-utils <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>  device-mapper-persistent-data <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>  lvm2
+</span></span><span style="display:flex;"><span>sudo yum-config-manager <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    --add-repo <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>    https://download.docker.com/linux/centos/docker-ce.repo
+</span></span><span style="display:flex;"><span>sudo yum install docker-ce
+</span></span></code></pre></div><h2 id="配置代理">
+  配置代理
+  <a class="heading-link" href="#%e9%85%8d%e7%bd%ae%e4%bb%a3%e7%90%86">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<ul>
+<li><a href="https://github.com/shadowsocks/shadowsocks/tree/master"  class="external-link" target="_blank" rel="noopener">shadowsocks服务端</a></li>
+<li>provixy</li>
+<li>shadowsocks客户端 sslocal</li>
+</ul>
+<h3 id="安装-shadowsocks">
+  安装 shadowsocks
+  <a class="heading-link" href="#%e5%ae%89%e8%a3%85-shadowsocks">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>yum -y install python-pip
+</span></span><span style="display:flex;"><span>pip install shadowsocks
+</span></span></code></pre></div><h3 id="配置-shadowsocks">
+  配置 shadowsocks
+  <a class="heading-link" href="#%e9%85%8d%e7%bd%ae-shadowsocks">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vim /etc/shadowsocks.json
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;server&#34;</span>:<span style="color:#a5d6ff">&#34;1.1.1.1&#34;</span>, 			<span style="color:#8b949e;font-style:italic">//shadowsocks server ip
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#7ee787">&#34;server_port&#34;</span>:<span style="color:#a5d6ff">8888</span>,				<span style="color:#8b949e;font-style:italic">//shadowsocks server port
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#7ee787">&#34;local_address&#34;</span>: <span style="color:#a5d6ff">&#34;127.0.0.1&#34;</span>,	
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;local_port&#34;</span>:<span style="color:#a5d6ff">1080</span>,				<span style="color:#8b949e;font-style:italic">//default 1080
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>    <span style="color:#7ee787">&#34;password&#34;</span>:<span style="color:#a5d6ff">&#34;ssserver_passwd&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;timeout&#34;</span>:<span style="color:#a5d6ff">300</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;method&#34;</span>:<span style="color:#a5d6ff">&#34;aes-256-cfb&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;fast_open&#34;</span>: <span style="color:#79c0ff">false</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;workers&#34;</span>: <span style="color:#a5d6ff">1</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="安装-privoxy">
+  安装 privoxy
+  <a class="heading-link" href="#%e5%ae%89%e8%a3%85-privoxy">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>配置全局代理或 gfwlist 代理</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>yum -y install privoxy
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 全局代理</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#a5d6ff">&#39;forward-socks5 / 127.0.0.1:1080 .&#39;</span> &gt;&gt;/etc/privoxy/config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># gfwlist 代理</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 获取 gfwlist2privoxy 脚本</span>
+</span></span><span style="display:flex;"><span>curl -4sSkL https://raw.github.com/zfl9/gfwlist2privoxy/master/gfwlist2privoxy -O
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 生成 gfwlist.action 文件</span>
+</span></span><span style="display:flex;"><span>bash gfwlist2privoxy <span style="color:#a5d6ff">&#39;127.0.0.1:1080&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 检查 gfwlist.action 文件</span>
+</span></span><span style="display:flex;"><span>more gfwlist.action <span style="color:#8b949e;font-style:italic"># 一般有 5000+ 行</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 应用 gfwlist.action 文件</span>
+</span></span><span style="display:flex;"><span>mv -f gfwlist.action /etc/privoxy
+</span></span><span style="display:flex;"><span>echo <span style="color:#a5d6ff">&#39;actionsfile gfwlist.action&#39;</span> &gt;&gt;/etc/privoxy/config
+</span></span></code></pre></div><h4 id="配置快捷命令">
+  配置快捷命令
+  <a class="heading-link" href="#%e9%85%8d%e7%bd%ae%e5%bf%ab%e6%8d%b7%e5%91%bd%e4%bb%a4">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>在 /etc/profile.d 新建 set_proxy.sh, linux开机会自动执行该目录下可执行文件</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vim /etc/profile.d/set_proxy.sh
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@localhost ~<span style="color:#ff7b72;font-weight:bold">]</span>$ cat /etc/profile.d/set_proxy.sh 
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Initialization script for bash and sh</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># export proxy for GFW</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_on</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;nohup sslocal -c /etc/shadowsocks.json &amp; systemctl start privoxy&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_off</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;systemctl stop privoxy &amp;&amp; pkill sslocal&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_export</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;export http_proxy=http://127.0.0.1:8118 &amp;&amp; export https_proxy=http://127.0.0.1:8118 &amp;&amp; export no_proxy=localhost&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_unset</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;unset http_proxy https_proxy no_proxy&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_test</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;curl google.com&#39;</span>
+</span></span></code></pre></div><p>手动执行 /etc/profile, 会重新执行/etc/profile.d下文件</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>source /etc/profile
+</span></span></code></pre></div><p>执行alias查看，发现有proxy前缀的别名，则配置成功</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@localhost ~<span style="color:#ff7b72;font-weight:bold">]</span>$ alias 
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">egrep</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;egrep --color=auto&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">fgrep</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;fgrep --color=auto&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">grep</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;grep --color=auto&#39;</span>
+</span></span><span style="display:flex;"><span>alias l.<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;ls -d .* --color=auto&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">ll</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;ls -l --color=auto&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">ls</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;ls --color=auto&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_export</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;export http_proxy=http://127.0.0.1:8118 &amp;&amp; export https_proxy=http://127.0.0.1:8118 &amp;&amp; export no_proxy=localhost&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_off</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;systemctl stop privoxy &amp;&amp; pkill sslocal&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_on</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;nohup sslocal -c /etc/shadowsocks.json &amp; systemctl start privoxy&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_test</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;curl google.com&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">proxy_unset</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;unset http_proxy https_proxy no_proxy&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">vi</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;vim&#39;</span>
+</span></span><span style="display:flex;"><span>alias <span style="color:#79c0ff">which</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde&#39;</span>
+</span></span></code></pre></div><p>执行下面命令开启代理，并配置环境变量(只对当前shell生效，若要永久生效需要在/etc/proxy中export环境变量)</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>proxy_on <span style="color:#ff7b72;font-weight:bold">&amp;&amp;</span> proxy_export
+</span></span></code></pre></div><p>执行 proxy_test 测试代理是否配置成功，出现如下输出则配置成功。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@mqd1c2g ~<span style="color:#ff7b72;font-weight:bold">]</span>$ proxy_test 
+</span></span><span style="display:flex;"><span>&lt;HTML&gt;&lt;HEAD&gt;&lt;meta http-equiv<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;content-type&#34;</span> <span style="color:#79c0ff">content</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;text/html;charset=utf-8&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;TITLE&gt;301 Moved&lt;/TITLE&gt;&lt;/HEAD&gt;&lt;BODY&gt;
+</span></span><span style="display:flex;"><span>&lt;H1&gt;301 Moved&lt;/H1&gt;
+</span></span><span style="display:flex;"><span>The document has moved
+</span></span><span style="display:flex;"><span>&lt;A <span style="color:#79c0ff">HREF</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;http://www.google.com/&#34;</span>&gt;here&lt;/A&gt;.
+</span></span><span style="display:flex;"><span>&lt;/BODY&gt;&lt;/HTML&gt;
+</span></span></code></pre></div><p>参考: <a href="https://www.zfl9.com/ss-local.html"  class="external-link" target="_blank" rel="noopener">ss-local 终端代理（gfwlist）</a></p>
+<h2 id="安装-kubernetes">
+  安装 Kubernetes
+  <a class="heading-link" href="#%e5%ae%89%e8%a3%85-kubernetes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><a href="https://kubernetes.io/docs/setup/independent/install-kubeadm/"  class="external-link" target="_blank" rel="noopener">官方文档</a></p>
+<h3 id="安装kubeadm">
+  安装kubeadm
+  <a class="heading-link" href="#%e5%ae%89%e8%a3%85kubeadm">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>检查机器是否符合文档中的<code>Before you begin</code>的要求, 符合的话才能进行接下来的步骤。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat <span style="color:#a5d6ff">&lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">[kubernetes]
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">name=Kubernetes
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">enabled=1
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">gpgcheck=1
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">repo_gpgcheck=1
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">exclude=kube*
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Set SELinux in permissive mode (effectively disabling it)</span>
+</span></span><span style="display:flex;"><span>setenforce <span style="color:#a5d6ff">0</span>
+</span></span><span style="display:flex;"><span>sed -i <span style="color:#a5d6ff">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> /etc/selinux/config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>yum install -y kubelet kubeadm kubectl --disableexcludes<span style="color:#ff7b72;font-weight:bold">=</span>kubernetes
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>systemctl enable kubelet <span style="color:#ff7b72;font-weight:bold">&amp;&amp;</span> systemctl start kubelet
+</span></span></code></pre></div><h3 id="创建-master-节点">
+  创建 master 节点
+  <a class="heading-link" href="#%e5%88%9b%e5%bb%ba-master-%e8%8a%82%e7%82%b9">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># pod-network-cidr 10.244.0.0/16 是后面 flannel 默认配置的 pod Network，配置成这个地址不用改的flannel的 默认配置</span>
+</span></span><span style="display:flex;"><span>kubeadm init --pod-network-cidr 10.244.0.0/16
+</span></span></code></pre></div><p>成功执行后 master 节点就已经启动了, 可以选择安装一种网络插件，这里选择flannel</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 使用默认配置启动 flannel 的 DaemonSet</span>
+</span></span><span style="display:flex;"><span>kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+</span></span></code></pre></div><h3 id="创建-node-节点">
+  创建 node 节点
+  <a class="heading-link" href="#%e5%88%9b%e5%bb%ba-node-%e8%8a%82%e7%82%b9">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>在 master 节点执行下面命令生成创建子节点命令</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubeadm token create --print-join-command
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff7b72;font-weight:bold">[</span>root@localhost ~<span style="color:#ff7b72;font-weight:bold">]</span>$ kubeadm token create --print-join-command
+</span></span><span style="display:flex;"><span>kubeadm join masterip:6443 --token 5zk5ql.5eq0rgoui0dl0xx3 --discovery-token-ca-cert-hash sha256:5bef3894fc492bf9d93c9f248f84ec3sdsadasdss7685191a9d841fd32a88bb9ac9 
+</span></span></code></pre></div><p>在 node 节点执行上述命令生成的命令</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubeadm join masterip:6443 --token 5zk5ql.5eq0rgoui0dl0xx3 --discovery-token-ca-cert-hash sha256:5bef3894fc492bf9d93c9f248f84ec3sdsadasdss7685191a9d841fd32a88bb9ac9
+</span></span></code></pre></div><p>执行成功则 node 节点添加成功</p>
+  </article>
+</section>
+
+  
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

@@ -10,9 +10,9 @@
     <atom:link href="/tags/data-structure/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Basic Data Structure</title>
-      <link>/posts/algorithm/basic-data-structure/</link>
+      <link>/post/algorithm/basic-data-structure/</link>
       <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
-      <guid>/posts/algorithm/basic-data-structure/</guid>
+      <guid>/post/algorithm/basic-data-structure/</guid>
       <description>&lt;p&gt;基础的数据结构和一些基本操作，及其 golang 语言的实现。&lt;/p&gt;</description>
     </item>
   </channel>

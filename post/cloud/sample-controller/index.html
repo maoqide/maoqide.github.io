@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Sample Controller · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="自己构建 sample-controller.">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Sample Controller"/>
+<meta name="twitter:description" content="自己构建 sample-controller."/>
+
+<meta property="og:title" content="Sample Controller" />
+<meta property="og:description" content="自己构建 sample-controller." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/cloud/sample-controller/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2019-03-18T12:53:41+08:00" />
+<meta property="article:modified_time" content="2019-03-18T12:53:41+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/post/cloud/sample-controller/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/post/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="/post/cloud/sample-controller/">
+          Sample Controller
+        </a>
+      </h1>
+    </header>
+
+    <p>自己构建 sample-controller.</p>
+<p><a href="https://github.com/maoqide/sample-controller"  class="external-link" target="_blank" rel="noopener">https://github.com/maoqide/sample-controller</a> <br>
+<a href="https://github.com/kubernetes/sample-controller"  class="external-link" target="_blank" rel="noopener">https://github.com/kubernetes/sample-controller</a></p>
+<h2 id="编写-crd-定义">
+  编写 CRD 定义
+  <a class="heading-link" href="#%e7%bc%96%e5%86%99-crd-%e5%ae%9a%e4%b9%89">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<pre tabindex="0"><code>sample-controller
+├── hack
+│   ├── boilerplate.go.txt
+│   ├── custom-boilerplate.go.txt
+│   ├── update-codegen.sh
+│   └── verify-codegen.sh
+└── pkg
+    └── apis
+        └── samplecontroller
+            ├── register.go
+            └── v1alpha1
+                ├── doc.go
+                ├── register.go
+                └── types.go
+</code></pre><p>首先，项目初始如上结构： <br>
+<code>hack</code>目录下的脚本可以复用，主要是调用了 <a href="https://github.com/kubernetes/code-generator"  class="external-link" target="_blank" rel="noopener">https://github.com/kubernetes/code-generator</a> 项目中的 <code>generate-groups.sh</code> 脚本，code-gengrator 项目 <code>cmd</code> 目录下的代码，需要提前<code>go install</code>生成对应二进制文件。 <br>
+<code>pkg</code>目录下的文件，需要自己手动编写，<code>pkg/apis/samplecontroller</code>是 CRD 所属的 <code>apiGroup</code>，<code>v1alpha1</code> 是 <code>apiVersion</code>，v1alpha1目录下的<code>types.go</code>文件，包含了 CRD 类型 <code>Foo</code> 的完整定义。 <br>
+<code>pkg/apis/samplecontroller/register.go</code>中，定义了后面所需的全局变量。 <br>
+<code>pkg/apis/samplecontroller/v1alpha1/doc.go</code>中，包含了 <code>+&lt;tag-name&gt;[=value]</code> 格式的注释，这就是 Kubernetes 进行源码生成用的 Annotation 风格的注释，doc.go 中的注释，起到的是全局范围的作用，包下面的每个 go 文件，同样可以定义自己的 Annotation 注释。(关于代码生成，可以看<a href="https://blog.openshift.com/kubernetes-deep-dive-code-generation-customresources/"  class="external-link" target="_blank" rel="noopener">这篇文章</a>) <br>
+<code>pkg/apis/samplecontroller/v1alpha1/types.go</code>，包含了<code>Foo</code>类型的完整定义。<code>Foo</code>是Kubernetes对象的标准定义；<code>FooSpec</code>是我们需要定义的<code>Foo</code>类型的具体结构；<code>FooList</code>包含一组 <code>Foo</code> 对象，apiserver 的 List 接口，返回的是 List 对象类型；<code>FooStatus</code>描述<code>Foo</code>类型实例状态的结构体，可以使用<code>+genclient:noStatus</code> 注释，则不需要定义<code>FooStatus</code>。 <br>
+<code>pkg/apis/samplecontroller/v1alpha1/register.go</code>，主要作用是通过<code>addKnownTypes()</code>方法，将我们定义的 CRD 类型 <code>Foo</code> 添加到 Scheme。</p>
+<h2 id="代码生成">
+  代码生成
+  <a class="heading-link" href="#%e4%bb%a3%e7%a0%81%e7%94%9f%e6%88%90">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><code>pkg</code>下的上述文件完成，即可执行<code>./hack/update-codegen.sh</code>，即可生成管理新定义的 CRD 类型所需的 Kubernetes 代码：</p>
+<pre tabindex="0"><code>sample-controller
+├── hack
+│   ├── boilerplate.go.txt
+│   ├── custom-boilerplate.go.txt
+│   ├── update-codegen.sh
+│   └── verify-codegen.sh
+└── pkg
+    ├── apis
+    │   └── samplecontroller
+    │       ├── register.go
+    │       └── v1alpha1
+    │           ├── doc.go
+    │           ├── register.go
+    │           ├── types.go
+    │           └── zz_generated.deepcopy.go
+    └── generated
+        ├── clientset
+        │   └── versioned
+        │       ├── clientset.go
+        │       ├── doc.go
+        │       ├── fake
+        │       │   ├── clientset_generated.go
+        │       │   ├── doc.go
+        │       │   └── register.go
+        │       ├── scheme
+        │       │   ├── doc.go
+        │       │   └── register.go
+        │       └── typed
+        │           └── samplecontroller
+        │               └── v1alpha1
+        │                   ├── doc.go
+        │                   ├── fake
+        │                   │   ├── doc.go
+        │                   │   ├── fake_foo.go
+        │                   │   └── fake_samplecontroller_client.go
+        │                   ├── foo.go
+        │                   ├── generated_expansion.go
+        │                   └── samplecontroller_client.go
+        ├── informers
+        │   └── externalversions
+        │       ├── factory.go
+        │       ├── generic.go
+        │       ├── internalinterfaces
+        │       │   └── factory_interfaces.go
+        │       └── samplecontroller
+        │           ├── interface.go
+        │           └── v1alpha1
+        │               ├── foo.go
+        │               └── interface.go
+        └── listers
+            └── samplecontroller
+                └── v1alpha1
+                    ├── expansion_generated.go
+                    └── foo.go
+</code></pre><p>自动生成了 <code>clientset</code>，<code>informers</code>，<code>listers</code> 三个文件夹下的文件和<code>apis</code>下的<code>zz_generated.deepcopy.go</code>文件。  <br>
+其中<code>zz_generated.deepcopy.go</code>中包含 <code>pkg/apis/samplecontroller/v1alpha1/types.go</code> 中定义的结构体的 <code>DeepCopy()</code> 方法。 <br>
+另外三个文件夹<code>clientset</code>，<code>informers</code>，<code>listers</code>下都是 Kubernetes 生成的客户端库，在 controller 中会用到。</p>
+<h2 id="controller-代码编写">
+  controller 代码编写
+  <a class="heading-link" href="#controller-%e4%bb%a3%e7%a0%81%e7%bc%96%e5%86%99">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>接下来就是编写具体 controller 的代码，通过上述步骤生成的客户端库访问 apiserver，监听 CRD 资源的变化，并触发对应的动作，如创建或删除 <code>Deployment</code> 等。</p>
+<p>编写自定义controller(Operator)时，可以使用 Kubernetes 提供的 <code>client-go</code> 客户端库。下图是 Kubernetes 提供的在使用<code>client-go</code>开发 controller 的过程中，<code>client-go</code> 和 controller 的交互流程： <br>
+<img src="/media/posts/cloud/sample-controller/client-go-controller-interaction.jpeg" alt=""></p>
+<h3 id="client-go-组件">
+  client-go 组件
+  <a class="heading-link" href="#client-go-%e7%bb%84%e4%bb%b6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>
+<p>Reflector: 定义在 cache 包的 <a href="https://github.com/kubernetes/client-go/blob/master/tools/cache/reflector.go"  class="external-link" target="_blank" rel="noopener">Reflector</a> 类中，它监听特定资源类型(Kind)的 Kubernetes API，在<code>ListAndWatch</code>方法中执行。监听的对象可以是 Kubernetes 的内置资源类型或者是自定义资源类型。当 reflector 通过 watch API 发现新的资源实例被创建，它将通过对应的 list API 获取到新创建的对象并在<code>watchHandler</code>方法中将其加入到<code>Delta Fifo</code>队列中。</p>
+</li>
+<li>
+<p>Informer: 定义在 cache 包的 <a href="https://github.com/kubernetes/client-go/blob/master/tools/cache/controller.go"  class="external-link" target="_blank" rel="noopener">base controller</a> 中，它从<code>Delta Fifo</code>队列中 pop 出对象，在<code>processLoop</code>方法中执行。base controller 的工作是将对象保存一遍后续获取，并调用 controller 将对象传给 controller。</p>
+</li>
+<li>
+<p>Indexer: 提供对象的 indexing 方法，定义在 cache 包的 <a href="https://github.com/kubernetes/client-go/blob/master/tools/cache/index.go"  class="external-link" target="_blank" rel="noopener">Indexer</a>中。一个典型的 indexing 的应用场景是基于对象的 label 创建索引。Indexer 基于几个 indexing 方法维护索引，它使用线程安全的 data store 来存储对象和他们的key。在 cache 包的 <a href="https://github.com/kubernetes/client-go/blob/master/tools/cache/store.go"  class="external-link" target="_blank" rel="noopener">Store</a> 类中定义了一个名为<code>MetaNamespaceKeyFunc</code>的默认方法，可以为对象生成一个<code>&lt;namespace&gt;/&lt;name&gt;</code>形式的key。</p>
+</li>
+</ul>
+<h3 id="自定义-controller-组件">
+  自定义 controller 组件
+  <a class="heading-link" href="#%e8%87%aa%e5%ae%9a%e4%b9%89-controller-%e7%bb%84%e4%bb%b6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>Informer reference: 它是对 Informer 实例的引用，知道如何使用自定义资源对象。你编写的自定义 controller 需要创建正确的 Informer。</li>
+<li>Indexer reference: 它是对 Indexer 实例的引用，你编写的自定义 controller 代码中需要创建它，在获取对象供后续使用时你会用到这个引用。</li>
+</ul>
+<p>client-go 中的 base controller 提供了<code>NewIndexerInformer</code>来创建 Informer 和 Indexer。在你的代码中，你可以直接使用 <a href="https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go#L174"  class="external-link" target="_blank" rel="noopener">此方法</a>，或者使用 <a href="https://github.com/kubernetes/sample-controller/blob/master/main.go#L61"  class="external-link" target="_blank" rel="noopener">工厂方法</a> 创建 informer。</p>
+<ul>
+<li>Resource Event Handlers: 一些回调方法，当 Informer 想要发送一个对象给 controller 时，会调用这些方法。典型的编写回调方法的模式，是获取资源对象的 key 并放入一个 <code>work queue</code>队列，等待进一步的处理(Proceess item)。</li>
+<li>Work queue: 在 controller 代码中创建的队列，用来解耦对象的传递和对应的处理。Resource Event Handlers 的方法就是用来接收对象并将其加入 <code>work queue</code>。</li>
+<li>Process Item: 在 controller 代码中创建的方法，用来对<code>work queue</code>中的对象做对应处理，可以有一个或多个其他的方法实际做处理，这些方法一般会使用<code>Indexer reference</code>，或者 list 方法来获取 key 对应的对象。</li>
+</ul>
+<h3 id="编写自定义-controller">
+  编写自定义 controller
+  <a class="heading-link" href="#%e7%bc%96%e5%86%99%e8%87%aa%e5%ae%9a%e4%b9%89-controller">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>以 sample-controller 为例，整体流程如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">*** main.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">*/</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// 创建 clientset
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>kubeClient, err <span style="color:#ff7b72;font-weight:bold">:=</span> kubernetes.<span style="color:#d2a8ff;font-weight:bold">NewForConfig</span>(cfg)		<span style="color:#8b949e;font-style:italic">// k8s clientset, &#34;k8s.io/client-go/kubernetes&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>exampleClient, err <span style="color:#ff7b72;font-weight:bold">:=</span> clientset.<span style="color:#d2a8ff;font-weight:bold">NewForConfig</span>(cfg)	<span style="color:#8b949e;font-style:italic">// sample clientset, &#34;k8s.io/sample-controller/pkg/generated/clientset/versioned&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// 创建 Informer
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>kubeInformerFactory <span style="color:#ff7b72;font-weight:bold">:=</span> kubeinformers.<span style="color:#d2a8ff;font-weight:bold">NewSharedInformerFactory</span>(kubeClient, time.Second<span style="color:#ff7b72;font-weight:bold">*</span><span style="color:#a5d6ff">30</span>)		<span style="color:#8b949e;font-style:italic">// k8s informer, &#34;k8s.io/client-go/informers&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>exampleInformerFactory <span style="color:#ff7b72;font-weight:bold">:=</span> informers.<span style="color:#d2a8ff;font-weight:bold">NewSharedInformerFactory</span>(exampleClient, time.Second<span style="color:#ff7b72;font-weight:bold">*</span><span style="color:#a5d6ff">30</span>)		<span style="color:#8b949e;font-style:italic">// sample informer, &#34;k8s.io/sample-controller/pkg/generated/informers/externalversions&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// 创建 controller，传入 clientset 和 informer
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>controller <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#d2a8ff;font-weight:bold">NewController</span>(kubeClient, exampleClient,
+</span></span><span style="display:flex;"><span>		kubeInformerFactory.<span style="color:#d2a8ff;font-weight:bold">Apps</span>().<span style="color:#d2a8ff;font-weight:bold">V1</span>().<span style="color:#d2a8ff;font-weight:bold">Deployments</span>(),
+</span></span><span style="display:flex;"><span>		exampleInformerFactory.<span style="color:#d2a8ff;font-weight:bold">Samplecontroller</span>().<span style="color:#d2a8ff;font-weight:bold">V1alpha1</span>().<span style="color:#d2a8ff;font-weight:bold">Foos</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// 运行 Informer，Start 方法为非阻塞，会运行在单独的 goroutine 中
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>kubeInformerFactory.<span style="color:#d2a8ff;font-weight:bold">Start</span>(stopCh)	
+</span></span><span style="display:flex;"><span>exampleInformerFactory.<span style="color:#d2a8ff;font-weight:bold">Start</span>(stopCh)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// 运行 controller
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>controller.<span style="color:#d2a8ff;font-weight:bold">Run</span>(<span style="color:#a5d6ff">2</span>, stopCh)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">*** controller.go 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">*/</span>
+</span></span><span style="display:flex;"><span><span style="color:#d2a8ff;font-weight:bold">NewController</span>() <span style="color:#ff7b72;font-weight:bold">*</span>Controller {}
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 将 CRD 资源类型定义加入到 Kubernetes 的 Scheme 中，以便 Events 可以记录 CRD 的事件
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	utilruntime.<span style="color:#d2a8ff;font-weight:bold">Must</span>(samplescheme.<span style="color:#d2a8ff;font-weight:bold">AddToScheme</span>(scheme.Scheme))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 创建 Broadcaster
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	eventBroadcaster <span style="color:#ff7b72;font-weight:bold">:=</span> record.<span style="color:#d2a8ff;font-weight:bold">NewBroadcaster</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ... ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 监听 CRD 类型&#39;Foo&#39;并注册 ResourceEventHandler 方法，当&#39;Foo&#39;的实例变化时进行处理
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	fooInformer.<span style="color:#d2a8ff;font-weight:bold">Informer</span>().<span style="color:#d2a8ff;font-weight:bold">AddEventHandler</span>(cache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>		AddFunc: controller.enqueueFoo,
+</span></span><span style="display:flex;"><span>		UpdateFunc: <span style="color:#ff7b72">func</span>(old, new <span style="color:#ff7b72">interface</span>{}) {
+</span></span><span style="display:flex;"><span>			controller.<span style="color:#d2a8ff;font-weight:bold">enqueueFoo</span>(new)
+</span></span><span style="display:flex;"><span>		},
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 监听 Deployment 变化并注册 ResourceEventHandler 方法，
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// 当它的 ownerReferences 为 Foo 类型实例时，将该 Foo 资源加入 work queue
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	deploymentInformer.<span style="color:#d2a8ff;font-weight:bold">Informer</span>().<span style="color:#d2a8ff;font-weight:bold">AddEventHandler</span>(cache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>		AddFunc: controller.handleObject,
+</span></span><span style="display:flex;"><span>		UpdateFunc: <span style="color:#ff7b72">func</span>(old, new <span style="color:#ff7b72">interface</span>{}) {
+</span></span><span style="display:flex;"><span>			newDepl <span style="color:#ff7b72;font-weight:bold">:=</span> new.(<span style="color:#ff7b72;font-weight:bold">*</span>appsv1.Deployment)
+</span></span><span style="display:flex;"><span>			oldDepl <span style="color:#ff7b72;font-weight:bold">:=</span> old.(<span style="color:#ff7b72;font-weight:bold">*</span>appsv1.Deployment)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">if</span> newDepl.ResourceVersion <span style="color:#ff7b72;font-weight:bold">==</span> oldDepl.ResourceVersion {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff7b72">return</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			controller.<span style="color:#d2a8ff;font-weight:bold">handleObject</span>(new)
+</span></span><span style="display:flex;"><span>		},
+</span></span><span style="display:flex;"><span>		DeleteFunc: controller.handleObject,
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> (c <span style="color:#ff7b72;font-weight:bold">*</span>Controller) <span style="color:#d2a8ff;font-weight:bold">Run</span>(threadiness <span style="color:#ff7b72">int</span>, stopCh <span style="color:#ff7b72;font-weight:bold">&lt;-</span><span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">struct</span>{}) <span style="color:#ff7b72">error</span> {}
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 在启动 worker 前等待缓存同步
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">if</span> ok <span style="color:#ff7b72;font-weight:bold">:=</span> cache.<span style="color:#d2a8ff;font-weight:bold">WaitForCacheSync</span>(stopCh, c.deploymentsSynced, c.foosSynced); !ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">return</span> fmt.<span style="color:#d2a8ff;font-weight:bold">Errorf</span>(<span style="color:#a5d6ff">&#34;failed to wait for caches to sync&#34;</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 运行两个 worker 来处理资源
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">for</span> i <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#a5d6ff">0</span>; i &lt; threadiness; i<span style="color:#ff7b72;font-weight:bold">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">go</span> wait.<span style="color:#d2a8ff;font-weight:bold">Until</span>(c.runWorker, time.Second, stopCh)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 无限循环，不断的调用 processNextWorkItem 处理下一个对象
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">func</span> (c <span style="color:#ff7b72;font-weight:bold">*</span>Controller) <span style="color:#d2a8ff;font-weight:bold">runWorker</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">for</span> c.<span style="color:#d2a8ff;font-weight:bold">processNextWorkItem</span>() {
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 从workqueue中获取下一个对象并进行处理，通过调用 syncHandler
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">func</span> (c <span style="color:#ff7b72;font-weight:bold">*</span>Controller) <span style="color:#d2a8ff;font-weight:bold">processNextWorkItem</span>() <span style="color:#ff7b72">bool</span> {
+</span></span><span style="display:flex;"><span>		obj, shutdown <span style="color:#ff7b72;font-weight:bold">:=</span> c.workqueue.<span style="color:#d2a8ff;font-weight:bold">Get</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">if</span> shutdown {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">return</span> <span style="color:#79c0ff">false</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		err <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72">func</span>(obj <span style="color:#ff7b72">interface</span>{}) <span style="color:#ff7b72">error</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// 调用 workqueue.Done(obj) 方法告诉 workqueue 当前项已经处理完毕，
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#8b949e;font-style:italic">// 如果我们不想让当前项重新入队，一定要调用 workqueue.Forget(obj)。
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#8b949e;font-style:italic">// 当我们没有调用Forget时，当前项会重新入队 workqueue 并在一段时间后重新被获取。
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#ff7b72">defer</span> c.workqueue.<span style="color:#d2a8ff;font-weight:bold">Done</span>(obj)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">var</span> key <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">var</span> ok <span style="color:#ff7b72">bool</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// 我们期望的是 key &#39;namespace/name&#39; 格式的 string
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#ff7b72">if</span> key, ok = obj.(<span style="color:#ff7b72">string</span>); !ok {
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">// 无效的项调用Forget方法，避免重新入队。
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				c.workqueue.<span style="color:#d2a8ff;font-weight:bold">Forget</span>(obj)
+</span></span><span style="display:flex;"><span>				utilruntime.<span style="color:#d2a8ff;font-weight:bold">HandleError</span>(fmt.<span style="color:#d2a8ff;font-weight:bold">Errorf</span>(<span style="color:#a5d6ff">&#34;expected string in workqueue but got %#v&#34;</span>, obj))
+</span></span><span style="display:flex;"><span>				<span style="color:#ff7b72">return</span> <span style="color:#79c0ff">nil</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">if</span> err <span style="color:#ff7b72;font-weight:bold">:=</span> c.<span style="color:#d2a8ff;font-weight:bold">syncHandler</span>(key); err <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">// 放回workqueue避免偶发的异常
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				c.workqueue.<span style="color:#d2a8ff;font-weight:bold">AddRateLimited</span>(key)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff7b72">return</span> fmt.<span style="color:#d2a8ff;font-weight:bold">Errorf</span>(<span style="color:#a5d6ff">&#34;error syncing &#39;%s&#39;: %s, requeuing&#34;</span>, key, err.<span style="color:#d2a8ff;font-weight:bold">Error</span>())
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// 如果没有异常，Forget当前项，同步成功
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			c.workqueue.<span style="color:#d2a8ff;font-weight:bold">Forget</span>(obj)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#d2a8ff;font-weight:bold">Infof</span>(<span style="color:#a5d6ff">&#34;Successfully synced &#39;%s&#39;&#34;</span>, key)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">return</span> <span style="color:#79c0ff">nil</span>
+</span></span><span style="display:flex;"><span>		}(obj)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">if</span> err <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> {
+</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#d2a8ff;font-weight:bold">HandleError</span>(err)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">return</span> <span style="color:#79c0ff">true</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">return</span> <span style="color:#79c0ff">true</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// 对比真实的状态和期望的状态并尝试合并，然后更新Foo类型实例的状态信息
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">func</span> (c <span style="color:#ff7b72;font-weight:bold">*</span>Controller) <span style="color:#d2a8ff;font-weight:bold">syncHandler</span>(key <span style="color:#ff7b72">string</span>) <span style="color:#ff7b72">error</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// 通过 workqueue 中的 key 解析出 namespace 和 name
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		namespace, name, err <span style="color:#ff7b72;font-weight:bold">:=</span> cache.<span style="color:#d2a8ff;font-weight:bold">SplitMetaNamespaceKey</span>(key)
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// 调用 lister 接口通过 namespace 和 name 获取 Foo 实例
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		foo, err <span style="color:#ff7b72;font-weight:bold">:=</span> c.foosLister.<span style="color:#d2a8ff;font-weight:bold">Foos</span>(namespace).<span style="color:#d2a8ff;font-weight:bold">Get</span>(name)
+</span></span><span style="display:flex;"><span>		deploymentName <span style="color:#ff7b72;font-weight:bold">:=</span> foo.Spec.DeploymentName
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// 获取 Foo 实例中定义的 deploymentname
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		deployment, err <span style="color:#ff7b72;font-weight:bold">:=</span> c.deploymentsLister.<span style="color:#d2a8ff;font-weight:bold">Deployments</span>(foo.Namespace).<span style="color:#d2a8ff;font-weight:bold">Get</span>(deploymentName)
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// 没有发现对应的 deployment，新建一个
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">if</span> errors.<span style="color:#d2a8ff;font-weight:bold">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>			deployment, err = c.kubeclientset.<span style="color:#d2a8ff;font-weight:bold">AppsV1</span>().<span style="color:#d2a8ff;font-weight:bold">Deployments</span>(foo.Namespace).<span style="color:#d2a8ff;font-weight:bold">Create</span>(<span style="color:#d2a8ff;font-weight:bold">newDeployment</span>(foo))
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// OwnerReferences 不是 Foo 实例，warning并返回错误
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">if</span> !metav1.<span style="color:#d2a8ff;font-weight:bold">IsControlledBy</span>(deployment, foo) {
+</span></span><span style="display:flex;"><span>			msg <span style="color:#ff7b72;font-weight:bold">:=</span> fmt.<span style="color:#d2a8ff;font-weight:bold">Sprintf</span>(MessageResourceExists, deployment.Name)
+</span></span><span style="display:flex;"><span>			c.recorder.<span style="color:#d2a8ff;font-weight:bold">Event</span>(foo, corev1.EventTypeWarning, ErrResourceExists, msg)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">return</span> fmt.<span style="color:#d2a8ff;font-weight:bold">Errorf</span>(msg)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// deployment 中 的配置和 Foo 实例中 Spec 的配置不一致，即更新 deployment
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">if</span> foo.Spec.Replicas <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> <span style="color:#ff7b72;font-weight:bold">&amp;&amp;</span> <span style="color:#ff7b72;font-weight:bold">*</span>foo.Spec.Replicas <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#ff7b72;font-weight:bold">*</span>deployment.Spec.Replicas {
+</span></span><span style="display:flex;"><span>			deployment, err = c.kubeclientset.<span style="color:#d2a8ff;font-weight:bold">AppsV1</span>().<span style="color:#d2a8ff;font-weight:bold">Deployments</span>(foo.Namespace).<span style="color:#d2a8ff;font-weight:bold">Update</span>(<span style="color:#d2a8ff;font-weight:bold">newDeployment</span>(foo))
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// 更新 Foo 实例状态
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		err = c.<span style="color:#d2a8ff;font-weight:bold">updateFooStatus</span>(foo, deployment)
+</span></span><span style="display:flex;"><span>		c.recorder.<span style="color:#d2a8ff;font-weight:bold">Event</span>(foo, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+</span></span><span style="display:flex;"><span>	}
+</span></span></code></pre></div><p>接下来编写对应的 CRD 和 对应 CRD 实例的 yaml 文件及 operator 的 Dockerfile：</p>
+<pre tabindex="0"><code>sample-controller
+├── artifacts
+│   └── examples
+│       ├── crd.yaml
+│       └── example-foo.yaml
+├── controller.go
+├── Dockerfile
+├── hack
+│   ├── boilerplate.go.txt
+│   ├── custom-boilerplate.go.txt
+│   ├── update-codegen.sh
+│   └── verify-codegen.sh
+├── main.go
+└── pkg
+    ├── apis
+    │   └── samplecontroller
+    │       ├── register.go
+    │       └── v1alpha1
+    │           ├── doc.go
+    │           ├── register.go
+    │           ├── types.go
+    │           └── zz_generated.deepcopy.go
+    ├── generated
+    │   ├── clientset
+    │   │   └── ...
+    │   ├── informers
+    │   │   └── ...
+    │   └── listers
+    │       └── ...
+    └── signals
+        └── signal.go
+</code></pre><h3 id="部署到-k8s">
+  部署到 k8s
+  <a class="heading-link" href="#%e9%83%a8%e7%bd%b2%e5%88%b0-k8s">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>controller 镜像 Dockerfile:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#ff7b72">FROM</span><span style="color:#a5d6ff"> golang</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> mkdir -p /go/src/k8s.io/sample-controller<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">ADD</span> . /go/src/k8s.io/sample-controller<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">WORKDIR</span><span style="color:#a5d6ff"> /go</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> go get -v ./...<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> go install -v ./...<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">CMD</span> [<span style="color:#a5d6ff">&#34;/go/bin/sample-controller&#34;</span>]<span style="color:#f85149">
+</span></span></span></code></pre></div><p>controller RBAC 及 Deployment yaml:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">apps/v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Deployment</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sample-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">replicas</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">template</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">labels</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">app</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sample</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">containers</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sample</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">image</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;maoqide/sample-controller&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">operator-role</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">rules</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">&#34;&#34;</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">events</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">patch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">apps</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">deployments</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">events</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">patch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">samplecontroller.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">foos</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">patch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRoleBinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">operator-rolebinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">roleRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">operator-role</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">subjects</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">default</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">default</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>将 operator 部署到 k8s 中并创建一个 CRD 对象，即可看到 operator 自动按照 CRD 对象 的配置创建出一个 nginx Deployment。</p>
+  </article>
+</section>
+
+  
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

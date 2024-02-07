@@ -10,9 +10,9 @@
     <atom:link href="/tags/distributed/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Etcd 的基础-分布式一致性算法 Raft</title>
-      <link>/posts/cloud/raft/</link>
+      <link>/post/cloud/raft/</link>
       <pubDate>Mon, 22 Mar 2021 09:37:09 +0800</pubDate>
-      <guid>/posts/cloud/raft/</guid>
+      <guid>/post/cloud/raft/</guid>
       <description>&lt;p&gt;Raft 是一个管理复制日志的分布式一致性算法，也是 ETCD 实现分布式一致性的基础，保证 ETCD 集群中各节点数据的强一致性。&lt;/p&gt;</description>
     </item>
   </channel>

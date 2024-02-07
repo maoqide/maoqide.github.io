@@ -10,30 +10,30 @@
     <atom:link href="/tags/awesome/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Collection 4</title>
-      <link>/posts/awesome-post/collection-4/</link>
+      <link>/post/awesome-post/collection-4/</link>
       <pubDate>Tue, 18 Feb 2020 12:13:08 +0800</pubDate>
-      <guid>/posts/awesome-post/collection-4/</guid>
+      <guid>/post/awesome-post/collection-4/</guid>
       <description>&lt;p&gt;golang GC &amp;amp; 内存管理&lt;/p&gt;</description>
     </item>
     <item>
       <title>Collection 3</title>
-      <link>/posts/awesome-post/collection-3/</link>
+      <link>/post/awesome-post/collection-3/</link>
       <pubDate>Tue, 07 Jan 2020 21:57:36 +0800</pubDate>
-      <guid>/posts/awesome-post/collection-3/</guid>
+      <guid>/post/awesome-post/collection-3/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;golang GC&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
     <item>
       <title>Awesome Post Collection 2</title>
-      <link>/posts/awesome-post/collection-2/</link>
+      <link>/post/awesome-post/collection-2/</link>
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
-      <guid>/posts/awesome-post/collection-2/</guid>
+      <guid>/post/awesome-post/collection-2/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;goroutine 调度器。&lt;/li&gt;&#xA;&lt;li&gt;Golang &lt;code&gt;for range&lt;/code&gt;性能分析及优化。&lt;/li&gt;&#xA;&lt;li&gt;一致性哈希算法。&lt;/li&gt;&#xA;&lt;li&gt;ETCD的一些使用场景及原理分析。&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
     <item>
       <title>Awesome Post Collection 1</title>
-      <link>/posts/awesome-post/collection-1/</link>
+      <link>/post/awesome-post/collection-1/</link>
       <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
-      <guid>/posts/awesome-post/collection-1/</guid>
+      <guid>/post/awesome-post/collection-1/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;Mesos 的资源分配。&lt;/li&gt;&#xA;&lt;li&gt;Kubernetes调度详解。&lt;/li&gt;&#xA;&lt;li&gt;Istio 调用链埋点/tracing。&lt;/li&gt;&#xA;&lt;li&gt;kubernetes informer 解析。&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
   </channel>

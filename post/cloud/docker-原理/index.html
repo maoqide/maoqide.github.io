@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Docker 原理 · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="
+Namespace
+Cgroup
+UnionFS
+
+docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Docker 原理"/>
+<meta name="twitter:description" content="
+Namespace
+Cgroup
+UnionFS
+
+docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。"/>
+
+<meta property="og:title" content="Docker 原理" />
+<meta property="og:description" content="
+Namespace
+Cgroup
+UnionFS
+
+docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/cloud/docker-%E5%8E%9F%E7%90%86/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2019-01-17T14:08:37+08:00" />
+<meta property="article:modified_time" content="2019-01-17T14:08:37+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/post/cloud/docker-%E5%8E%9F%E7%90%86/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/post/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="/post/cloud/docker-%E5%8E%9F%E7%90%86/">
+          Docker 原理
+        </a>
+      </h1>
+    </header>
+
+    <ul>
+<li>Namespace</li>
+<li>Cgroup</li>
+<li>UnionFS</li>
+</ul>
+<p>docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。</p>
+<h2 id="namespace">
+  Namespace
+  <a class="heading-link" href="#namespace">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>隔离内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UTS</td>
+<td>主机名与域名</td>
+</tr>
+<tr>
+<td>IPC</td>
+<td>信号量、消息队列和共享内存</td>
+</tr>
+<tr>
+<td>PID</td>
+<td>进程编号</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>网络设备、网络栈、端口等</td>
+</tr>
+<tr>
+<td>Mount</td>
+<td>挂载点（文件系统）</td>
+</tr>
+<tr>
+<td>User</td>
+<td>用户和用户组</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cgroup">
+  Cgroup
+  <a class="heading-link" href="#cgroup">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<ul>
+<li>blkio: 为块设备设定输入输出/限制，比如物理驱动设备（包括磁盘、固态硬盘、USB等）</li>
+<li>cpu: 使用调度程序控制任务对 CPU 的使用</li>
+<li>cpuacct: 自动生成 cgroup 中任务对 CPU 资源使用情况的报告</li>
+<li>cpuset: 为 cgroup 中的任务分配独立的 CPU 和内存</li>
+<li>devices: 可以开启或关闭 cgroup 中任务对设备的访问</li>
+<li>freezer: 可以挂起或恢复 cgroup 中的任务</li>
+<li>memory: 可以设定 cgroup 中任务对内存使用量的限定，并且自动生成这些任务对内存资源使用情况的报告</li>
+<li>perf_event: 使用后使 cgroup 中的任务可以进行统一的性能测试</li>
+<li>net_cls: Docker 没有直接使用它，它通过使用等级识别符（classid）标记网络数据包，从而允许 Linux 流量控制程序识别从具体 cgroup 中生成的数据包</li>
+</ul>
+<h3 id="子系统文件">
+  子系统文件
+  <a class="heading-link" href="#%e5%ad%90%e7%b3%bb%e7%bb%9f%e6%96%87%e4%bb%b6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<h4 id="公共">
+  公共
+  <a class="heading-link" href="#%e5%85%ac%e5%85%b1">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<ul>
+<li>tasks: 这个文件罗列所有该 cgroup 中任务的 TID，即所有线程或进程的 ID</li>
+<li>cgroup.procs: 这个文件罗列所有该 cgroup 中的线程组ID(TGID), 及线程组中第一个进程的ID</li>
+<li>notify_on_release: 0或1，表示是否在 cgroup 中最后一个任务退出时通知运行 release agent, 默认0, 表示不运行</li>
+<li>release_agent: 指定 release agent 执行脚本的文件路径，这个脚本通常用于自动化卸载无用的 cgroup</li>
+</ul>
+<h4 id="cpu">
+  cpu
+  <a class="heading-link" href="#cpu">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>cpu子系统根据进程设置的调度属性，选择对应的CPU资源调度方法。</p>
+<ol>
+<li><strong>完全公平调度 Completely Fair Scheduler (CFS)</strong>  <br>
+限上限，cpu.cfs_period_us, cpu.cfs_quota_us  <br>
+cpu.cfs_period_us = 统计CPU使用时间的周期   <br>
+cpu.cfs_quota_us = 周期内允许占用的CPU时间(指单核的时间, 多核则需要在设置时累加)</li>
+</ol>
+<p>CFS 用于处理以下几种进程调度策略:</p>
+<ul>
+<li>SCHED_OTHER</li>
+<li>SCHED_BATCH</li>
+<li>SCHED_IDLE</li>
+</ul>
+<p>cfs_period_us用来配置时间周期长度, cfs_quota_us用来配置当前 cgroup 在设置的周期长度内所能使用的 CPU 时间数，两个文件配合起来设置 CPU 的使用上限。两个文件的单位都是微秒（us），cfs_period_us的取值范围为1毫秒（ms）到1秒（s），cfs_quota_us的取值大于 1ms 即可，如果 cfs_quota_us 的值为 -1（默认值），表示不受 cpu 时间的限制。<br>
+例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">#设置只能使用1个cpu的20%的时间</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#a5d6ff">50000</span> &gt; cpu.cfs_period_us
+</span></span><span style="display:flex;"><span>echo <span style="color:#a5d6ff">10000</span> &gt; cpu.cfs_quota_us
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">#设置完全使用4个cpu的时间</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#a5d6ff">1000000</span> &gt; cpu.cfs_period_us
+</span></span><span style="display:flex;"><span>echo <span style="color:#a5d6ff">4000000</span> &gt; cpu.cfs_quota_us
+</span></span></code></pre></div><ol start="2">
+<li><strong>实时调度 Real-Time scheduler (RT)</strong>  <br>
+限实时任务上限，cpu.rt_period_us，cpu.rt_runtime_us <br>
+cpu.rt_period_us = 统计CPU使用时间的周期 <br>
+cpu.rt_runtime_us = 周期内允许任务使用单个CPU核的时间，如果系统中有多个核，则可以使用核倍数的时间 (计算方法与cfs不一样，需要注意)</li>
+</ol>
+<p>RT用于处理以下几种进程调度策略</p>
+<ul>
+<li>SCHED_FIFO</li>
+<li>SCHED_RR</li>
+</ul>
+<ol start="3">
+<li><strong>cpu.shares</strong>   <br>
+shares用来设置CPU的相对值，并且是针对所有的CPU（内核），默认值是1024。 <br>
+假如系统中有两个cgroup，分别是A和B，A的shares值是1024，B的shares值是512，那么A将获得1024/(1204+512)=66%的CPU资源，而B将获得33%的CPU资源。
+shares有两个特点：</li>
+</ol>
+<ul>
+<li>如果A不忙，没有使用到66%的CPU时间，那么剩余的CPU时间将会被系统分配给B，即B的CPU使用率可以超过33%</li>
+<li>如果添加了一个新的cgroup C，且它的shares值是1024，那么A的限额变成了1024/(1204+512+1024)=40%，B的变成了20%</li>
+</ul>
+<ol start="4">
+<li><strong>cpu.stat</strong> <br>
+包含了下面三项统计结果： <br>
+nr_periods： 表示过去了多少个cpu.cfs_period_us里面配置的时间周期 <br>
+nr_throttled： 在上面的这些周期中，有多少次是受到了限制（即cgroup中的进程在指定的时间周期中用光了它的配额） <br>
+throttled_time: cgroup中的进程被限制使用CPU持续了多长时间(纳秒)</li>
+</ol>
+<h4 id="memory">
+  memory
+  <a class="heading-link" href="#memory">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span> cgroup.event_control       <span style="color:#8b949e;font-style:italic">#用于eventfd的接口</span>
+</span></span><span style="display:flex;"><span> memory.usage_in_bytes      <span style="color:#8b949e;font-style:italic">#显示当前已用的内存</span>
+</span></span><span style="display:flex;"><span> memory.limit_in_bytes      <span style="color:#8b949e;font-style:italic">#设置/显示当前限制的内存额度</span>
+</span></span><span style="display:flex;"><span> memory.failcnt             <span style="color:#8b949e;font-style:italic">#显示内存使用量达到限制值的次数</span>
+</span></span><span style="display:flex;"><span> memory.max_usage_in_bytes  <span style="color:#8b949e;font-style:italic">#历史内存最大使用量</span>
+</span></span><span style="display:flex;"><span> memory.soft_limit_in_bytes <span style="color:#8b949e;font-style:italic">#设置/显示当前限制的内存软额度</span>
+</span></span><span style="display:flex;"><span> memory.stat                <span style="color:#8b949e;font-style:italic">#显示当前cgroup的内存使用情况</span>
+</span></span><span style="display:flex;"><span> memory.use_hierarchy       <span style="color:#8b949e;font-style:italic">#设置/显示是否将子cgroup的内存使用情况统计到当前cgroup里面</span>
+</span></span><span style="display:flex;"><span> memory.force_empty         <span style="color:#8b949e;font-style:italic">#触发系统立即尽可能的回收当前cgroup中可以回收的内存</span>
+</span></span><span style="display:flex;"><span> memory.pressure_level      <span style="color:#8b949e;font-style:italic">#设置内存压力的通知事件，配合cgroup.event_control一起使用</span>
+</span></span><span style="display:flex;"><span> memory.swappiness          <span style="color:#8b949e;font-style:italic">#设置和显示当前的swappiness</span>
+</span></span><span style="display:flex;"><span> memory.move_charge_at_immigrate <span style="color:#8b949e;font-style:italic">#设置当进程移动到其他cgroup中时，它所占用的内存是否也随着移动过去</span>
+</span></span><span style="display:flex;"><span> memory.oom_control         <span style="color:#8b949e;font-style:italic">#设置/显示oom controls相关的配置</span>
+</span></span><span style="display:flex;"><span> memory.numa_stat           <span style="color:#8b949e;font-style:italic">#显示numa相关的内存</span>
+</span></span></code></pre></div><h4 id="cpuacct">
+  cpuacct
+  <a class="heading-link" href="#cpuacct">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cpuacct.usage      			<span style="color:#8b949e;font-style:italic">#所有cpu核的累加使用时间(nanoseconds)  </span>
+</span></span><span style="display:flex;"><span>cpuacct.usage_percpu 	    <span style="color:#8b949e;font-style:italic">#针对多核，输出的是每个CPU的使用时间(nanoseconds)  </span>
+</span></span><span style="display:flex;"><span>cpuacct.stat       			<span style="color:#8b949e;font-style:italic">#输出系统（system/kernel mode）耗时和用户（user mode）耗时 ， 单位为USER_HZ。 </span>
+</span></span></code></pre></div><h2 id="storage-driver">
+  Storage Driver
+  <a class="heading-link" href="#storage-driver">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="aufsunionfs">
+  aufs(UnionFS)
+  <a class="heading-link" href="#aufsunionfs">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>容器启动速度很快</li>
+<li>存储空间利用很高效</li>
+<li>内存的利用很高效</li>
+</ul>
+<p>读写：写时复制 <br>
+删除：whiteout 屏蔽</p>
+<p>Docker 镜像的各层的全部内容都存储在<code>/var/lib/docker/aufs/diff/&lt;image-id&gt;</code>文件夹下，每个文件夹下包含了该镜像层的全部文件和目录，文件以各层的 UUID 命名。  <br>
+正在运行的容器的<strong>文件系统</strong>被挂载在<code>/var/lib/docker/aufs/mnt/&lt;container-id&gt;</code>文件夹下，这就是 AUFS 的联合挂载点，在这里的文件夹下，你可以看到容器文件系统的所有文件。如果容器没有在运行，它的挂载目录仍然存在，不过是个空文件夹。 <br>
+容器的<strong>元数据</strong>和<strong>各种配置文件</strong>被放在<code>/var/lib/docker/containers/&lt;container-id&gt;</code>文件夹下，无论容器是运行还是停止都会有一个文件夹。如果容器正在运行，其对应的文件夹下会有一个 log 文件。  <br>
+容器的<strong>只读层</strong>存储在<code>/var/lib/docker/aufs/diff/&lt;container-id&gt;</code>目录下，对容器的所有修改都会保存在这个文件夹下，即便容器停止，这个文件夹也不会删除。也就是说，容器重启后并不会丢失原先的更改。  <br>
+容器中<strong>镜像层</strong>的信息存储在<code>/var/lib/docker/aufs/layers/&lt;container-id&gt;</code>文件中。文件中从上至下依次记录了容器使用的各镜像层。 <br>
+<img src="/media/posts/cloud/docker/aufs_layers.jpg" alt=""></p>
+<h4 id="性能表现">
+  性能表现
+  <a class="heading-link" href="#%e6%80%a7%e8%83%bd%e8%a1%a8%e7%8e%b0">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<ul>
+<li>在容器密度比较告的场景下，AUFS 是非常好的选择，因为AUFS的容器间共享镜像层的特性使其磁盘利用率很高，容器的启动时间很短</li>
+<li>AUFS 中容器之间的共享使对系统页缓存的利用率很高</li>
+<li>AUFS 的写时复制策略会带来很高的性能开销，因为 AUFS 对文件的第一次更改需要将整个文件复制带读写层，当容器层数很多或文件所在目录很深时尤其明显</li>
+</ul>
+<h3 id="device-mapper">
+  device mapper
+  <a class="heading-link" href="#device-mapper">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>device mapper工作在块层次上而不是文件层次上，这意味着它的写时复制策略不需要拷贝整个文件。 <br>
+在device mapper中，对容器的写操作由<strong>需要时分配</strong>策略完成。更新已有数据由<strong>写时复制</strong>策略完成，这些操作都在块的层次上完成，每个块的大小为64KB。</p>
+<h4 id="需要时分配allocate-on-demand">
+  需要时分配(allocate-on-demand)
+  <a class="heading-link" href="#%e9%9c%80%e8%a6%81%e6%97%b6%e5%88%86%e9%85%8dallocate-on-demand">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>每当容器中的进程需要向容器写入数据时，device mapper就从资源池中分配一些数据块并将其映射到容器。当容器频繁进行小数据的写操作时，这种机制非常影响影响性能。</p>
+<h4 id="写时复制copy-on-write">
+  写时复制(copy-on-write)
+  <a class="heading-link" href="#%e5%86%99%e6%97%b6%e5%a4%8d%e5%88%b6copy-on-write">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>device mapper的写时复制策略以64KB作为粒度，意味着无论是对32KB的文件还是对1GB大小的文件的修改都仅复制64KB大小的文件。这相对于在文件层面进行的读操作具有很明显的性能优势。但是，如果容器频繁对小于64KB的文件进行改写，device mapper的性能是低于aufs的。</p>
+<h3 id="overlayfsunionfs">
+  overlayfs(UnionFS)
+  <a class="heading-link" href="#overlayfsunionfs">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>OverlayFS与AUFS相似，也是一种联合文件系统(union filesystem)，与AUFS相比，OverlayFS：</p>
+<ul>
+<li>设计更简单</li>
+<li>被加入Linux3.18版本内核</li>
+<li>可能更快</li>
+</ul>
+<p>OverlayFS 将一个 Linux 主机中的两个目录组合起来，一个在上，一个在下，对外提供统一的视图。这两个目录就是层<code>layer</code>，将两个层组合在一起的技术被成为联合挂载<code>union mount</code>。在OverlayFS中，上层的目录被称作<code>upperdir</code>，下层的目录被称作<code>lowerdir</code>，对外提供的统一视图被称作<code>merged</code>。  <br>
+<img src="/media/posts/cloud/docker/overlay_constructs.jpg" alt=""> <br>
+OverlayFS 仅有两层，也就是说镜像中的每一层并不对应 OverlayFS 中的层，而是镜像中的每一层对应<code>/var/lib/docker/overlay</code>中的一个文件夹，文件夹以该层的 UUID 命名。然后使用硬连接将下面层的文件引用到上层。这在一定程度上节省了磁盘空间。这样 OverlayFS中 的<code>lowerdir</code>就对应镜像层的最上层，并且是只读的。在创建镜像时，Docker 会新建一个文件夹作为OverlayFS的<code>upperdir</code>，它是可写的。</p>
+<p>读写：第一次修改时，文件不在container layer(upperdir)中，overlay driver 调用<code>copy-up</code>操作将文件从<code>lowerdir</code>读到<code>upperdir</code>中，然后对文件的副本做出修改。  <br>
+overlay的<code>copy-up</code>操作工作在文件层面, 对文件的修改需要将整个文件拷贝到<code>upperdir</code>中。</p>
+<ul>
+<li><code>copy-up</code>操作仅发生在文件第一次被修改时，此后对文件的读写都直接在<code>upperdir</code>中进行</li>
+<li>overlayfs中仅有两层，这使得文件的查找效率很高(相对于aufs)。  <br>
+删除：whiteout 覆盖</li>
+</ul>
+<h2 id="参考">
+  参考
+  <a class="heading-link" href="#%e5%8f%82%e8%80%83">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><a href="https://yq.aliyun.com/articles/54483"  class="external-link" target="_blank" rel="noopener">https://yq.aliyun.com/articles/54483</a> <br>
+<a href="https://segmentfault.com/a/1190000008323952"  class="external-link" target="_blank" rel="noopener">https://segmentfault.com/a/1190000008323952</a> <br>
+<a href="https://blog.csdn.net/vchy_zhao/article/details/70238690"  class="external-link" target="_blank" rel="noopener">https://blog.csdn.net/vchy_zhao/article/details/70238690</a></p>
+  </article>
+</section>
+
+  
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

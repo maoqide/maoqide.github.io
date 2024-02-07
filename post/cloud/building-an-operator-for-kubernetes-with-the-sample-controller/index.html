@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Building an Operator for Kubernetes With the Sample Controller · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
+
+Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。 
+Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Building an Operator for Kubernetes With the Sample Controller"/>
+<meta name="twitter:description" content="An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
+
+Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。 
+Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。"/>
+
+<meta property="og:title" content="Building an Operator for Kubernetes With the Sample Controller" />
+<meta property="og:description" content="An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
+
+Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。 
+Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2019-03-16T21:34:46+08:00" />
+<meta property="article:modified_time" content="2019-03-16T21:34:46+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/post/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/">
+          Building an Operator for Kubernetes With the Sample Controller
+        </a>
+      </h1>
+    </header>
+
+    <pre><code>An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     
+</code></pre>
+<p>Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。 <br>
+Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。</p>
+<p>[译] <a href="https://itnext.io/building-an-operator-for-kubernetes-with-the-sample-controller-b4204be9ad56"  class="external-link" target="_blank" rel="noopener">https://itnext.io/building-an-operator-for-kubernetes-with-the-sample-controller-b4204be9ad56</a></p>
+<h2 id="the-sample-controller">
+  The sample-controller
+  <a class="heading-link" href="#the-sample-controller">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>创建示例的 operator 程序需要用到的第一个工具是 <a href="https://github.com/kubernetes/sample-controller"  class="external-link" target="_blank" rel="noopener">sample-controller</a>, 可以在 <a href="https://github.com/kubernetes/sample-controller"  class="external-link" target="_blank" rel="noopener">https://github.com/kubernetes/sample-controller</a> 找到。</p>
+<p>这个项目实现了一个简单的 <code>Foo</code> 类型的 operator, 当创建一个自定义类型的对象 <code>foo</code>，operator 会创建一个 以几个公开的 docker 镜像和特定的副本数创建一个 <code>Deployment</code>。 <br>
+要安装和编译它，需要确认你的 <code>GOPATH</code>，然后执行:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>go get github.com/kubernetes/sample-controller
+</span></span><span style="display:flex;"><span>cd <span style="color:#79c0ff">$GOPATH</span>/src/k8s.io/sample-controller
+</span></span><span style="display:flex;"><span>go build -o ctrl .
+</span></span></code></pre></div><p>接着我们可以用<code>artifacts/examples</code>目录下的文件，创建<code>Foo</code>类型的自定义资源定义(CRD)。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f artifacts/examples/crd-validation.yaml
+</span></span></code></pre></div><p>现在从另一个终端，我们可以操作<code>Foo</code>对象并观察 controller 发生了什么：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ kubectl apply -f artifacts/examples/example-foo.yaml
+</span></span><span style="display:flex;"><span>$ kubectl get pods
+</span></span><span style="display:flex;"><span>NAME                           READY  STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>example-foo-6cbc69bf5d-j8lhx   1/1    Running   <span style="color:#a5d6ff">0</span>          18s
+</span></span><span style="display:flex;"><span>$ kubectl delete -f artifacts/examples/example-foo.yaml
+</span></span><span style="display:flex;"><span>$ kubectl get pods
+</span></span><span style="display:flex;"><span>NAME                           READY  STATUS        RESTARTS   AGE
+</span></span><span style="display:flex;"><span>example-foo-6cbc69bf5d-j8lhx   0/1    Terminating   <span style="color:#a5d6ff">0</span>          38s
+</span></span></code></pre></div><pre><code>在 Kubernetes 1.11.0，controller 会进入无限循环，当 foo 对象创建一个 deployment 后更新它的状态：在`updateFooStatus`方法中，你必调用`UpdateStatus(fooCopy)`代替`Update(fooCopy)`。    
+</code></pre>
+<p>到目前为止，控制器完成了这样一项工作：它在我们创建<code>foo</code>对象时创建一个<code>deployment</code>并在我们删除对象时停止<code>deployment</code>。</p>
+<p>现在我们可以进一步调整 CRD 和 controller 以使用我们自己的自定义资源定义。</p>
+<h2 id="adapting-the-sample-controller">
+  Adapting the sample-controller
+  <a class="heading-link" href="#adapting-the-sample-controller">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>假设我们的目标是编写一个在集群节点上部署守护程序的 operator。它会使用 DaemonSet 对象来部署此守护程序，并且能够指定标签，仅在打上此标签的节点上部署守护程序。我们，还希望能够指定部署的 docker 镜像，而不是像<code>sample-controller</code>的例子那样静态的。</p>
+<p>我们首先为<code>GenericDaemon</code>类型创建自定义资源定义：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#a5d6ff">// artifacts/generic-daemon/crd.yaml</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">apiextensions.k8s.io/v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">CustomResourceDefinition</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">genericdaemons.mydomain.com</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">group</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mydomain.com</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">version</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">names</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Genericdaemon</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">plural</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">genericdaemons</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">scope</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Namespaced</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">validation</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">openAPIV3Schema</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">properties</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">properties</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">            </span><span style="color:#7ee787">label</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">              </span><span style="color:#7ee787">type</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">string</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">            </span><span style="color:#7ee787">image</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">              </span><span style="color:#7ee787">type</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">string</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">          </span><span style="color:#7ee787">required</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">            </span>- <span style="color:#a5d6ff">image</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>以及第一个要部署的守护程序的示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#a5d6ff">// artifacts/generic-daemon/syslog.yaml</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mydomain.com/v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Genericdaemon</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">syslog</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">label</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">logs</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">image</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">mbessler/syslogdocker</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>现在我们必须为 operator 访问新的自定义资源定义(CRD)的 API 构建 go 文件。为此，我们要创建一个新的目录<code>pkg/apis/genericdaemon</code>，在这个目录中复制<code>pkg/apis/samplecontroller</code>目录下的文件(除了<code>zz_generated.deepcopy.go</code>)。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ tree pkg/apis/genericdaemon/
+</span></span><span style="display:flex;"><span>pkg/apis/genericdaemon/
+</span></span><span style="display:flex;"><span>├── register.go
+</span></span><span style="display:flex;"><span>└── v1beta1
+</span></span><span style="display:flex;"><span>    ├── doc.go
+</span></span><span style="display:flex;"><span>    ├── register.go
+</span></span><span style="display:flex;"><span>    └── types.go
+</span></span></code></pre></div><p>并调整其内容：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// register.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">package</span> genericdaemon
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">const</span> (
+</span></span><span style="display:flex;"><span> GroupName = <span style="color:#a5d6ff">&#34;mydomain.com&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">/////////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// v1beta1/doc.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">/////////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// +k8s:deepcopy-gen=package
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// Package v1beta1 is the v1beta1 version of the API.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// +groupName=mydomain.com
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">package</span> v1beta1
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">/////////////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// v1beta1/register.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">/////////////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">package</span> v1beta1
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> (
+</span></span><span style="display:flex;"><span> metav1 <span style="color:#a5d6ff">&#34;k8s.io/apimachinery/pkg/apis/meta/v1&#34;</span>
+</span></span><span style="display:flex;"><span> <span style="color:#a5d6ff">&#34;k8s.io/apimachinery/pkg/runtime&#34;</span>
+</span></span><span style="display:flex;"><span> <span style="color:#a5d6ff">&#34;k8s.io/apimachinery/pkg/runtime/schema&#34;</span>
+</span></span><span style="display:flex;"><span>genericdaemon <span style="color:#a5d6ff">&#34;k8s.io/sample-controller/pkg/apis/genericdaemon&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// SchemeGroupVersion is group version used to register these objects
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">var</span> SchemeGroupVersion = schema.GroupVersion{Group: genericdaemon.GroupName, Version: <span style="color:#a5d6ff">&#34;v1beta1&#34;</span>}
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// Kind takes an unqualified kind and returns back a Group qualified GroupKind
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">Kind</span>(kind <span style="color:#ff7b72">string</span>) schema.GroupKind {
+</span></span><span style="display:flex;"><span> <span style="color:#ff7b72">return</span> SchemeGroupVersion.<span style="color:#d2a8ff;font-weight:bold">WithKind</span>(kind).<span style="color:#d2a8ff;font-weight:bold">GroupKind</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// Resource takes an unqualified resource and returns a Group qualified GroupResource
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">Resource</span>(resource <span style="color:#ff7b72">string</span>) schema.GroupResource {
+</span></span><span style="display:flex;"><span> <span style="color:#ff7b72">return</span> SchemeGroupVersion.<span style="color:#d2a8ff;font-weight:bold">WithResource</span>(resource).<span style="color:#d2a8ff;font-weight:bold">GroupResource</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> (
+</span></span><span style="display:flex;"><span> SchemeBuilder = runtime.<span style="color:#d2a8ff;font-weight:bold">NewSchemeBuilder</span>(addKnownTypes)
+</span></span><span style="display:flex;"><span> AddToScheme   = SchemeBuilder.AddToScheme
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// Adds the list of known types to Scheme.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">addKnownTypes</span>(scheme <span style="color:#ff7b72;font-weight:bold">*</span>runtime.Scheme) <span style="color:#ff7b72">error</span> {
+</span></span><span style="display:flex;"><span> scheme.<span style="color:#d2a8ff;font-weight:bold">AddKnownTypes</span>(SchemeGroupVersion,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72;font-weight:bold">&amp;</span>Genericdaemon{},
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72;font-weight:bold">&amp;</span>GenericdaemonList{},
+</span></span><span style="display:flex;"><span> )
+</span></span><span style="display:flex;"><span> metav1.<span style="color:#d2a8ff;font-weight:bold">AddToGroupVersion</span>(scheme, SchemeGroupVersion)
+</span></span><span style="display:flex;"><span> <span style="color:#ff7b72">return</span> <span style="color:#79c0ff">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">//////////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// v1beta1/types.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">//////////////////////
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">package</span> v1beta1
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> (
+</span></span><span style="display:flex;"><span> metav1 <span style="color:#a5d6ff">&#34;k8s.io/apimachinery/pkg/apis/meta/v1&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// +genclient
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// Genericdaemon is a specification for a Generic Daemon resource
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">type</span> Genericdaemon <span style="color:#ff7b72">struct</span> {
+</span></span><span style="display:flex;"><span> metav1.TypeMeta   <span style="color:#a5d6ff">`json:&#34;,inline&#34;`</span>
+</span></span><span style="display:flex;"><span> metav1.ObjectMeta <span style="color:#a5d6ff">`json:&#34;metadata,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span> Spec   GenericdaemonSpec   <span style="color:#a5d6ff">`json:&#34;spec&#34;`</span>
+</span></span><span style="display:flex;"><span> Status GenericdaemonStatus <span style="color:#a5d6ff">`json:&#34;status&#34;`</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// GenericDaemonSpec is the spec for a GenericDaemon resource
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">type</span> GenericdaemonSpec <span style="color:#ff7b72">struct</span> {
+</span></span><span style="display:flex;"><span> Label <span style="color:#ff7b72">string</span> <span style="color:#a5d6ff">`json:&#34;label&#34;`</span>
+</span></span><span style="display:flex;"><span> Image <span style="color:#ff7b72">string</span> <span style="color:#a5d6ff">`json:&#34;image&#34;`</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// GenericDaemonStatus is the status for a GenericDaemon resource
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">type</span> GenericdaemonStatus <span style="color:#ff7b72">struct</span> {
+</span></span><span style="display:flex;"><span> Installed <span style="color:#ff7b72">int32</span> <span style="color:#a5d6ff">`json:&#34;installed&#34;`</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// GenericDaemonList is a list of GenericDaemon resources
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">type</span> GenericdaemonList <span style="color:#ff7b72">struct</span> {
+</span></span><span style="display:flex;"><span> metav1.TypeMeta <span style="color:#a5d6ff">`json:&#34;,inline&#34;`</span>
+</span></span><span style="display:flex;"><span> metav1.ListMeta <span style="color:#a5d6ff">`json:&#34;metadata&#34;`</span>
+</span></span><span style="display:flex;"><span>Items []Genericdaemon <span style="color:#a5d6ff">`json:&#34;items&#34;`</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>脚本<code>hack/update-codegen.sh</code>可用于生成我们之前文件中定义的新的自定义资源定义(CRD)的代码，我们必需修改此脚本来为我们的新 CRD 生成文件：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># hack/update-codegen.sh</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">#!/usr/bin/env bash</span>
+</span></span><span style="display:flex;"><span>set -o errexit
+</span></span><span style="display:flex;"><span>set -o nounset
+</span></span><span style="display:flex;"><span>set -o pipefail
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">SCRIPT_ROOT</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#ff7b72">$(</span>dirname <span style="color:#a5d6ff">${</span><span style="color:#79c0ff">BASH_SOURCE</span><span style="color:#a5d6ff">}</span><span style="color:#ff7b72">)</span>/..
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">CODEGEN_PKG</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">${</span><span style="color:#79c0ff">CODEGEN_PKG</span><span style="color:#ff7b72">:-$(</span>cd <span style="color:#a5d6ff">${</span><span style="color:#79c0ff">SCRIPT_ROOT</span><span style="color:#a5d6ff">}</span>; ls -d -1 ./vendor/k8s.io/code-generator 2&gt;/dev/null <span style="color:#ff7b72;font-weight:bold">||</span> echo ../code-generator<span style="color:#ff7b72">)</span><span style="color:#a5d6ff">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># generate the code with:</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># --output-base    because this script should also be able to run inside the vendor dir of</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">#                  k8s.io/kubernetes. The output-base is needed for the generators to output into the vendor dir</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">#                  instead of the $GOPATH directly. For normal projects this can be dropped.</span>
+</span></span><span style="display:flex;"><span><span style="color:#a5d6ff">${</span><span style="color:#79c0ff">CODEGEN_PKG</span><span style="color:#a5d6ff">}</span>/generate-groups.sh <span style="color:#a5d6ff">&#34;deepcopy,client,informer,lister&#34;</span> <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>  k8s.io/sample-controller/pkg/client k8s.io/sample-controller/pkg/apis <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>  genericdaemon:v1beta1 <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>  --output-base <span style="color:#a5d6ff">&#34;</span><span style="color:#ff7b72">$(</span>dirname <span style="color:#a5d6ff">${</span><span style="color:#79c0ff">BASH_SOURCE</span><span style="color:#a5d6ff">}</span><span style="color:#ff7b72">)</span><span style="color:#a5d6ff">/../../..&#34;</span> <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>  --go-header-file <span style="color:#a5d6ff">${</span><span style="color:#79c0ff">SCRIPT_ROOT</span><span style="color:#a5d6ff">}</span>/hack/boilerplate.go.txt
+</span></span></code></pre></div><p>接着执行此脚本：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ ./hack/update-codegen.sh 
+</span></span><span style="display:flex;"><span>Generating deepcopy funcs
+</span></span><span style="display:flex;"><span>Generating clientset <span style="color:#ff7b72">for</span> genericdaemon:v1beta1 at k8s.io/sample-controller/pkg/client/clientset
+</span></span><span style="display:flex;"><span>Generating listers <span style="color:#ff7b72">for</span> genericdaemon:v1beta1 at k8s.io/sample-controller/pkg/client/listers
+</span></span><span style="display:flex;"><span>Generating informers <span style="color:#ff7b72">for</span> genericdaemon:v1beta1 at k8s.io/sample-controller/pkg/client/informers
+</span></span></code></pre></div><p>现在可以调整它来编写我们的 operator。首先，我们必须将所有对之前的<code>Foo</code>类型的引用修改为<code>Genericdaemon</code>类型。另外，当一个新的 <code>genericdaemon</code>实例创建后，我们要创建 DaemonSet 而不是 Deployment。</p>
+<h2 id="deploying-the-operator-to-the-kubernetes-cluster">
+  Deploying the operator to the Kubernetes cluster
+  <a class="heading-link" href="#deploying-the-operator-to-the-kubernetes-cluster">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>当我们将<code>sample-controller</code>修改为我们需要的之后，我们要将它部署到kubernetes集群。事实上，在这个时候，我们已经使用我们的凭证将它运行在我们的开发系统来测试它。</p>
+<p>这是一个简单的 Dockerfile，用于构建 operator 的 Docker 镜像（你必须删除原有的<code>sample-controller</code>中的所有代码才能构建）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#ff7b72">FROM</span><span style="color:#a5d6ff"> golang</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> mkdir -p /go/src/k8s.io/sample-controller<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">ADD</span> . /go/src/k8s.io/sample-controller<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">WORKDIR</span><span style="color:#a5d6ff"> /go</span><span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> go get ./...<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">RUN</span> go install -v ./...<span style="color:#f85149">
+</span></span></span><span style="display:flex;"><span><span style="color:#f85149"></span><span style="color:#ff7b72">CMD</span> [<span style="color:#a5d6ff">&#34;/go/bin/sample-controller&#34;</span>]<span style="color:#f85149">
+</span></span></span></code></pre></div><p>现在我们可以构建并将镜像推送到 DockerHub：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker build . -t mydockerid/genericdaemon
+</span></span><span style="display:flex;"><span>docker push mydockerid/genericdaemon
+</span></span></code></pre></div><p>最后用这个新的镜像部署一个 Deployment：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#a5d6ff">// deploy.yaml</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">apps/v1beta1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Deployment</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sample-controller</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">replicas</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">selector</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">matchLabels</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">app</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sample</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">template</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">labels</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">        </span><span style="color:#7ee787">app</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sample</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">    </span><span style="color:#7ee787">spec</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span><span style="color:#7ee787">containers</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">      </span>- <span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sample</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">		</span><span style="color:#7ee787">image</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;mydockerid/genericdaemon:latest&#34;</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>并<code>kubectl apply -f deploy.yaml</code>。</p>
+<p>operator 现在已经运行，但是如果我们查看 pod 的日志，可以看到授权存在问题; pod 没有对不同资源的访问权限：</p>
+<pre tabindex="0"><code>$ kubectl logs sample-controller-66b79c7d5f-2qnft
+E0721 14:34:50.499584       1 reflector.go:134] k8s.io/sample-controller/pkg/client/informers/externalversions/factory.go:117: Failed to list *v1beta1.Genericdaemon: genericdaemons.mydomain.com is forbidden: User &#34;system:serviceaccount:default:default&#34; cannot list genericdaemons.mydomain.com at the cluster scope
+E0721 14:34:50.500385       1 reflector.go:134] k8s.io/client-go/informers/factory.go:131: Failed to list *v1.DaemonSet: daemonsets.apps is forbidden: User &#34;system:serviceaccount:default:default&#34; cannot list daemonsets.apps at the cluster scope
+[...]
+</code></pre><p>我们需要创建一个<code>ClusterRole</code>和一个<code>ClusterRoleBinding</code>来为 operator 提供必要的权限：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#a5d6ff">// rbac_role.yaml</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">operator-role</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">rules</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">apps</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">daemonsets</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">patch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">apiGroups</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">mydomain.com</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">resources</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">genericdaemons</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">verbs</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">get</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">list</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">watch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">create</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">update</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">patch</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span>- <span style="color:#a5d6ff">delete</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#a5d6ff">// rbac_role_binding.yaml</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRoleBinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">operator-rolebinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">roleRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">operator-role</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">subjects</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">default</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">default</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><p>并且部署它：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f rbac_role.yaml
+</span></span><span style="display:flex;"><span>kubectl delete -f deploy.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f deploy.yaml
+</span></span></code></pre></div><p>现在，你的 operator 应该已经部署到你的 Kubernetes 集群并处于活动状态。</p>
+  </article>
+</section>
+
+  
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

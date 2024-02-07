@@ -10,16 +10,16 @@
     <atom:link href="/tags/docker/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Kubernetes Container Network</title>
-      <link>/posts/cloud/container-network/</link>
+      <link>/post/cloud/container-network/</link>
       <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
-      <guid>/posts/cloud/container-network/</guid>
+      <guid>/post/cloud/container-network/</guid>
       <description>&lt;p&gt;容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Docker 原理</title>
-      <link>/posts/cloud/docker-%E5%8E%9F%E7%90%86/</link>
+      <link>/post/cloud/docker-%E5%8E%9F%E7%90%86/</link>
       <pubDate>Thu, 17 Jan 2019 14:08:37 +0800</pubDate>
-      <guid>/posts/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
+      <guid>/post/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;Namespace&lt;/li&gt;&#xA;&lt;li&gt;Cgroup&lt;/li&gt;&#xA;&lt;li&gt;UnionFS&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。&lt;/p&gt;</description>
     </item>
   </channel>

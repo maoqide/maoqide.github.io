@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  The Go Memory Model · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="[译]https://golang.google.cn/ref/mem
+Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="The Go Memory Model"/>
+<meta name="twitter:description" content="[译]https://golang.google.cn/ref/mem
+Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。"/>
+
+<meta property="og:title" content="The Go Memory Model" />
+<meta property="og:description" content="[译]https://golang.google.cn/ref/mem
+Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/golang/the-go-memory-model/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2019-06-19T09:10:37+08:00" />
+<meta property="article:modified_time" content="2019-06-19T09:10:37+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/post/golang/the-go-memory-model/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/post/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="/post/golang/the-go-memory-model/">
+          The Go Memory Model
+        </a>
+      </h1>
+    </header>
+
+    <p>[译]https://golang.google.cn/ref/mem</p>
+<p>Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。</p>
+<h2 id="introduction">
+  Introduction
+  <a class="heading-link" href="#introduction">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。</p>
+<h2 id="advice">
+  Advice
+  <a class="heading-link" href="#advice">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>如果一个程序要修改被多个 goroutine 同时访问的数据，必须序列化此类访问。</p>
+<p>要序列化访问，请使用 channel 操作或其他同步原语（例如<code>sync</code>和<code>sync/atomic</code>包中的那些）来保护数据。</p>
+<p>如果您必须阅读本文档的其余部分以了解程序的行为，那么您就太聪明了。</p>
+<p>别聪明。</p>
+<h2 id="happens-before">
+  Happens Before
+  <a class="heading-link" href="#happens-before">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>在单个 goroutine 中，读取和写入必须表现得好像它们按程序指定的顺序执行。也就是说，只有当重新排序不改变语言规范中定义的 goroutine 的行为时，编译器和处理器才可以对在单个 goroutine 中读取和写入操作的执行进行重新排序。由于这种重新排序，一个 goroutine 观察到的执行顺序可能与另一个 goroutine 感知到的顺序不同。例如，如果一个 goroutine 执行<code>a = 1; b = 2;</code>，另一个 goroutine 可能会在 a 的值更新之前观察到 b 的更新值。</p>
+<p>为了指定读取和写入的要求，我们定义 发生之前(hanppen before)，Go 程序中内存操作的局部顺序。如果事件 e1 在事件 e2 发生之前(hanppen before)，那么我们说事件 e2 在事件 e1 发生之后(hanppen after)。另外，如果 e1 在 e2 之前没有发生并且在 e2 之后没有发生，那么我们说 e1 和 e2 同时发生。</p>
+<p>在单个goroutine中，<code>happens-before</code> 顺序是程序表达的顺序。</p>
+<p>如果以下两个都成立，则允许变量 v 的读取操作 r 观察到写入操作 w 写入到 v 的值： <br>
+1. r 没有发生在 w 之前。 <br>
+2. 在 w 之后但在 r 之前没有其他写入操作 w&rsquo;。</p>
+<p>为了保证对变量 v 的读取操作 r 观察到特定写入操作 w 对 v 写入的值，确保 w 是允许读取操作 r 观察到的唯一的写入操作。也就是说，如果以下两个条件都成立，才能保证读取操作 r 能够观察到写入操作 w： <br>
+1. w 发生在 r 之前。 <br>
+2. 任何其他对共享变量 v 的写入操作，要么发生在 w 之前，要么发生在 r 之后。</p>
+<p>这组条件比第一组更加严格。它要求没有其他写入与 w 或 r 同时发生。</p>
+<p>在单个goroutine中，没有并发，因此这两个定义是等效的：一个读取操作 r 观察最近的写入操作 w 写入 v 的值。</p>
+<p>具有零值的 v 的类型的变量 v 的初始化表现为以上存储模型中的写入。</p>
+<p>对于大于单个机器字的值的读取和写入操作，表现为以未指定顺序进行的多个 机器字大小的操作。</p>
+<h2 id="synchronization">
+  Synchronization
+  <a class="heading-link" href="#synchronization">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="initialization">
+  Initialization
+  <a class="heading-link" href="#initialization">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>程序的初始化在单个 goroutine 中运行，但该 goroutine 可能会创建其他并发运行的 goroutine。</p>
+<p>如果包 p 导入包 q，则 q 的 init 函数在包 p 的任何代码开始之前完成。</p>
+<p>函数 main.main 在所有的 init 函数完成后开始执行。</p>
+<h3 id="goroutine-creation">
+  Goroutine creation
+  <a class="heading-link" href="#goroutine-creation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>启动新 goroutine 的 go 语句发生在该 goroutine 开始执行之前。</p>
+<p>例如，在此程序中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">f</span>() {
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">hello</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">f</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>调用<code>hello</code>将在未来的某个时刻打印“hello，world”（也许在<code>hello</code>返回之后）。</p>
+<h3 id="goroutine-destruction">
+  Goroutine destruction
+  <a class="heading-link" href="#goroutine-destruction">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>goroutine 的退出不保证在程序中的任何事件之前发生。例如，在此程序中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">hello</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>() { a = <span style="color:#a5d6ff">&#34;hello&#34;</span> }()
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>对 a 的赋值没有伴随任何同步事件，因此不保证任何其他 goroutine 都能观察到它。事实上，一个激进的编译器可能会删掉整条 go 语句。</p>
+<p>如果一个 goroutine 影响必须被另一个 goroutine 观察到，要使用锁或 channel 通信等同步机制来建立相对顺序。</p>
+<h3 id="channel-communication">
+  Channel communication
+  <a class="heading-link" href="#channel-communication">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>channel 通信是 goroutine 之间同步的主要方法。特定 channel 上的每一个 send 操作都与该 channel 对应的 receive 操作相匹配，通常在不同的 goroutine 中。</p>
+<h4 id="channel-的-send-在该-channel-相应的-receive-操作完成之前发生">
+  channel 的 send 在该 channel 相应的 receive 操作完成之前发生
+  <a class="heading-link" href="#channel-%e7%9a%84-send-%e5%9c%a8%e8%af%a5-channel-%e7%9b%b8%e5%ba%94%e7%9a%84-receive-%e6%93%8d%e4%bd%9c%e5%ae%8c%e6%88%90%e4%b9%8b%e5%89%8d%e5%8f%91%e7%94%9f">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>示例程序：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> c = make(<span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">int</span>, <span style="color:#a5d6ff">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">f</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>	c <span style="color:#ff7b72;font-weight:bold">&lt;-</span> <span style="color:#a5d6ff">0</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">f</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72;font-weight:bold">&lt;-</span>c
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>保证打印出 &ldquo;hello, world&rdquo;。对 a 的写入发生在 c 的 send 之前，即发生在 c 的相应的 receive 完成之前，即发生在<code>print</code>之前。</p>
+<h4 id="channel-的关闭发生在因通道已关闭而接收到零值返回之前">
+  channel 的关闭发生在因通道已关闭而接收到零值返回之前
+  <a class="heading-link" href="#channel-%e7%9a%84%e5%85%b3%e9%97%ad%e5%8f%91%e7%94%9f%e5%9c%a8%e5%9b%a0%e9%80%9a%e9%81%93%e5%b7%b2%e5%85%b3%e9%97%ad%e8%80%8c%e6%8e%a5%e6%94%b6%e5%88%b0%e9%9b%b6%e5%80%bc%e8%bf%94%e5%9b%9e%e4%b9%8b%e5%89%8d">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>在前面的示例中，用<code> close(c)</code>替换<code>c &lt;- 0</code>会产生具有保证同样行为的程序。</p>
+<p>无缓冲 channel 的 receive 操作在该 channel 的 send 操作完成之前发生。</p>
+<p>示例程序(和上面一样，但是交换了 send 和 receive 语句并且使用了无缓冲的 channel)：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> c = make(<span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">int</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">f</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72;font-weight:bold">&lt;-</span>c
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">f</span>()
+</span></span><span style="display:flex;"><span>	c <span style="color:#ff7b72;font-weight:bold">&lt;-</span> <span style="color:#a5d6ff">0</span>
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>同样保证打印出 &ldquo;hello, world&rdquo;。对 a 的写入发生在 c 的 receive 之前，即发生在 c 的相应的 send 完成之前，即发生在<code>print</code>之前。</p>
+<p>如果 channel 是有缓冲的，（例如，c = make(chan int, 1)），那么程序将不能保证打印 &ldquo;hello, world&rdquo;。（可能会打印空字符串，崩溃或执行其他操作。）</p>
+<p><em>具有容量<code>C</code>的 channel 的第 <code>k</code> 次 receive 操作，在第 <code>k+C</code> 次 send 操作完成之前。</em>  <br>
+此规则概括了先前的有缓冲的 channel 的规则。它允许用有缓冲的 channel 建立的计数信号量：channel 中的 data 数量对应于当前的使用数量，channel 的容量对应于允许最大同时使用的数量，发送一条 data 来获取信号量，接收一条 data 来释放信号量。这是限制并发数量的常用用法。</p>
+<p>该程序为工作列表中的每个条目启动一个 goroutine，但是 goroutine 利用<code>limit</code>这个 channel 来确保一次最多有三个正在运行的<code>work</code>函数。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> limit = make(<span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">int</span>, <span style="color:#a5d6ff">3</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">for</span> _, w <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72">range</span> work {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">go</span> <span style="color:#ff7b72">func</span>(w <span style="color:#ff7b72">func</span>()) {
+</span></span><span style="display:flex;"><span>			limit <span style="color:#ff7b72;font-weight:bold">&lt;-</span> <span style="color:#a5d6ff">1</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#d2a8ff;font-weight:bold">w</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72;font-weight:bold">&lt;-</span>limit
+</span></span><span style="display:flex;"><span>		}(w)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">select</span>{}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="locks">
+  Locks
+  <a class="heading-link" href="#locks">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><code>sync</code>包实现了两种锁的类型，<code>sync.Mutex</code> 和 <code>sync.RWMutex</code>。</p>
+<p><strong>对于任何<code>sync.Mutex</code>或<code>sync.RWMutex</code>类型的变量<code>l</code>，并且n &lt; m，第n次调用<code>l.Unock()</code>在第m次调用<code>l.Lock()</code>返回之前发生。</strong> <br>
+示例程序：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> l sync.Mutex
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">f</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>	l.<span style="color:#d2a8ff;font-weight:bold">Unlock</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	l.<span style="color:#d2a8ff;font-weight:bold">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">f</span>()
+</span></span><span style="display:flex;"><span>	l.<span style="color:#d2a8ff;font-weight:bold">Lock</span>()
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>保证打印出&quot;hello, world&quot;。第一次调用<code>l.Unlock()</code>（在f()中），在第二次调用<code>l.Lock()</code>（在main()中）返回之前发生，即在<code>print</code>之前发生。</p>
+<p>For any call to l.RLock on a sync.RWMutex variable l, there is an n such that the l.RLock happens (returns) after call n to l.Unlock and the matching l.RUnlock happens before call n+1 to l.Lock.</p>
+<p>对于<code>sync.RWMutex</code>类型的变量<code>l</code>的<code>l.RLock()</code>的任意调用，有一个 n 使得本次<code>l.RLock()</code>在第 n 次调用<code>l.Unlock()</code>之后发生（返回）并且对应的<code>l.RUnlock()</code>在第 n+1 调用<code>l.Lock()</code>之前发生。</p>
+<h3 id="once">
+  Once
+  <a class="heading-link" href="#once">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><code>sync</code>包通过使用Once类型，在存在多个 goroutine 的情况下提供了一种安全的初始化机制。多个线程可以对特定的 f 执行<code>nce.Do(f)</code>，但是只有一个线程会真正运行<code>f()</code>，并且其他调用会阻塞直到<code>f()</code>返回。</p>
+<p><strong>从<code>once.Do(f) </code>中对<code>f()</code>的单次调用在任意<code>once.Do(f)</code>的调用之前发生（返回）。</strong> <br>
+在如下程序中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> once sync.Once
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">setup</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">doprint</span>() {
+</span></span><span style="display:flex;"><span>	once.<span style="color:#d2a8ff;font-weight:bold">Do</span>(setup)
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">twoprint</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">doprint</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">doprint</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>调用<code>twoprint()</code>将只会调用<code>setup()</code>一次。setup 方法将在<code>print</code>之前完成。结果是&quot;hello, world&quot;将被打印两次。</p>
+<h2 id="incorrect-synchronization">
+  Incorrect synchronization
+  <a class="heading-link" href="#incorrect-synchronization">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>注意，读取操作 r 可以观察到与r同时发生的写入操作 w 所写的值。即使发生这种情况，也不意味着在 r 之后发生的读取操作将观察到在 w 之前发生的写入操作。 <br>
+如下程序中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a, b <span style="color:#ff7b72">int</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">f</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">1</span>
+</span></span><span style="display:flex;"><span>	b = <span style="color:#a5d6ff">2</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">g</span>() {
+</span></span><span style="display:flex;"><span>	print(b)
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">f</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#d2a8ff;font-weight:bold">g</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>可能会发生 g 先打印 2 然后打印 0。</p>
+<p>这使一些常见的管用语法无效。</p>
+<p>双重检查锁 是为了避免同步的开销。 <br>
+例如，<code>twoprint</code>程序可能被错误的写为：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> done <span style="color:#ff7b72">bool</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">setup</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>	done = <span style="color:#79c0ff">true</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">doprint</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">if</span> !done {
+</span></span><span style="display:flex;"><span>		once.<span style="color:#d2a8ff;font-weight:bold">Do</span>(setup)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">twoprint</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">doprint</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">doprint</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>但是这不能保证，在<code>doprint</code>中，观察到<code>done</code>的写入操作意味着同样能观察到对<code>a</code>的写入操作。这个版本可能（错误地）打印空字符串而不是&quot;hello，world&quot;。</p>
+<p>另一个不正确的惯用语法是忙着等待一个值，如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">var</span> a <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> done <span style="color:#ff7b72">bool</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">setup</span>() {
+</span></span><span style="display:flex;"><span>	a = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>	done = <span style="color:#79c0ff">true</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">setup</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">for</span> !done {
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	print(a)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>像之前一样，不能保证在<code>main</code>中，观察到<code>done</code>的写入操作意味着同样能观察到对<code>a</code>的写入操作，因此这个程序也可能打印出空的字符串。更糟的是，还无法保证<code>main</code>能观察到对<code>done</code>的写入操作，因为两个线程之间没有同步事件。<code>main</code>中的循环无法保证能完成。</p>
+<p>这个主题有更微妙的变体，例如这个程序：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">type</span> T <span style="color:#ff7b72">struct</span> {
+</span></span><span style="display:flex;"><span>	msg <span style="color:#ff7b72">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">var</span> g <span style="color:#ff7b72;font-weight:bold">*</span>T
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">setup</span>() {
+</span></span><span style="display:flex;"><span>	t <span style="color:#ff7b72;font-weight:bold">:=</span> new(T)
+</span></span><span style="display:flex;"><span>	t.msg = <span style="color:#a5d6ff">&#34;hello, world&#34;</span>
+</span></span><span style="display:flex;"><span>	g = t
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">go</span> <span style="color:#d2a8ff;font-weight:bold">setup</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">for</span> g <span style="color:#ff7b72;font-weight:bold">==</span> <span style="color:#79c0ff">nil</span> {
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	print(g.msg)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>即使<code>main</code>观察到<code>g != nil</code>并且退出循环，无法保证它会观察到<code>g.msg</code>的初始化值。</p>
+<p>在所有这些示例中，解决方案是相同的：使用显式的同步。</p>
+  </article>
+</section>
+
+  
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

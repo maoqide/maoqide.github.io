@@ -10,23 +10,23 @@
     <atom:link href="/tags/etcd/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Etcd 的基础-分布式一致性算法 Raft</title>
-      <link>/posts/cloud/raft/</link>
+      <link>/post/cloud/raft/</link>
       <pubDate>Mon, 22 Mar 2021 09:37:09 +0800</pubDate>
-      <guid>/posts/cloud/raft/</guid>
+      <guid>/post/cloud/raft/</guid>
       <description>&lt;p&gt;Raft 是一个管理复制日志的分布式一致性算法，也是 ETCD 实现分布式一致性的基础，保证 ETCD 集群中各节点数据的强一致性。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Upgrade Kubernets From Binary to Kubeadm</title>
-      <link>/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/</link>
+      <link>/post/notes/upgrade-kubernets-from-binary-to-kubeadm/</link>
       <pubDate>Tue, 06 Aug 2019 13:55:04 +0800</pubDate>
-      <guid>/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/</guid>
+      <guid>/post/notes/upgrade-kubernets-from-binary-to-kubeadm/</guid>
       <description>&lt;p&gt;记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。 &lt;br&gt;&#xA;原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Awesome Post Collection 2</title>
-      <link>/posts/awesome-post/collection-2/</link>
+      <link>/post/awesome-post/collection-2/</link>
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
-      <guid>/posts/awesome-post/collection-2/</guid>
+      <guid>/post/awesome-post/collection-2/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;goroutine 调度器。&lt;/li&gt;&#xA;&lt;li&gt;Golang &lt;code&gt;for range&lt;/code&gt;性能分析及优化。&lt;/li&gt;&#xA;&lt;li&gt;一致性哈希算法。&lt;/li&gt;&#xA;&lt;li&gt;ETCD的一些使用场景及原理分析。&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
   </channel>

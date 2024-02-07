@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Golang Websocket Message Pushing · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="使用 golang 的 websocket 框架 melody，实现通用的消息分组推送服务。针对同一推送对象，只起一个后端协程进行广播推送，减少资源消耗，并提供监控接口查询当前的协程和websocket连接。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Golang Websocket Message Pushing"/>
+<meta name="twitter:description" content="使用 golang 的 websocket 框架 melody，实现通用的消息分组推送服务。针对同一推送对象，只起一个后端协程进行广播推送，减少资源消耗，并提供监控接口查询当前的协程和websocket连接。"/>
+
+<meta property="og:title" content="Golang Websocket Message Pushing" />
+<meta property="og:description" content="使用 golang 的 websocket 框架 melody，实现通用的消息分组推送服务。针对同一推送对象，只起一个后端协程进行广播推送，减少资源消耗，并提供监控接口查询当前的协程和websocket连接。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/golang/golang-websocket-message-pushing/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2020-01-11T20:49:24+08:00" />
+<meta property="article:modified_time" content="2020-01-11T20:49:24+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/post/golang/golang-websocket-message-pushing/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/post/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="/post/golang/golang-websocket-message-pushing/">
+          Golang Websocket Message Pushing
+        </a>
+      </h1>
+    </header>
+
+    <p>使用 golang 的 websocket 框架 <a href="https://github.com/olahol/melody"  class="external-link" target="_blank" rel="noopener">melody</a>，实现通用的消息分组推送服务。针对同一推送对象，只起一个后端协程进行广播推送，减少资源消耗，并提供监控接口查询当前的协程和websocket连接。</p>
+<p>github：<a href="https://github.com/maoqide/ws-notifier"  class="external-link" target="_blank" rel="noopener">ws-notifier</a></p>
+<h2 id="melody">
+  melody
+  <a class="heading-link" href="#melody">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>melody 是一个 golang 的 websocket 框架，通过对 <a href="https://github.com/gorilla/websocket"  class="external-link" target="_blank" rel="noopener">websocket</a> 包装，实现方便的广播或推送消息给多个指定的 session。</p>
+<h2 id="ws-notifier">
+  ws-notifier
+  <a class="heading-link" href="#ws-notifier">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>ws-notifier 在 melody 的基础上，通过给 Session 添加特定的key，实现对特定的 group 的消息推送，并实现负责后端推送的 worker 和 group 的关联，对同一group只需起一个 worker 的 goroutine 进行推送，减少后端推送的资源消耗。</p>
+<h2 id="example">
+  example
+  <a class="heading-link" href="#example">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="handler">
+  handler
+  <a class="heading-link" href="#handler">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><a href="https://github.com/maoqide/ws-notifier/tree/master/example"  class="external-link" target="_blank" rel="noopener">https://github.com/maoqide/ws-notifier/tree/master/example</a>  <br>
+使用 golang 的 ticker 对不同组的客户端推送消息，同一组的客户端推送消息相同。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span>n <span style="color:#ff7b72;font-weight:bold">:=</span> notifier.<span style="color:#d2a8ff;font-weight:bold">Default</span>()
+</span></span></code></pre></div><p>使用 default 配置获取默认配置的 notifier 实例。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	group <span style="color:#ff7b72;font-weight:bold">:=</span> strings.<span style="color:#d2a8ff;font-weight:bold">Trim</span>(r.RequestURI, <span style="color:#a5d6ff">&#34;/&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// should be random generated
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	sessionID <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#a5d6ff">&#34;123456&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span></code></pre></div><p>使用请求 URL 的 path 作为 group 的标识，随机生成的唯一 ID 作为 session 的标识，通过 group 对同一组的客户端广播，通过 sessionID 可对某一客户端单独推送。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// n.Notify 启动后端推送 worker，如果已经启动则直接返回
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	n.<span style="color:#d2a8ff;font-weight:bold">Notify</span>(groupID, tickerWorker, time.Hour<span style="color:#ff7b72;font-weight:bold">*</span><span style="color:#a5d6ff">24</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	n.<span style="color:#d2a8ff;font-weight:bold">HandleRequestWithKeys</span>(w, r, <span style="color:#ff7b72">map</span>[<span style="color:#ff7b72">string</span>]<span style="color:#ff7b72">interface</span>{}{<span style="color:#a5d6ff">&#34;group&#34;</span>: groupID, <span style="color:#a5d6ff">&#34;id&#34;</span>: groupID <span style="color:#ff7b72;font-weight:bold">+</span> <span style="color:#a5d6ff">&#34;_&#34;</span> <span style="color:#ff7b72;font-weight:bold">+</span> sessionID})
+</span></span></code></pre></div><p><code>HandleRequestWithKeys</code>传入对应 groupID 和 sessionID，将 session 加入 melody 的 hub 中管理，并使 group 和 sessionID 生效。</p>
+<h3 id="worker">
+  worker
+  <a class="heading-link" href="#worker">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">func</span> <span style="color:#d2a8ff;font-weight:bold">tickerWorker</span>(groupID <span style="color:#ff7b72">string</span>, sigChan <span style="color:#ff7b72">chan</span> <span style="color:#ff7b72">int8</span>, n <span style="color:#ff7b72;font-weight:bold">*</span>notifier.Notifier) <span style="color:#ff7b72">error</span> {
+</span></span><span style="display:flex;"><span>	worker <span style="color:#ff7b72;font-weight:bold">:=</span> fmt.<span style="color:#d2a8ff;font-weight:bold">Sprintf</span>(<span style="color:#a5d6ff">&#34;ticker_worker_%s_%d&#34;</span>, groupID, time.<span style="color:#d2a8ff;font-weight:bold">Now</span>().<span style="color:#d2a8ff;font-weight:bold">Unix</span>())
+</span></span><span style="display:flex;"><span>	fmt.<span style="color:#d2a8ff;font-weight:bold">Printf</span>(<span style="color:#a5d6ff">&#34;worker: %s\n&#34;</span>, worker)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff7b72">defer</span> <span style="color:#ff7b72">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">case</span> sigChan <span style="color:#ff7b72;font-weight:bold">&lt;-</span> <span style="color:#a5d6ff">0</span>:
+</span></span><span style="display:flex;"><span>			log.<span style="color:#d2a8ff;font-weight:bold">Printf</span>(<span style="color:#a5d6ff">&#34;ticker worker: %s exit&#34;</span>, worker)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">case</span> <span style="color:#ff7b72;font-weight:bold">&lt;-</span>time.<span style="color:#d2a8ff;font-weight:bold">After</span>(time.Second <span style="color:#ff7b72;font-weight:bold">*</span> <span style="color:#a5d6ff">3</span>):
+</span></span><span style="display:flex;"><span>			log.<span style="color:#d2a8ff;font-weight:bold">Printf</span>(<span style="color:#a5d6ff">&#34;ticker worker: %s exit after 3s delaying&#34;</span>, worker)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>}
+</span></span></code></pre></div><p>worker 退出前，要向外部管理 goroutine 发送退出信号，以便 notifier 回收内部 worker map的 worker，待下一个 session 连接时启动新的 worker。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#ff7b72">for</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">case</span> signal <span style="color:#ff7b72;font-weight:bold">:=</span> <span style="color:#ff7b72;font-weight:bold">&lt;-</span>sigChan:
+</span></span><span style="display:flex;"><span>			log.<span style="color:#d2a8ff;font-weight:bold">Printf</span>(<span style="color:#a5d6ff">&#34;receice stop signal %d for ticker worker: %s&#34;</span>, signal, worker)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">return</span> <span style="color:#79c0ff">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">case</span> <span style="color:#ff7b72;font-weight:bold">&lt;-</span>ticker.C:
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		}
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	}
+</span></span></code></pre></div><p>推送过程中，接收信号 channel，当收到退出信号后退出循环。</p>
+  </article>
+</section>
+
+  
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Kubelet-1 Kubelet 会做些什么 · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="Kubelet 是 Kubernetes 集群中非常重要的组件，起在集群中的每个几点上，具体 Kubelet 会做那些事情，可以通过 Kubelet 的源码找到答案。">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Kubelet-1 Kubelet 会做些什么"/>
+<meta name="twitter:description" content="Kubelet 是 Kubernetes 集群中非常重要的组件，起在集群中的每个几点上，具体 Kubelet 会做那些事情，可以通过 Kubelet 的源码找到答案。"/>
+
+<meta property="og:title" content="Kubelet-1 Kubelet 会做些什么" />
+<meta property="og:description" content="Kubelet 是 Kubernetes 集群中非常重要的组件，起在集群中的每个几点上，具体 Kubelet 会做那些事情，可以通过 Kubelet 的源码找到答案。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/cloud/kubelet-1-what-do-kubelet-do/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2019-07-14T11:30:24+08:00" />
+<meta property="article:modified_time" content="2019-07-14T11:30:24+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/post/cloud/kubelet-1-what-do-kubelet-do/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/post/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="/post/cloud/kubelet-1-what-do-kubelet-do/">
+          Kubelet-1 Kubelet 会做些什么
+        </a>
+      </h1>
+    </header>
+
+    <p>Kubelet 是 Kubernetes 集群中非常重要的组件，起在集群中的每个几点上，具体 Kubelet 会做那些事情，可以通过 Kubelet 的源码找到答案。</p>
+<p>本文的 Kubelet 源码基于 Kubernetes-1.14。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic">// k8s.io\kubernetes\pkg\kubelet\kubelet.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span><span style="color:#ff7b72">func</span> (kl <span style="color:#ff7b72;font-weight:bold">*</span>Kubelet) <span style="color:#d2a8ff;font-weight:bold">Run</span>(updates <span style="color:#ff7b72;font-weight:bold">&lt;-</span><span style="color:#ff7b72">chan</span> kubetypes.PodUpdate) {}
+</span></span><span style="display:flex;"><span>	kl.<span style="color:#d2a8ff;font-weight:bold">initializeModules</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// Prometheus metrics.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		metrics.<span style="color:#d2a8ff;font-weight:bold">Register</span>(
+</span></span><span style="display:flex;"><span>			kl.runtimeCache,
+</span></span><span style="display:flex;"><span>			collectors.<span style="color:#d2a8ff;font-weight:bold">NewVolumeStatsCollector</span>(kl),
+</span></span><span style="display:flex;"><span>			collectors.<span style="color:#d2a8ff;font-weight:bold">NewLogMetricsCollector</span>(kl.StatsProvider.ListPodStats),
+</span></span><span style="display:flex;"><span>		)
+</span></span><span style="display:flex;"><span>		metrics.<span style="color:#d2a8ff;font-weight:bold">SetNodeName</span>(kl.nodeName)
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// TODO: 1.!!! 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// Start async garbage collection of images.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		kl.imageManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// TODO: 2.!!!!!! 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// Watches cadvisor for system oom&#39;s and records an event for every system oom encountered.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		kl.oomWatcher.<span style="color:#d2a8ff;font-weight:bold">Start</span>(kl.nodeRef)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		kl.resourceAnalyzer.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// updateCachedPodVolumeStats calculates and caches the PodVolumeStats for every Pod known to the kubelet.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#ff7b72">go</span> wait.<span style="color:#d2a8ff;font-weight:bold">Forever</span>(<span style="color:#ff7b72">func</span>() { s.<span style="color:#d2a8ff;font-weight:bold">updateCachedPodVolumeStats</span>() }, s.calcPeriod)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// TODO: 3.!!!!!
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// VolumeManager runs a set of asynchronous loops that figure out which
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// volumes need to be attached/mounted/unmounted/detached based on the pods
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// scheduled on this node and makes it so.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">go</span> kl.volumeManager.<span style="color:#d2a8ff;font-weight:bold">Run</span>(kl.sourcesReady, wait.NeverStop)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// DesiredStateOfWorldPopulator periodically loops through the list of active
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// pods and ensures that each one exists in the desired state of the world cache
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// if it has volumes. It also verifies that the pods in the desired state of the
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// world cache still exist, if not, it removes them.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">go</span> vm.desiredStateOfWorldPopulator.<span style="color:#d2a8ff;font-weight:bold">Run</span>(sourcesReady, stopCh)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// Reconciler runs a periodic loop to reconcile the desired state of the world
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// with the actual state of the world by triggering attach, detach, mount, and
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// unmount operations.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">go</span> vm.reconciler.<span style="color:#d2a8ff;font-weight:bold">Run</span>(stopCh)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// TODO:important. 4.!!!!!!!!!! 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// Start syncing node status immediately, this may set up things the runtime needs to run.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">go</span> wait.<span style="color:#d2a8ff;font-weight:bold">Until</span>(kl.syncNodeStatus, kl.nodeStatusUpdateFrequency, wait.NeverStop)
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// syncNodeStatus should be called periodically from a goroutine.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// It synchronizes node status to master if there is any change or enough time
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// passed from the last sync, registering the kubelet first if necessary.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">func</span> (kl <span style="color:#ff7b72;font-weight:bold">*</span>Kubelet) <span style="color:#d2a8ff;font-weight:bold">syncNodeStatus</span>() {}
+</span></span><span style="display:flex;"><span>			kl.<span style="color:#d2a8ff;font-weight:bold">registerWithAPIServer</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// updateNodeStatus updates node status to master with retries if there is any
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#8b949e;font-style:italic">// change or enough time passed from the last sync.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			kl.<span style="color:#d2a8ff;font-weight:bold">updateNodeStatus</span>()
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">// In large clusters, GET and PUT operations on Node objects coming
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				<span style="color:#8b949e;font-style:italic">// from here are the majority of load on apiserver and etcd.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				<span style="color:#8b949e;font-style:italic">// To reduce the load on etcd, we are serving GET operations from
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				<span style="color:#8b949e;font-style:italic">// apiserver cache (the data might be slightly delayed but it doesn&#39;t
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				<span style="color:#8b949e;font-style:italic">// seem to cause more conflict - the delays are pretty small).
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				<span style="color:#8b949e;font-style:italic">// If it result in a conflict, all retries are served directly from etcd.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				<span style="color:#d2a8ff;font-weight:bold">tryUpdateNodeStatus</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// fastStatusUpdateOnce starts a loop that checks the internal node indexer cache for when a CIDR
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// is applied  and tries to update pod CIDR immediately. After pod CIDR is updated it fires off
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// a runtime update and a node status update. Function returns after one successful node status update.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// Function is executed only during Kubelet start which improves latency to ready node by updating
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// pod CIDR, runtime status and node statuses ASAP.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">go</span> kl.<span style="color:#d2a8ff;font-weight:bold">fastStatusUpdateOnce</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// ....................
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// 不断尝试更新 CIDR，成功后，直接调用 syncNodeStatus() 更新 node 状态.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">if</span> node.Spec.PodCIDR <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#a5d6ff">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">if</span> _, err <span style="color:#ff7b72;font-weight:bold">:=</span> kl.<span style="color:#d2a8ff;font-weight:bold">updatePodCIDR</span>(node.Spec.PodCIDR); err <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#79c0ff">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#d2a8ff;font-weight:bold">Errorf</span>(<span style="color:#a5d6ff">&#34;Pod CIDR update failed %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff7b72">continue</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			kl.<span style="color:#d2a8ff;font-weight:bold">updateRuntimeUp</span>()
+</span></span><span style="display:flex;"><span>			kl.<span style="color:#d2a8ff;font-weight:bold">syncNodeStatus</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#ff7b72">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// start syncing lease
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// create or update lease periodically
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">if</span> utilfeature.DefaultFeatureGate.<span style="color:#d2a8ff;font-weight:bold">Enabled</span>(features.NodeLease) {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">go</span> kl.nodeLeaseController.<span style="color:#d2a8ff;font-weight:bold">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// TODO:important. 5.!!!!!!!!! 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// updateRuntimeUp calls the container runtime status callback, 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// initializing the runtime dependent modules when the container runtime first comes up,
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// and returns an error if the status check fails.  If the status check is OK,
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// update the container runtime uptime in the kubelet runtimeState.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">go</span> wait.<span style="color:#d2a8ff;font-weight:bold">Until</span>(kl.updateRuntimeUp, <span style="color:#a5d6ff">5</span><span style="color:#ff7b72;font-weight:bold">*</span>time.Second, wait.NeverStop)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff7b72">func</span> (kl <span style="color:#ff7b72;font-weight:bold">*</span>Kubelet) <span style="color:#d2a8ff;font-weight:bold">updateRuntimeUp</span>() {}
+</span></span><span style="display:flex;"><span>			kl.containerRuntime.<span style="color:#d2a8ff;font-weight:bold">Status</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#d2a8ff;font-weight:bold">initializeRuntimeDependentModules</span>() {}
+</span></span><span style="display:flex;"><span>				kl.cadvisor.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">// get nodeinfo or initilized.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				kl.<span style="color:#d2a8ff;font-weight:bold">getNodeAnyWay</span>()
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">// 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				kl.containerManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>(node, kl.GetActivePods, kl.sourcesReady, kl.statusManager, kl.runtimeService)
+</span></span><span style="display:flex;"><span>					cm.cpuManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>(cpumanager.<span style="color:#d2a8ff;font-weight:bold">ActivePodsFunc</span>(activePods), podStatusProvider, runtimeService)
+</span></span><span style="display:flex;"><span>					cm.<span style="color:#d2a8ff;font-weight:bold">setupNode</span>(activePods)
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// Start starts the Device Plugin Manager and start initialization of
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					<span style="color:#8b949e;font-style:italic">// podDevices and allocatedDevices information from checkpointed state and
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					<span style="color:#8b949e;font-style:italic">// starts device plugin registration service.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					cm.deviceManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>(devicemanager.<span style="color:#d2a8ff;font-weight:bold">ActivePodsFunc</span>(activePods), sourcesReady)
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// TODO: important. 6 !!!!!! 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					<span style="color:#8b949e;font-style:italic">// Start starts the control loop to observe and response to low compute resources.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					kl.evictionManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>(kl.StatsProvider, kl.GetActivePods, kl.podResourcesAreReclaimed, evictionMonitoringPeriod)
+</span></span><span style="display:flex;"><span>				<span style="color:#8b949e;font-style:italic">// Needed to observe and respond to situations that could impact node stability
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>				kl.containerLogManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>				<span style="color:#ff7b72">if</span> kl.enablePluginsWatcher {
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// Adding Registration Callback function for CSI Driver
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					kl.pluginWatcher.<span style="color:#d2a8ff;font-weight:bold">AddHandler</span>(pluginwatcherapi.CSIPlugin, pluginwatcher.<span style="color:#d2a8ff;font-weight:bold">PluginHandler</span>(csi.PluginHandler))
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// Adding Registration Callback function for Device Manager
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					kl.pluginWatcher.<span style="color:#d2a8ff;font-weight:bold">AddHandler</span>(pluginwatcherapi.DevicePlugin, kl.containerManager.<span style="color:#d2a8ff;font-weight:bold">GetPluginRegistrationHandler</span>())
+</span></span><span style="display:flex;"><span>					<span style="color:#8b949e;font-style:italic">// Start the plugin watcher
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>					klog.<span style="color:#d2a8ff;font-weight:bold">V</span>(<span style="color:#a5d6ff">4</span>).<span style="color:#d2a8ff;font-weight:bold">Infof</span>(<span style="color:#a5d6ff">&#34;starting watcher&#34;</span>)
+</span></span><span style="display:flex;"><span>					err <span style="color:#ff7b72;font-weight:bold">:=</span> kl.pluginWatcher.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// Start loop to sync iptables util rules
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">if</span> kl.makeIPTablesUtilChains {
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// syncNetworkUtil ensures the network utility are present on host.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// Network util includes:
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// 1. 	In nat table, KUBE-MARK-DROP rule to mark connections for dropping
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// 	Marked connection will be drop on INPUT/OUTPUT Chain in filter table
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// 2. 	In nat table, KUBE-MARK-MASQ rule to mark connections for SNAT
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// 	Marked connection will get SNAT on POSTROUTING Chain in nat table
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">go</span> wait.<span style="color:#d2a8ff;font-weight:bold">Until</span>(kl.syncNetworkUtil, <span style="color:#a5d6ff">1</span><span style="color:#ff7b72;font-weight:bold">*</span>time.Minute, wait.NeverStop)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// podKiller launches a goroutine to kill a pod received from the channel if
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// another goroutine isn&#39;t already in action.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">go</span> wait.<span style="color:#d2a8ff;font-weight:bold">Until</span>(kl.podKiller, <span style="color:#a5d6ff">1</span><span style="color:#ff7b72;font-weight:bold">*</span>time.Second, wait.NeverStop)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// Syncs pods statuses with apiserver; also used as a cache of statuses.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// case syncRequest := &lt;-m.podStatusChannel: syncPod(syncRequest)
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// case &lt;-syncTicker: m.syncBatch() 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	kl.statusManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// TODO: 7.!!!! 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// pod probe
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	kl.probeManager.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#ff7b72">go</span> kl.runtimeClassManager.<span style="color:#d2a8ff;font-weight:bold">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// TODO: 8.!!!!
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// Start the pod lifecycle event generator.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	kl.pleg.<span style="color:#d2a8ff;font-weight:bold">Start</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#8b949e;font-style:italic">// Get all the pods. 
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// g.runtime.GetPods(true)
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// kube
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// pods := kubecontainer.Pods(podList)
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// Compare the old and the current pods, and generate events.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// computeEvents
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#8b949e;font-style:italic">// If there are events associated with a pod, we should update the podCache.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>		<span style="color:#ff7b72">go</span> wait.<span style="color:#d2a8ff;font-weight:bold">Until</span>(g.relist, g.relistPeriod, wait.NeverStop)
+</span></span><span style="display:flex;"><span>			<span style="color:#8b949e;font-style:italic">// relist queries the container runtime for list of pods/containers, compare
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#8b949e;font-style:italic">// with the internal pods/containers, and generates events accordingly.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>			<span style="color:#ff7b72">func</span> (g <span style="color:#ff7b72;font-weight:bold">*</span>GenericPLEG) <span style="color:#d2a8ff;font-weight:bold">relist</span>() {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8b949e;font-style:italic">// TODO:important. 9.!!!!!!!
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// syncLoop is the main loop for processing changes. It watches for changes from
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// three channels (file, apiserver, and http) and creates a union of them. For
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// any new change seen, will run a sync against desired state and running state. If
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// no changes are seen to the configuration, will synchronize the last known desired
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	<span style="color:#8b949e;font-style:italic">// state every sync-frequency seconds. Never returns.
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"></span>	kl.<span style="color:#d2a8ff;font-weight:bold">syncLoop</span>(updates, kl)
+</span></span><span style="display:flex;"><span>		kl.<span style="color:#d2a8ff;font-weight:bold">syncLoopIteration</span>(updates, handler, syncTicker.C, housekeepingTicker.C, plegCh)
+</span></span></code></pre></div><p>首先，Kubelet 的代码入口在<code>k8s.io/kubernetes/cmd/kubelet/kubelet.go</code>, 暂时略过一系列的参数校验，结构体构建及初始化操作，直接看<code>k8s.io/kubernetes/cmdkubelet/app/server.go</code>中最关键的<code>startKubelet</code>方法, 这个方法中调用了 Kubelet 的 <code>func (kl *Kubelet) Run(updates &lt;-chan kubetypes.PodUpdate) {}</code>方法，Kubelet 具体做的事情，几乎都可以在这个方法中找到，接下来主要以此方法为入口，分析 Kubelet 启动执行的动作。</p>
+<h3 id="initializemodules">
+  initializeModules
+  <a class="heading-link" href="#initializemodules">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>此方法源码中的注释为<code>initializeModules will initialize internal modules that do not require the container runtime to be up. Note that the modules here must not depend on modules that are not initialized here.</code>，即初始化不需要启动容器运行时的内部模块，并且不依赖于尚未初始化的模块。主要包含的有：prometheus metrics 的采集模块，创建目录（如：pod目录，kubelet root 目录，pod 日志目录等）， 启动 imageManager（负责镜像gc），启动serverCertificateManager（证书更新），启动 oomWatcher（监听oom并记录事件），启动 resourceAnalyzer。</p>
+<h3 id="volumemanager">
+  volumeManager
+  <a class="heading-link" href="#volumemanager">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>goroutine 启动 volumeManager，保证调度到本节点的 pod 的 volume 执行正确的 mount 或 unmount 等操作。volumeManager 会启动两个 goroutine <code>desiredStateOfWorldPopulator</code>和<code>reconciler</code>。<code>desiredStateOfWorldPopulator</code> 通过两个方法<code>findAndAddNewPods</code>和<code>findAndRemoveDeletedPods</code>遍历节点上所有 pod，对新添加的和已删除的 pod 执行 volume 操作；<code>reconciler</code>包含两种 cache，<code>desiredStateOfWorld</code>和<code>actualStateOfWorld</code>，启动 reconciler 会遍历 cache 中的所有 volume，通过执行对应的 mount/unmount 操作来保证实际的 volume 状态和预期的相同。</p>
+<h3 id="syncnodestatus">
+  syncNodeStatus
+  <a class="heading-link" href="#syncnodestatus">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>接下来，kubelet 会执行<code>syncNodeStatus</code>进行节点状态同步，这时会做好启动运行时所需要的配置。<code>syncNodeStatus</code>方法在节点有任何变化，或距上次同步一定时间后，向 master 同步本节点的状态，在必要时会首先向 master 进行注册（注册即将当前节点信息提交给 apiserver）。<code>syncNodeStatus</code>会调用<code>tryUpdateNodeStatus</code>尝试更新，<code>tryUpdateNodeStatus</code>方法在尝试更新节点状态时，首先会尝试从 apiserver 缓存中获取信息，当获取到的信息发生冲突时，会重新尝试直接获取 etcd 的数据并重新尝试同步。（在大规模集群中，节点状态同步中所调用的 GET 和 PUT 方法，是 apiserver 和 etcd 负载的主要来源，为了减小负载，tryUpdateNodeStatus 调用的 GET 方法优先从缓存中获取）。</p>
+<h3 id="faststatusupdateonce">
+  fastStatusUpdateOnce
+  <a class="heading-link" href="#faststatusupdateonce">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>在 kubelet 启动时，还会调用一个<code>fastStatusUpdateOnce</code>，该方法会调用不断尝试更新 pod CIDR，一旦更新成功，会立即执行<code>updateRuntimeUp</code>和<code>syncNodeStatus</code>来进行运行时的更新和节点状态更新。此方法只在 Kubelet 启动时会执行，目的是为了通过更新 pod CIDR，减少节点达到 ready 状态的时延，尽可能快的进行 runtime update 和 node status update。</p>
+<h3 id="nodeleasecontroller">
+  nodeLeaseController
+  <a class="heading-link" href="#nodeleasecontroller">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><code>nodeLeaseController</code> 非常简单，它是一个无限循环，为 Kubelet 声明并定时更新对节点的租约。</p>
+<h3 id="updateruntimeup">
+  updateRuntimeUp
+  <a class="heading-link" href="#updateruntimeup">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><code>updateRuntimeUp</code>调用容器运行时状态回调，当容器运行时首次启动时初始化运行时依赖的模块，如果状态检测 ok，在 kubelet 的<code>runtimeState</code>中更新容器运行时的启动时间。updateRuntimeUp 方法首先调用<code>containerRuntime.Status()</code>获取容器运行时状态，当状态ok后，会调用<code>initializeRuntimeDependentModules</code>方法，初始化并运行 kubelet 中需要依赖容器运行时的模块。包括 containerManager、evictionManager、containerLogManager、pluginWatcher等。关于这几个模块，通过名字应该基本可以猜测到大概的功能，后面再做详细的分析。</p>
+<h3 id="syncnetworkutil">
+  syncNetworkUtil
+  <a class="heading-link" href="#syncnetworkutil">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>设置 iptables 规则，配置<code>KUBE-MARK-DROP</code>和<code>KUBE-MARK-MASQ</code>规则。</p>
+<h3 id="podkiller">
+  podKiller
+  <a class="heading-link" href="#podkiller">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>podKiller 从 kubelet 的<code>podKillingCh</code> channel 中接受并启动一个 goroutine 来 kill pod，kill 之前会先判断该 pod 是否已经有其他 goroutine 在执行 kill。</p>
+<h3 id="statusmanager">
+  statusManager
+  <a class="heading-link" href="#statusmanager">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>statusManager 和 apiserver 同步 pod 状态，同时也被用作状态的缓存。</p>
+<h3 id="probemanager">
+  probeManager
+  <a class="heading-link" href="#probemanager">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>probeManager 处理 pod 的探针，并根据结果更新 pod 状态。</p>
+<h3 id="pleg">
+  pleg
+  <a class="heading-link" href="#pleg">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>pleg 是 PodLifecycleEventGenerator，即 pod 生命周期时间生成器。它周期性的执行 relist 方法，查询容器运行时来查询 pod/container 列表，和内部的 pod/container 列表作比对，并由此生成事件。</p>
+<h3 id="syncloop">
+  syncLoop
+  <a class="heading-link" href="#syncloop">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>最后，进入 syncLoop，即 kubelet 的主循环。syncLoop 从三个 channel 监听变化（file，apiserver，http），并将他们合并。对于发现的任何改变，kubelet 针对期望状态和实际运行状态作同步，如果没有变化，就在一定同步周期内，和上次发现的期望状态同步，永远不会退出。</p>
+<h3 id="syncloopiteration">
+  syncLoopIteration
+  <a class="heading-link" href="#syncloopiteration">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>syncLoop 中 执行 syncLoopIteration 方法进行真正的同步操作。具体代码在<code>pkg/kubelet/kubelet.go</code>中，逻辑较复杂，后面单独分析。</p>
+  </article>
+</section>
+
+  
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

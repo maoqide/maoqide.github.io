@@ -10,9 +10,9 @@
     <atom:link href="/tags/gc/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Golang Gc &amp; Memory Allocation</title>
-      <link>/posts/golang/golang-gc--memory-allocation/</link>
+      <link>/post/golang/golang-gc--memory-allocation/</link>
       <pubDate>Tue, 18 Feb 2020 17:20:47 +0800</pubDate>
-      <guid>/posts/golang/golang-gc--memory-allocation/</guid>
+      <guid>/post/golang/golang-gc--memory-allocation/</guid>
       <description>&lt;p&gt;关于 Golang GC 和内存管理相关的流程和原理的一些总结。&lt;/p&gt;</description>
     </item>
   </channel>
