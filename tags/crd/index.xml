@@ -10,16 +10,16 @@
     <atom:link href="/tags/crd/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Kubernetes Crd</title>
-      <link>/post/cloud/kubernetes-crd/</link>
+      <link>/posts/cloud/kubernetes-crd/</link>
       <pubDate>Thu, 29 Oct 2020 09:00:05 +0800</pubDate>
-      <guid>/post/cloud/kubernetes-crd/</guid>
+      <guid>/posts/cloud/kubernetes-crd/</guid>
       <description></description>
     </item>
     <item>
       <title>Sample Operator</title>
-      <link>/post/cloud/sample-operator/</link>
+      <link>/posts/cloud/sample-operator/</link>
       <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
-      <guid>/post/cloud/sample-operator/</guid>
+      <guid>/posts/cloud/sample-operator/</guid>
       <description>&lt;p&gt;用 kubebuilder 开发 operator 实现 sample-controller&lt;/p&gt;</description>
     </item>
   </channel>

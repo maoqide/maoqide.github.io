@@ -10,9 +10,9 @@
     <atom:link href="/tags/xterm/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Kubernetes Webshell</title>
-      <link>/post/cloud/kubernetes-webshell/</link>
+      <link>/posts/cloud/kubernetes-webshell/</link>
       <pubDate>Sun, 11 Aug 2019 11:32:17 +0800</pubDate>
-      <guid>/post/cloud/kubernetes-webshell/</guid>
+      <guid>/posts/cloud/kubernetes-webshell/</guid>
       <description>&lt;p&gt;通过 client-go 提供的方法，实现通过网页进入 kubernetes pod 的终端操作。&lt;/p&gt;</description>
     </item>
   </channel>

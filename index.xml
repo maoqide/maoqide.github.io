@@ -17,296 +17,296 @@
     </item>
     <item>
       <title>云原生资源优化实践</title>
-      <link>/post/practice/resource-optimization/</link>
+      <link>/posts/practice/resource-optimization/</link>
       <pubDate>Wed, 07 Feb 2024 17:25:40 +0800</pubDate>
-      <guid>/post/practice/resource-optimization/</guid>
+      <guid>/posts/practice/resource-optimization/</guid>
       <description>本文发表于 infoQ: infoQ 文章链接&#xA;背景 Link to heading 在容器化的基础上，我们已经通过一些手段，比如监控分析、弹性伸缩等降低了 k8s 集群的成本，取得了一定的成效。&#xA;但是深入分析下来，集群资源使用还是有不小的优化空间。当然，成本和稳定性总是对立的，这就要求我们更精细、更深入业务进行资源的优化，以同时保证应用的稳定性不受影响。因此，进一步的资源优化，我们围绕云原生和 k8s 本身的功能特性和架构优势，从具体业务应用的特点着手，对 k8s 的弹性和调度等能力做了一系列的拓展和增强，以达成进一步降低成本，并能够不损失甚至持续提升应用稳定性的目标。&#xA;弹性伸缩 Link to heading 业务挑战-1，如何有效推进业务接入 HPA？ Link to heading Pod 水平弹性扩缩容是 K8s 的一个重要功能，随着应用迁移到 K8s，我们自然也上线了这一功能。但是，在实际落地中，却有一些问题导致弹性扩缩容的效果受到了很大影响，甚至很多应用因此未能开启弹性扩缩。这里简单列举几个比较普遍存在的问题：&#xA;由于 java 本身的特点和一些历史债务问题，很多核心业务的应用启动时间很长，这使得扩容出的 Pod 并不能及时分担线上流量，使得一些大流量的业务在业务高峰期可能会出现服务受损的情况。 有些应用如 kafka 消费者应用，由于每次 Pod 的扩缩容，都会触发到 kafka 的重平衡，造成对消息消费的影响，部分应用无法容忍较高频次的扩缩容动作。 &amp;hellip; &amp;hellip; 解决方案 Link to heading 基于上面提到的问题，我们需要 HPA 能够做到提前感知扩容，并尽可能的减少扩缩容的频次，减少无效的扩缩容。经过问题分析和对社区产品的调研，我们决定从多个方向来解决这个问题。其一，是引入 keda，借助丰富的 scaler 和自定义 scaler 的能力，支持通过自定义的业务指标及更灵活的扩缩策略，实现更精准的扩缩容。其二，引入了 crane 的 EHPA，实现基于流量预测的弹性扩缩。最后，对于扩缩容极端敏感的应用，还是无法容忍扩缩容带来的影响的话，使用固定的定时弹性扩缩容策略，由业务方自己指定扩缩容的时间和个数，实现扩缩容完全可控。&#xA;案例 Link to heading 通过 EHPA 提前扩容，减少无效缩容 Link to heading 如上图，EHPA 使用在数字信号处理（Digital Signal Processing）领域中常用的的离散傅里叶变换、自相关函数等手段，识别、预测周期性的时间序列。可以通过算法预测未来的流量洪峰实现提前扩容，及减少不必要的缩容，稳定工作负载的资源使用率，消除突刺误判，缓解抖动。</description>
     </item>
     <item>
       <title>2023 总结</title>
-      <link>/post/self/2023/</link>
+      <link>/posts/self/2023/</link>
       <pubDate>Wed, 07 Feb 2024 14:36:46 +0800</pubDate>
-      <guid>/post/self/2023/</guid>
+      <guid>/posts/self/2023/</guid>
       <description>年前最后的工作日，工作收收尾，便再难静下心在工作上。趁此机会，也作下个人的年终总结吧。之前看过很多人的年终总结，每每不以为然，如今自己加入其中，兴许是年纪到了吧。&#xA;工作 Link to heading 这本是一个技术博客，我又是一个极度避免将自己的生活暴露在外部尤其是互联网之上的人，因此，绝大部分的篇幅应该还是落在工作之上。&#xA;既然是写给自己的个人总结，那么就可以完全放下工作汇报所带有的功利性的色彩。回顾这一年，还有哪些事情，能够多少带给我一些成就感或者得到一些成长呢？&#xA;分享 Link to heading 通过 infoQ 公众号发布了一篇技术文章。 今年通过投稿 infoQ 发布了一篇技术分享的文章，第一次在比较主流的技术社区发表文章，算是一个小小的成果，同时也有一些朋友因为看了这篇文章联系到我，探讨相关的技术问题，体验不错。&#xA;现实生活中，在大多数人眼中我应该是个话少的人，实际也确实是这样。但是在技术上，我始终还是有一些分享欲。几年前在上家公司的时候，我曾经坚持维护了一段时期的个人博客。本意只是当作个人的备忘笔记，并未在任何技术社区或者朋友圈做过分享。然而，逐渐却有一些朋友，通过博客的留言或者邮箱跟我联系，甚至添加微信，交流技术问题，后面还看到有关注了的技术公众号，转发我的博客文章，这算是第一次让我体验到技术分享带来的小小的成就感。&#xA;目前，在现在的公司，或出于自发，或出于上级要求，我基本保持在大概每个半年度一次大部门级别的技术分享演演讲，。无论内部外部，形式如何，分享这件事情，我还是想坚持下去，这篇文章，也算是这个博客的重新开始。&#xA;角色 Link to heading 推动公司 flink 计算任务的全面 k8s 迁移。 这件事情本身倒没有什么特别的技术难题的攻克，就是非常中规中矩的技术方案。但是这件事情，是去年 TL 离职，我从他手中接过了小组的职责后，第一个主动发起和推动的项目，并且取得了不错的成果，给业务方带来了不小的收益。也因此间接的推广了我们团队的影响，由于这个项目的顺利进行，业务方自己主动提出了 spark 离线任务也迁移 k8s 的需求。对我们而言，这两块业务，都可算是绝对的大客户，比较大的扩展的我们团队的业务覆盖范围。&#xA;带来的思考，就是工作上要主动的发现需求，果断的抓住机会。至少在自己的专业领域这块，相信自己的能力和眼光，看到需求，果断主动出击，毕竟说起云原生、容器化，无论是部门主管还是其他业务方，我相信没有人会比我自己更加了解和专业，我理应能够看到他们所看不到的价值。&#xA;这一点，可能许多前辈或者经历更优秀的朋友早已领悟，但是对我来说，从去年的角色转换之后，在实际工作中，才有了更加切身的体会。&#xA;生活 Link to heading 前面说了，我是一个极度避免将自己的生活暴露在外部尤其是互联网之上的人。因此，生活层面，可说的不多。但是作为年度总结，姑且提上几笔。&#xA;我是个非常注重 WLB 的人，这也是一个我没有去追求进入大厂的原因（还有就是又懒又菜吧）。因此我工作中加班还是较少的，基本大概算是975的工作节奏吧。但是业余的时间，并没有做到所谓的提升自己或者发展爱好，运动的计划也总是不了了之。新的一年，也无意给自己太多的计划，只希望再做回顾时，能有更充实一些的感觉吧。（反正计划了也没用，佛一些吧。。）&#xA;另外，于我而言，主要的两大杀时间利器，就是B站和微信读书。&#xA;读书 Link to heading 微信读书，看了下记录，显示2023年读过 33 本，看完了 25 本。读点闲书，算是我的业余爱好。我读书基本是来者通吃，题材不限。&#xA;具体到去年读的书，有些是重读一遍，如因为看了剧版三体后，重读了一遍《三体》，不记得什么原因重读了余华的《活着》，甚至还重读了一遍《三国演义》。&#xA;归类的话，去年读完的书中占比最多的是茅盾文学奖获奖作品，这些书的典型特点是带有浓重的民族和时代背景，从中可以读到不同的顶尖文字表达者所塑造出来的时代面貌，可以由此感知到一些当前社会的发展逻辑，得到一些思考。&#xA;印象较深比较特别的一本，是《寻找百忧解：一个精神科医生的观察手记》，描写精神病患者的一本书，和之前比较火的《天才在左，疯子在右》相比，后者更加猎奇，但是个人认为真实性存疑，也是很多人诟病之处。而《寻找百忧解》这本书，本身题材是纪实文学，作者也是一名精神科医生，少了一些猎奇，多了一些真实，更能打动人心。&#xA;要推荐一本书的话，我会推荐《多余的话》，瞿秋白就义前夕写下的文字。一万余字，38分钟读完，让我重新认识了瞿秋白，而不只是历史课本上的一个好听的名字。瞿秋白，一直感觉是一个很好听的名字，让人很容易联想到一个文质彬彬的文人，他的确是一个文人，在历史的裹挟下，一度成为中国共产党早期的最高领袖。就义前夕的文字，让人很能深刻体会到那个时代知识分子的内心。这里不是书评，不做过多描述，感兴趣可以看一下，1小时内就可以读完。&#xA;B站 Link to heading 最近B站刷的有点多。出于对病毒式爆发的短视频的抵触，我没有下载任何的短视频 App。主要的 UGC 的视频 App 的选项可能也就是 B 站了。B 站目前也充斥了大量的短视频，我刷B站的时候也多少会有意识的避开这一类。</description>
     </item>
     <item>
       <title>Build Fileserver Using Nginx on K8s</title>
-      <link>/post/practice/build-fileserver-using-nginx-on-k8s/</link>
+      <link>/posts/practice/build-fileserver-using-nginx-on-k8s/</link>
       <pubDate>Thu, 27 May 2021 13:52:43 +0800</pubDate>
-      <guid>/post/practice/build-fileserver-using-nginx-on-k8s/</guid>
+      <guid>/posts/practice/build-fileserver-using-nginx-on-k8s/</guid>
       <description>&lt;p&gt;使用 nginx 镜像在 k8s 中搭建一个简单的文件服务器。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kubernetes Service 502, IPVS 的坑</title>
-      <link>/post/problems/kubernetes-service-502/</link>
+      <link>/posts/problems/kubernetes-service-502/</link>
       <pubDate>Sun, 18 Apr 2021 14:00:22 +0800</pubDate>
-      <guid>/post/problems/kubernetes-service-502/</guid>
+      <guid>/posts/problems/kubernetes-service-502/</guid>
       <description>&lt;p&gt;目前部署在 Kubernetes 中的服务，通过 calico BGP 将 Service 与集群外网络打通，并在外部的 nginx 中配置 Service 地址对外进行服务暴露。经过一段时间的观察，发现在 Deployment 滚动更新中及之后一段时间，偶现服务访问 502 的问题。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Etcd 的基础-分布式一致性算法 Raft</title>
-      <link>/post/cloud/raft/</link>
+      <link>/posts/cloud/raft/</link>
       <pubDate>Mon, 22 Mar 2021 09:37:09 +0800</pubDate>
-      <guid>/post/cloud/raft/</guid>
+      <guid>/posts/cloud/raft/</guid>
       <description>&lt;p&gt;Raft 是一个管理复制日志的分布式一致性算法，也是 ETCD 实现分布式一致性的基础，保证 ETCD 集群中各节点数据的强一致性。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kubernetes Crd</title>
-      <link>/post/cloud/kubernetes-crd/</link>
+      <link>/posts/cloud/kubernetes-crd/</link>
       <pubDate>Thu, 29 Oct 2020 09:00:05 +0800</pubDate>
-      <guid>/post/cloud/kubernetes-crd/</guid>
+      <guid>/posts/cloud/kubernetes-crd/</guid>
       <description></description>
     </item>
     <item>
       <title>Application Containerization Best Practice</title>
-      <link>/post/cloud/application-containerization-best-practice/</link>
+      <link>/posts/cloud/application-containerization-best-practice/</link>
       <pubDate>Mon, 10 Aug 2020 09:18:18 +0800</pubDate>
-      <guid>/post/cloud/application-containerization-best-practice/</guid>
+      <guid>/posts/cloud/application-containerization-best-practice/</guid>
       <description>&lt;p&gt;应用容器化部署最佳实践&lt;/p&gt;</description>
     </item>
     <item>
       <title>监控系统的设计</title>
-      <link>/post/practice/monitor-system/</link>
+      <link>/posts/practice/monitor-system/</link>
       <pubDate>Fri, 03 Jul 2020 11:27:06 +0800</pubDate>
-      <guid>/post/practice/monitor-system/</guid>
+      <guid>/posts/practice/monitor-system/</guid>
       <description>&lt;p&gt;本文为个人对监控系统的设计调研后的总结及个人理解，如有偏差，欢迎指正。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Sample Operator</title>
-      <link>/post/cloud/sample-operator/</link>
+      <link>/posts/cloud/sample-operator/</link>
       <pubDate>Mon, 29 Jun 2020 15:40:29 +0800</pubDate>
-      <guid>/post/cloud/sample-operator/</guid>
+      <guid>/posts/cloud/sample-operator/</guid>
       <description>&lt;p&gt;用 kubebuilder 开发 operator 实现 sample-controller&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kubernetes Events</title>
-      <link>/post/cloud/kubernetes-events/</link>
+      <link>/posts/cloud/kubernetes-events/</link>
       <pubDate>Sat, 25 Apr 2020 16:38:17 +0800</pubDate>
-      <guid>/post/cloud/kubernetes-events/</guid>
+      <guid>/posts/cloud/kubernetes-events/</guid>
       <description>&lt;p&gt;通过源码探究 kubernetes 如何记录和存储集群中的大量事件信息。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Bfs and Dfs</title>
-      <link>/post/algorithm/bfs-and-dfs/</link>
+      <link>/posts/algorithm/bfs-and-dfs/</link>
       <pubDate>Sat, 28 Mar 2020 11:23:38 +0800</pubDate>
-      <guid>/post/algorithm/bfs-and-dfs/</guid>
+      <guid>/posts/algorithm/bfs-and-dfs/</guid>
       <description>&lt;p&gt;golang 深度优先搜索和广度优先搜索。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Golang Gc &amp; Memory Allocation</title>
-      <link>/post/golang/golang-gc--memory-allocation/</link>
+      <link>/posts/golang/golang-gc--memory-allocation/</link>
       <pubDate>Tue, 18 Feb 2020 17:20:47 +0800</pubDate>
-      <guid>/post/golang/golang-gc--memory-allocation/</guid>
+      <guid>/posts/golang/golang-gc--memory-allocation/</guid>
       <description>&lt;p&gt;关于 Golang GC 和内存管理相关的流程和原理的一些总结。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Collection 4</title>
-      <link>/post/awesome-post/collection-4/</link>
+      <link>/posts/awesome-post/collection-4/</link>
       <pubDate>Tue, 18 Feb 2020 12:13:08 +0800</pubDate>
-      <guid>/post/awesome-post/collection-4/</guid>
+      <guid>/posts/awesome-post/collection-4/</guid>
       <description>&lt;p&gt;golang GC &amp;amp; 内存管理&lt;/p&gt;</description>
     </item>
     <item>
       <title>Golang Websocket Message Pushing</title>
-      <link>/post/golang/golang-websocket-message-pushing/</link>
+      <link>/posts/golang/golang-websocket-message-pushing/</link>
       <pubDate>Sat, 11 Jan 2020 20:49:24 +0800</pubDate>
-      <guid>/post/golang/golang-websocket-message-pushing/</guid>
+      <guid>/posts/golang/golang-websocket-message-pushing/</guid>
       <description>&lt;p&gt;使用 golang 的 websocket 框架 &lt;a href=&#34;https://github.com/olahol/melody&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;melody&lt;/a&gt;，实现通用的消息分组推送服务。针对同一推送对象，只起一个后端协程进行广播推送，减少资源消耗，并提供监控接口查询当前的协程和websocket连接。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Collection 3</title>
-      <link>/post/awesome-post/collection-3/</link>
+      <link>/posts/awesome-post/collection-3/</link>
       <pubDate>Tue, 07 Jan 2020 21:57:36 +0800</pubDate>
-      <guid>/post/awesome-post/collection-3/</guid>
+      <guid>/posts/awesome-post/collection-3/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;golang GC&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
     <item>
       <title>Upgrade Kubeadm Cluster</title>
-      <link>/post/notes/upgrade-kubeadm-cluster/</link>
+      <link>/posts/notes/upgrade-kubeadm-cluster/</link>
       <pubDate>Thu, 31 Oct 2019 09:50:41 +0800</pubDate>
-      <guid>/post/notes/upgrade-kubeadm-cluster/</guid>
+      <guid>/posts/notes/upgrade-kubeadm-cluster/</guid>
       <description>&lt;p&gt;升级 kubeadm 部署的 kubernetes 集群。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Build Docker Image in a Pod in Kubernetes</title>
-      <link>/post/cloud/build-docker-image-in-a-pod-in-kubernetes/</link>
+      <link>/posts/cloud/build-docker-image-in-a-pod-in-kubernetes/</link>
       <pubDate>Sun, 27 Oct 2019 11:24:01 +0800</pubDate>
-      <guid>/post/cloud/build-docker-image-in-a-pod-in-kubernetes/</guid>
+      <guid>/posts/cloud/build-docker-image-in-a-pod-in-kubernetes/</guid>
       <description>&lt;p&gt;利用 &lt;a href=&#34;https://github.com/GoogleContainerTools/kaniko&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;kaniko&lt;/a&gt; 在 kubernetes 集群中使用 pod 来进行镜像构建，并 push 到镜像仓库中。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kubernetes Monitoring</title>
-      <link>/post/practice/kubernetes-monitoring/</link>
+      <link>/posts/practice/kubernetes-monitoring/</link>
       <pubDate>Wed, 25 Sep 2019 10:15:26 +0800</pubDate>
-      <guid>/post/practice/kubernetes-monitoring/</guid>
+      <guid>/posts/practice/kubernetes-monitoring/</guid>
       <description>&lt;p&gt;完整的记录 kubernetes 监控从部署到配置。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Glusterfs Kubernetes</title>
-      <link>/post/cloud/glusterfs-kubernetes/</link>
+      <link>/posts/cloud/glusterfs-kubernetes/</link>
       <pubDate>Fri, 06 Sep 2019 08:46:14 +0800</pubDate>
-      <guid>/post/cloud/glusterfs-kubernetes/</guid>
+      <guid>/posts/cloud/glusterfs-kubernetes/</guid>
       <description>&lt;p&gt;在 kubernetes 中使用 glusterfs 作为 pv。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kubernetes Webshell</title>
-      <link>/post/cloud/kubernetes-webshell/</link>
+      <link>/posts/cloud/kubernetes-webshell/</link>
       <pubDate>Sun, 11 Aug 2019 11:32:17 +0800</pubDate>
-      <guid>/post/cloud/kubernetes-webshell/</guid>
+      <guid>/posts/cloud/kubernetes-webshell/</guid>
       <description>&lt;p&gt;通过 client-go 提供的方法，实现通过网页进入 kubernetes pod 的终端操作。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Upgrade Kubernets From Binary to Kubeadm</title>
-      <link>/post/notes/upgrade-kubernets-from-binary-to-kubeadm/</link>
+      <link>/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/</link>
       <pubDate>Tue, 06 Aug 2019 13:55:04 +0800</pubDate>
-      <guid>/post/notes/upgrade-kubernets-from-binary-to-kubeadm/</guid>
+      <guid>/posts/notes/upgrade-kubernets-from-binary-to-kubeadm/</guid>
       <description>&lt;p&gt;记一次从二进制部署的 k8s 集群 到 kubeadm 部署的 k8s 迁移测试。 &lt;br&gt;&#xA;原有 k8s 集群为二进制形式部署，集群管理不太方便，准备在集群升级的机会，将集群部署方式改为 kubeadm部署，本文记录测试迁移的过程。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Go Concurrency</title>
-      <link>/post/golang/go-concurrency/</link>
+      <link>/posts/golang/go-concurrency/</link>
       <pubDate>Sat, 20 Jul 2019 21:38:08 +0800</pubDate>
-      <guid>/post/golang/go-concurrency/</guid>
+      <guid>/posts/golang/go-concurrency/</guid>
       <description>&lt;p&gt;go 语言相比其他语言的一大优势，就是便捷，高效的并发代码的编写。本文具体介绍 go 语言的并发机制和使用 go 语言作并发编程的方法。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kubelet-1 Kubelet 会做些什么</title>
-      <link>/post/cloud/kubelet-1-what-do-kubelet-do/</link>
+      <link>/posts/cloud/kubelet-1-what-do-kubelet-do/</link>
       <pubDate>Sun, 14 Jul 2019 11:30:24 +0800</pubDate>
-      <guid>/post/cloud/kubelet-1-what-do-kubelet-do/</guid>
+      <guid>/posts/cloud/kubelet-1-what-do-kubelet-do/</guid>
       <description>&lt;p&gt;Kubelet 是 Kubernetes 集群中非常重要的组件，起在集群中的每个几点上，具体 Kubelet 会做那些事情，可以通过 Kubelet 的源码找到答案。&lt;/p&gt;</description>
     </item>
     <item>
       <title>The Go Memory Model</title>
-      <link>/post/golang/the-go-memory-model/</link>
+      <link>/posts/golang/the-go-memory-model/</link>
       <pubDate>Wed, 19 Jun 2019 09:10:37 +0800</pubDate>
-      <guid>/post/golang/the-go-memory-model/</guid>
+      <guid>/posts/golang/the-go-memory-model/</guid>
       <description>&lt;p&gt;[译]https://golang.google.cn/ref/mem&lt;/p&gt;&#xA;&lt;p&gt;Go内存模型指定了一个条件，在该条件下，可以保证在一个 goroutine 中读取变量，能够获取到另一个不同 goroutine 写入同一变量产生的值。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Golang Data Race Detector</title>
-      <link>/post/golang/golang-data-race-detector/</link>
+      <link>/posts/golang/golang-data-race-detector/</link>
       <pubDate>Tue, 18 Jun 2019 09:26:13 +0800</pubDate>
-      <guid>/post/golang/golang-data-race-detector/</guid>
+      <guid>/posts/golang/golang-data-race-detector/</guid>
       <description>&lt;p&gt;[译] &lt;a href=&#34;https://golang.google.cn/doc/articles/race_detector.html&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://golang.google.cn/doc/articles/race_detector.html&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;golang 中的几种 Data Race 场景及 Data Race 检测工具。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Deploy Mysql on Kubernetes</title>
-      <link>/post/cloud/deploy-mysql-on-kubernetes/</link>
+      <link>/posts/cloud/deploy-mysql-on-kubernetes/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
-      <guid>/post/cloud/deploy-mysql-on-kubernetes/</guid>
+      <guid>/posts/cloud/deploy-mysql-on-kubernetes/</guid>
       <description>&lt;p&gt;本文通过 &lt;a href=&#34;https://github.com/oracle/mysql-operator&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;mysql-operator&lt;/a&gt; 在kubernetes集群部署高可用的mysql statefulset。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Sample Controller</title>
-      <link>/post/cloud/sample-controller/</link>
+      <link>/posts/cloud/sample-controller/</link>
       <pubDate>Mon, 18 Mar 2019 12:53:41 +0800</pubDate>
-      <guid>/post/cloud/sample-controller/</guid>
+      <guid>/posts/cloud/sample-controller/</guid>
       <description>&lt;p&gt;自己构建 sample-controller.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Building an Operator for Kubernetes With the Sample Controller</title>
-      <link>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
+      <link>/posts/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</link>
       <pubDate>Sat, 16 Mar 2019 21:34:46 +0800</pubDate>
-      <guid>/post/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
+      <guid>/posts/cloud/building-an-operator-for-kubernetes-with-the-sample-controller/</guid>
       <description>&lt;pre&gt;&lt;code&gt;An Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user.     &#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;Operator 是一个特定的应用程序的控制器，通过扩展 Kubernetes API 以代表 Kubernetes 用户创建，配置和管理复杂有状态应用程序的实例。 &lt;br&gt;&#xA;Operator 是一种软件，它结合了特定的领域知识并通过 CRD(Custom Resource Definition ) 机制扩展了Kubernetes API，使用户像管理 Kubernetes 的内置资源一样创建，配置和管理应用程序。Operator 管理整个集群中的多个实例，而不仅仅管理应用程序的单个实例。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Golang Mutex</title>
-      <link>/post/golang/golang-mutex/</link>
+      <link>/posts/golang/golang-mutex/</link>
       <pubDate>Mon, 11 Mar 2019 16:35:20 +0800</pubDate>
-      <guid>/post/golang/golang-mutex/</guid>
+      <guid>/posts/golang/golang-mutex/</guid>
       <description>&lt;p&gt;golang 的&lt;code&gt;sync&lt;/code&gt;包中有两种锁，互斥锁&lt;code&gt;sync.Mutex&lt;/code&gt; 和读写锁&lt;code&gt;sync.RWMutex&lt;/code&gt;。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kube Scheduler 源码阅读</title>
-      <link>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>/posts/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Thu, 07 Mar 2019 20:00:30 +0800</pubDate>
-      <guid>/post/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>/posts/cloud/kube-scheduler-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s kube-scheduler 源码阅读笔记&lt;/p&gt;</description>
     </item>
     <item>
       <title>Controller Manager 源码阅读</title>
-      <link>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>/posts/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Sat, 23 Feb 2019 16:52:30 +0800</pubDate>
-      <guid>/post/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>/posts/cloud/controller-manager-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s controller-manager 源码阅读笔记&lt;/p&gt;</description>
     </item>
     <item>
       <title>Awesome Post Collection 2</title>
-      <link>/post/awesome-post/collection-2/</link>
+      <link>/posts/awesome-post/collection-2/</link>
       <pubDate>Wed, 20 Feb 2019 10:51:58 +0800</pubDate>
-      <guid>/post/awesome-post/collection-2/</guid>
+      <guid>/posts/awesome-post/collection-2/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;goroutine 调度器。&lt;/li&gt;&#xA;&lt;li&gt;Golang &lt;code&gt;for range&lt;/code&gt;性能分析及优化。&lt;/li&gt;&#xA;&lt;li&gt;一致性哈希算法。&lt;/li&gt;&#xA;&lt;li&gt;ETCD的一些使用场景及原理分析。&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
     <item>
       <title>Kubernetes Container Network</title>
-      <link>/post/cloud/container-network/</link>
+      <link>/posts/cloud/container-network/</link>
       <pubDate>Tue, 22 Jan 2019 17:28:28 +0800</pubDate>
-      <guid>/post/cloud/container-network/</guid>
+      <guid>/posts/cloud/container-network/</guid>
       <description>&lt;p&gt;容器间通信可分为跨主机和同主机间的通信，同主机主要通过 docker 本身的默认 docker0 即可，跨主机通信则相对复杂一些。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Docker 原理</title>
-      <link>/post/cloud/docker-%E5%8E%9F%E7%90%86/</link>
+      <link>/posts/cloud/docker-%E5%8E%9F%E7%90%86/</link>
       <pubDate>Thu, 17 Jan 2019 14:08:37 +0800</pubDate>
-      <guid>/post/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
+      <guid>/posts/cloud/docker-%E5%8E%9F%E7%90%86/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;Namespace&lt;/li&gt;&#xA;&lt;li&gt;Cgroup&lt;/li&gt;&#xA;&lt;li&gt;UnionFS&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;docker 的实现，主要依赖 linux 的 namespace、cgroup 和 unionFS 三种技术实现，达到容器的环境隔离、资源控制和镜像打包。&lt;/p&gt;</description>
     </item>
     <item>
       <title>将网站部署在 Kubernetes 上</title>
-      <link>/post/notes/publish-your-site-on-k8s/</link>
+      <link>/posts/notes/publish-your-site-on-k8s/</link>
       <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
-      <guid>/post/notes/publish-your-site-on-k8s/</guid>
+      <guid>/posts/notes/publish-your-site-on-k8s/</guid>
       <description>&lt;p&gt;将自己的博客网站发布到自己的 Kubernetes 集群上。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Goroutine 的管理</title>
-      <link>/post/golang/goroutine/</link>
+      <link>/posts/golang/goroutine/</link>
       <pubDate>Fri, 28 Dec 2018 16:29:32 +0800</pubDate>
-      <guid>/post/golang/goroutine/</guid>
+      <guid>/posts/golang/goroutine/</guid>
       <description>&lt;p&gt;goroutine 是 go 的最重要特性之一，可以方便的实现并发编程。但是真正用起来，如果不多加注意，很容易造成 goroutine 的泄漏或者脱离管理，造成代码跑一段时间，就是产生大量无法回收的goroutine(可通过 &lt;a href=&#34;https://golang.org/pkg/net/http/pprof/&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;pprof&lt;/a&gt; 查看)。最近学习整理了下 go 语言中管理 goroutine 的几种方法和一些最佳实践。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Basic Data Structure</title>
-      <link>/post/algorithm/basic-data-structure/</link>
+      <link>/posts/algorithm/basic-data-structure/</link>
       <pubDate>Fri, 07 Dec 2018 16:31:03 +0800</pubDate>
-      <guid>/post/algorithm/basic-data-structure/</guid>
+      <guid>/posts/algorithm/basic-data-structure/</guid>
       <description>&lt;p&gt;基础的数据结构和一些基本操作，及其 golang 语言的实现。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Build Blog With Hugo</title>
-      <link>/post/notes/build-blog-with-hugo/</link>
+      <link>/posts/notes/build-blog-with-hugo/</link>
       <pubDate>Tue, 04 Dec 2018 18:37:11 +0800</pubDate>
-      <guid>/post/notes/build-blog-with-hugo/</guid>
+      <guid>/posts/notes/build-blog-with-hugo/</guid>
       <description>&lt;p&gt;how to build your own blog using hugo.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Awesome Post Collection 1</title>
-      <link>/post/awesome-post/collection-1/</link>
+      <link>/posts/awesome-post/collection-1/</link>
       <pubDate>Mon, 03 Dec 2018 21:38:12 +0800</pubDate>
-      <guid>/post/awesome-post/collection-1/</guid>
+      <guid>/posts/awesome-post/collection-1/</guid>
       <description>&lt;ul&gt;&#xA;&lt;li&gt;Mesos 的资源分配。&lt;/li&gt;&#xA;&lt;li&gt;Kubernetes调度详解。&lt;/li&gt;&#xA;&lt;li&gt;Istio 调用链埋点/tracing。&lt;/li&gt;&#xA;&lt;li&gt;kubernetes informer 解析。&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
     <item>
       <title>Apiserver 源码阅读</title>
-      <link>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>/posts/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 19:46:06 +0800</pubDate>
-      <guid>/post/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>/posts/cloud/apiserver-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;k8s apiserver 源码阅读笔记&lt;/p&gt;</description>
     </item>
     <item>
       <title>Kubelet</title>
-      <link>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <link>/posts/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
       <pubDate>Wed, 21 Nov 2018 18:48:01 +0800</pubDate>
-      <guid>/post/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <guid>/posts/cloud/kubelet-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
       <description>&lt;p&gt;Kubelet 源码阅读笔记&lt;/p&gt;</description>
     </item>
     <item>
       <title>阿里云主机搭建 K8S 集群</title>
-      <link>/post/cloud/deploy-kubernetes-on-aliyun/</link>
+      <link>/posts/cloud/deploy-kubernetes-on-aliyun/</link>
       <pubDate>Wed, 14 Nov 2018 14:31:38 +0800</pubDate>
-      <guid>/post/cloud/deploy-kubernetes-on-aliyun/</guid>
+      <guid>/posts/cloud/deploy-kubernetes-on-aliyun/</guid>
       <description>&lt;p&gt;通过阿里云ECS实例搭建K8S集群&lt;/p&gt;</description>
     </item>
   </channel>

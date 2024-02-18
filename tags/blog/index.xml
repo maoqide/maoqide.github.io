@@ -10,16 +10,16 @@
     <atom:link href="/tags/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>将网站部署在 Kubernetes 上</title>
-      <link>/post/notes/publish-your-site-on-k8s/</link>
+      <link>/posts/notes/publish-your-site-on-k8s/</link>
       <pubDate>Tue, 01 Jan 2019 17:04:25 +0800</pubDate>
-      <guid>/post/notes/publish-your-site-on-k8s/</guid>
+      <guid>/posts/notes/publish-your-site-on-k8s/</guid>
       <description>&lt;p&gt;将自己的博客网站发布到自己的 Kubernetes 集群上。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Build Blog With Hugo</title>
-      <link>/post/notes/build-blog-with-hugo/</link>
+      <link>/posts/notes/build-blog-with-hugo/</link>
       <pubDate>Tue, 04 Dec 2018 18:37:11 +0800</pubDate>
-      <guid>/post/notes/build-blog-with-hugo/</guid>
+      <guid>/posts/notes/build-blog-with-hugo/</guid>
       <description>&lt;p&gt;how to build your own blog using hugo.&lt;/p&gt;</description>
     </item>
   </channel>

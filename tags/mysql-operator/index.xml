@@ -10,9 +10,9 @@
     <atom:link href="/tags/mysql-operator/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Deploy Mysql on Kubernetes</title>
-      <link>/post/cloud/deploy-mysql-on-kubernetes/</link>
+      <link>/posts/cloud/deploy-mysql-on-kubernetes/</link>
       <pubDate>Thu, 16 May 2019 14:06:37 +0800</pubDate>
-      <guid>/post/cloud/deploy-mysql-on-kubernetes/</guid>
+      <guid>/posts/cloud/deploy-mysql-on-kubernetes/</guid>
       <description>&lt;p&gt;本文通过 &lt;a href=&#34;https://github.com/oracle/mysql-operator&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;mysql-operator&lt;/a&gt; 在kubernetes集群部署高可用的mysql statefulset。&lt;/p&gt;</description>
     </item>
   </channel>
