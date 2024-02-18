@@ -10,6 +10,13 @@
     <atom:link href="/tags/glusterfs/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Glusterfs Kubernetes</title>
+      <link>/post/cloud/glusterfs-kubernetes/</link>
+      <pubDate>Fri, 06 Sep 2019 08:46:14 +0800</pubDate>
+      <guid>/post/cloud/glusterfs-kubernetes/</guid>
+      <description>&lt;p&gt;在 kubernetes 中使用 glusterfs 作为 pv。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Glusterfs Kubernetes</title>
       <link>/posts/cloud/glusterfs-kubernetes/</link>
       <pubDate>Fri, 06 Sep 2019 08:46:14 +0800</pubDate>
       <guid>/posts/cloud/glusterfs-kubernetes/</guid>

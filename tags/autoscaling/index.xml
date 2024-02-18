@@ -10,6 +10,13 @@
     <atom:link href="/tags/autoscaling/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>云原生资源优化实践</title>
+      <link>/post/practice/resource-optimization/</link>
+      <pubDate>Wed, 07 Feb 2024 17:25:40 +0800</pubDate>
+      <guid>/post/practice/resource-optimization/</guid>
+      <description>本文发表于 infoQ: infoQ 文章链接&#xA;背景 Link to heading 在容器化的基础上，我们已经通过一些手段，比如监控分析、弹性伸缩等降低了 k8s 集群的成本，取得了一定的成效。&#xA;但是深入分析下来，集群资源使用还是有不小的优化空间。当然，成本和稳定性总是对立的，这就要求我们更精细、更深入业务进行资源的优化，以同时保证应用的稳定性不受影响。因此，进一步的资源优化，我们围绕云原生和 k8s 本身的功能特性和架构优势，从具体业务应用的特点着手，对 k8s 的弹性和调度等能力做了一系列的拓展和增强，以达成进一步降低成本，并能够不损失甚至持续提升应用稳定性的目标。&#xA;弹性伸缩 Link to heading 业务挑战-1，如何有效推进业务接入 HPA？ Link to heading Pod 水平弹性扩缩容是 K8s 的一个重要功能，随着应用迁移到 K8s，我们自然也上线了这一功能。但是，在实际落地中，却有一些问题导致弹性扩缩容的效果受到了很大影响，甚至很多应用因此未能开启弹性扩缩。这里简单列举几个比较普遍存在的问题：&#xA;由于 java 本身的特点和一些历史债务问题，很多核心业务的应用启动时间很长，这使得扩容出的 Pod 并不能及时分担线上流量，使得一些大流量的业务在业务高峰期可能会出现服务受损的情况。 有些应用如 kafka 消费者应用，由于每次 Pod 的扩缩容，都会触发到 kafka 的重平衡，造成对消息消费的影响，部分应用无法容忍较高频次的扩缩容动作。 &amp;hellip; &amp;hellip; 解决方案 Link to heading 基于上面提到的问题，我们需要 HPA 能够做到提前感知扩容，并尽可能的减少扩缩容的频次，减少无效的扩缩容。经过问题分析和对社区产品的调研，我们决定从多个方向来解决这个问题。其一，是引入 keda，借助丰富的 scaler 和自定义 scaler 的能力，支持通过自定义的业务指标及更灵活的扩缩策略，实现更精准的扩缩容。其二，引入了 crane 的 EHPA，实现基于流量预测的弹性扩缩。最后，对于扩缩容极端敏感的应用，还是无法容忍扩缩容带来的影响的话，使用固定的定时弹性扩缩容策略，由业务方自己指定扩缩容的时间和个数，实现扩缩容完全可控。&#xA;案例 Link to heading 通过 EHPA 提前扩容，减少无效缩容 Link to heading 如上图，EHPA 使用在数字信号处理（Digital Signal Processing）领域中常用的的离散傅里叶变换、自相关函数等手段，识别、预测周期性的时间序列。可以通过算法预测未来的流量洪峰实现提前扩容，及减少不必要的缩容，稳定工作负载的资源使用率，消除突刺误判，缓解抖动。</description>
+    </item>
+    <item>
+      <title>云原生资源优化实践</title>
       <link>/posts/practice/resource-optimization/</link>
       <pubDate>Wed, 07 Feb 2024 17:25:40 +0800</pubDate>
       <guid>/posts/practice/resource-optimization/</guid>

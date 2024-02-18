@@ -10,6 +10,13 @@
     <atom:link href="/tags/fileserver/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Build Fileserver Using Nginx on K8s</title>
+      <link>/post/practice/build-fileserver-using-nginx-on-k8s/</link>
+      <pubDate>Thu, 27 May 2021 13:52:43 +0800</pubDate>
+      <guid>/post/practice/build-fileserver-using-nginx-on-k8s/</guid>
+      <description>&lt;p&gt;使用 nginx 镜像在 k8s 中搭建一个简单的文件服务器。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Build Fileserver Using Nginx on K8s</title>
       <link>/posts/practice/build-fileserver-using-nginx-on-k8s/</link>
       <pubDate>Thu, 27 May 2021 13:52:43 +0800</pubDate>
       <guid>/posts/practice/build-fileserver-using-nginx-on-k8s/</guid>

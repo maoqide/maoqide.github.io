@@ -10,6 +10,13 @@
     <atom:link href="/tags/containerize/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Application Containerization Best Practice</title>
+      <link>/post/cloud/application-containerization-best-practice/</link>
+      <pubDate>Mon, 10 Aug 2020 09:18:18 +0800</pubDate>
+      <guid>/post/cloud/application-containerization-best-practice/</guid>
+      <description>&lt;p&gt;应用容器化部署最佳实践&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Application Containerization Best Practice</title>
       <link>/posts/cloud/application-containerization-best-practice/</link>
       <pubDate>Mon, 10 Aug 2020 09:18:18 +0800</pubDate>
       <guid>/posts/cloud/application-containerization-best-practice/</guid>
