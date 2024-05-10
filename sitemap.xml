@@ -17,10 +17,16 @@
     <loc>/post/cloud/kubernetes-audit/</loc>
     <lastmod>2024-05-10T13:51:54+08:00</lastmod>
   </url><url>
+    <loc>/posts/cloud/kubernetes-audit/</loc>
+    <lastmod>2024-05-10T13:51:54+08:00</lastmod>
+  </url><url>
     <loc>/</loc>
     <lastmod>2024-05-10T13:51:54+08:00</lastmod>
   </url><url>
     <loc>/authors/maoqide/</loc>
+    <lastmod>2024-05-10T13:51:54+08:00</lastmod>
+  </url><url>
+    <loc>/posts/</loc>
     <lastmod>2024-05-10T13:51:54+08:00</lastmod>
   </url><url>
     <loc>/post/</loc>
@@ -33,9 +39,6 @@
     <lastmod>2024-02-07T17:25:40+08:00</lastmod>
   </url><url>
     <loc>/tags/cloud-native/</loc>
-    <lastmod>2024-02-07T17:25:40+08:00</lastmod>
-  </url><url>
-    <loc>/posts/</loc>
     <lastmod>2024-02-07T17:25:40+08:00</lastmod>
   </url><url>
     <loc>/post/practice/resource-optimization/</loc>

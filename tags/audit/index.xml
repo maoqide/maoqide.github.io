@@ -15,5 +15,12 @@
       <guid>/post/cloud/kubernetes-audit/</guid>
       <description>&lt;p&gt;开启 kubernetes apiserver 的审计日志。&lt;/p&gt;</description>
     </item>
+    <item>
+      <title>kubernetes 集群开启审计日志</title>
+      <link>/posts/cloud/kubernetes-audit/</link>
+      <pubDate>Fri, 10 May 2024 13:51:54 +0800</pubDate>
+      <guid>/posts/cloud/kubernetes-audit/</guid>
+      <description>&lt;p&gt;开启 kubernetes apiserver 的审计日志。&lt;/p&gt;</description>
+    </item>
   </channel>
 </rss>
