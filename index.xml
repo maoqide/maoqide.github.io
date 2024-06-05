@@ -6,7 +6,7 @@
     <description>Recent content on maoqide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 10 May 2024 13:51:54 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 31 May 2024 16:08:07 +0800</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
@@ -14,6 +14,13 @@
       <pubDate>Sat, 08 Jun 2019 00:00:00 +0000</pubDate>
       <guid>/about/</guid>
       <description>Programmer. Gopher. Cloud Native, Kubernetes, Docker, CICD&amp;hellip; Keep Learning.&#xA;Contact: maoqidemail@gmail.com Github: https://github.com/maoqide </description>
+    </item>
+    <item>
+      <title>手动二进制部署的 kubernetes 集群证书过期处理</title>
+      <link>/posts/cloud/kubernetes-certs-renew/</link>
+      <pubDate>Fri, 31 May 2024 16:08:07 +0800</pubDate>
+      <guid>/posts/cloud/kubernetes-certs-renew/</guid>
+      <description>&lt;hr&gt;&#xA;&lt;p&gt;通过 kubeadm 更新手动部署的 kubernetes 集群证书。&lt;/p&gt;</description>
     </item>
     <item>
       <title>kubernetes 集群开启审计日志</title>
