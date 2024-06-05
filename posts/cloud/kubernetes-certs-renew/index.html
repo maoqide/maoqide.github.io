@@ -197,24 +197,42 @@
 </h2>
 <p>排查下来原因是 apiserver 的证书过期，导致 kubectl 及其他的控制面组件均无法连接到 apiserver。所以我们需要更新 apiserver 的证书。由于这是一个比较古老的集群，之前还是完全使用手动二进制部署方式，证书也是手动生成的，维护并不方便。因此我想要通过 kubeadm 来更新集群证书。</p>
 <p>通过查阅官方文档 <a href="https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#custom-certificates"  class="external-link" target="_blank" rel="noopener">使用 kubeadm 进行证书管理</a>，发现是可行的，只要在生成证书时，将手动生成证书时使用的根证书 ca.crt 和 ca.key 传递给 kubeadm 即可。具体方式如下：</p>
-<ol>
-<li>备份原有证书。备份是一个好习惯，需要养成。在更新证书之前，先将原有证书备份一份，出现问题时可以快速恢复。</li>
-</ol>
+<h3 id="1备份原有证书">
+  1.备份原有证书
+  <a class="heading-link" href="#1%e5%a4%87%e4%bb%bd%e5%8e%9f%e6%9c%89%e8%af%81%e4%b9%a6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>备份是一个好习惯，需要养成。在更新证书之前，先将原有证书备份一份，出现问题时可以快速恢复。</p>
 <div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cp -r /etc/kubernetes/pki /etc/kubernetes/pki.bak
-</span></span></code></pre></div><ol start="2">
-<li>
-<p>下载 kubeadm，下载和当前集群版本对应的 kubeadm 工具。</p>
-</li>
-<li>
-<p>准备证书生成目录。kubeadm 默认生成证书是在 /etc/kubernetes/pki 下，为了避免出现问题覆盖原有证书，我新建了一个目录<code>/tmp/kubernetes/pki</code>用于证书生成，同时将原 ca 证书文件拷贝到该目录下。</p>
-</li>
-</ol>
+</span></span></code></pre></div><h3 id="2下载-kubeadm">
+  2.下载 kubeadm
+  <a class="heading-link" href="#2%e4%b8%8b%e8%bd%bd-kubeadm">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>下载和当前集群版本对应的 kubeadm 工具。</p>
+<h3 id="3准备证书生成目录">
+  3.准备证书生成目录
+  <a class="heading-link" href="#3%e5%87%86%e5%a4%87%e8%af%81%e4%b9%a6%e7%94%9f%e6%88%90%e7%9b%ae%e5%bd%95">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>kubeadm 默认生成证书是在 /etc/kubernetes/pki 下，为了避免出现问题覆盖原有证书，我新建了一个目录<code>/tmp/kubernetes/pki</code>用于证书生成，同时将原 ca 证书文件拷贝到该目录下。</p>
 <div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir -p /tmp/kubernetes/pki
 </span></span><span style="display:flex;"><span>cp /etc/kubernetes/pki/ca.crt /tmp/kubernetes/pki
 </span></span><span style="display:flex;"><span>cp /etc/kubernetes/pki/ca.key /tmp/kubernetes/pki
-</span></span></code></pre></div><ol start="4">
-<li>准备 kubeadm config 文件。执行 kubeadm 时，需要指定一个配置文件，用来告诉 kubeadm apiserver 的地址、pods/svc 的网段、DNS 后缀等信息，以便在生成证书时，写入 csr 文件中。否则证书更新后可能出现 x509 错误。以下是我在生成时指定的配置文件。</li>
-</ol>
+</span></span></code></pre></div><h3 id="4准备-kubeadm-config-文件">
+  4.准备 kubeadm config 文件
+  <a class="heading-link" href="#4%e5%87%86%e5%a4%87-kubeadm-config-%e6%96%87%e4%bb%b6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>执行 kubeadm 时，需要指定一个配置文件，用来告诉 kubeadm apiserver 的地址、pods/svc 的网段、DNS 后缀等信息，以便在生成证书时，写入 csr 文件中。否则证书更新后可能出现 x509 错误。以下是我在生成时指定的配置文件。</p>
 <div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">kubeadm.k8s.io/v1beta2</span><span style="color:#6e7681">
 </span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterConfiguration</span><span style="color:#6e7681">
 </span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">controlPlaneEndpoint</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;172.16.249.85:6443&#34;</span><span style="color:#6e7681">
@@ -223,17 +241,26 @@
 </span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">serviceSubnet</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;xx.xxx.128.0/17&#34;</span><span style="color:#6e7681">
 </span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">dnsDomain</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;cluster.local&#34;</span><span style="color:#6e7681">
 </span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">certificatesDir</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">&#34;/tmp/kubernetes/certs&#34;</span><span style="color:#6e7681">
-</span></span></span></code></pre></div><ol start="5">
-<li>生成新的证书。</li>
-</ol>
+</span></span></span></code></pre></div><h3 id="5生成新的证书">
+  5.生成新的证书
+  <a class="heading-link" href="#5%e7%94%9f%e6%88%90%e6%96%b0%e7%9a%84%e8%af%81%e4%b9%a6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 生成所有证书</span>
 </span></span><span style="display:flex;"><span>./kubeadm init phase certs all --config kubeadm-config.yaml
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># 实际上这里只需要更新 apiserver 的证书即可，可以指定只生成 apiserver 证书</span>
 </span></span><span style="display:flex;"><span>./kubeadm init phase certs apiserver --config kubeadm-config.yaml
-</span></span></code></pre></div><ol start="6">
-<li>更新证书。将生成的 apiserver 的证书拷贝到原有证书目录下。</li>
-</ol>
+</span></span></code></pre></div><h3 id="6更新证书">
+  6.更新证书
+  <a class="heading-link" href="#6%e6%9b%b4%e6%96%b0%e8%af%81%e4%b9%a6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>将生成的 apiserver 的证书拷贝到原有证书目录下。</p>
 <div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cp -f /tmp/kubernetes/pki/apiserver.crt /etc/kubernetes/pki
 </span></span><span style="display:flex;"><span>cp -f /tmp/kubernetes/pki/apiserver.key /etc/kubernetes/pki
 </span></span></code></pre></div><p>到此，证书更新已经完成，可以检查下集群是否恢复正常。</p>
