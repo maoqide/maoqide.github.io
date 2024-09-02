@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  为 Kubernetes ServiceAccount 生成 kubeconfig 文件 · maoqide
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Maoqide">
+<meta name="description" content="为 Service Account 生成 kubeconfig 文件">
+<meta name="keywords" content="blog,developer,cloud-native">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="为 Kubernetes ServiceAccount 生成 kubeconfig 文件"/>
+<meta name="twitter:description" content="为 Service Account 生成 kubeconfig 文件"/>
+
+<meta property="og:title" content="为 Kubernetes ServiceAccount 生成 kubeconfig 文件" />
+<meta property="og:description" content="为 Service Account 生成 kubeconfig 文件" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/cloud/generate-sa-kubeconfig/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-09-02T16:06:49+08:00" />
+<meta property="article:modified_time" content="2024-09-02T16:06:49+08:00" />
+
+
+
+
+
+<link rel="canonical" href="/posts/cloud/generate-sa-kubeconfig/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      maoqide
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/tags/">Tag</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="/posts/cloud/generate-sa-kubeconfig/">
+              为 Kubernetes ServiceAccount 生成 kubeconfig 文件
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-09-02T16:06:49&#43;08:00">
+                September 2, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              2-minute read
+            </span>
+          </div>
+          <div class="authors">
+  <i class="fa-solid fa-user" aria-hidden="true"></i>
+    <a href="/authors/maoqide/">Maoqide</a></div>
+
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/kubernetes/">kubernetes</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/rbac/">rbac</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>为 Service Account 生成 kubeconfig 文件</p>
+<h2 id="创建-service-account-并绑定-clusterrole">
+  创建 Service Account 并绑定 ClusterRole
+  <a class="heading-link" href="#%e5%88%9b%e5%bb%ba-service-account-%e5%b9%b6%e7%bb%91%e5%ae%9a-clusterrole">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>这里创建了一个 ServiceAccount <code>testsa</code> 并绑定了 <code>edit</code> ClusterRole，这样 ServiceAccount 就有了对应 Namespace 下的资源的读写权限。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">Namespace</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sa-test</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">testsa</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sa-test</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#ff7b72">---</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">apiVersion</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io/v1</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">RoleBinding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">metadata</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">testsa-role-binding</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sa-test</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">roleRef</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">apiGroup</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">rbac.authorization.k8s.io</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ClusterRole</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">edit</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span><span style="color:#7ee787">subjects</span>:<span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681"></span>- <span style="color:#7ee787">kind</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">ServiceAccount</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">name</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">testsa</span><span style="color:#6e7681">
+</span></span></span><span style="display:flex;"><span><span style="color:#6e7681">  </span><span style="color:#7ee787">namespace</span>:<span style="color:#6e7681"> </span><span style="color:#a5d6ff">sa-test</span><span style="color:#6e7681">
+</span></span></span></code></pre></div><h2 id="生成-kubeconfig-文件">
+  生成 kubeconfig 文件
+  <a class="heading-link" href="#%e7%94%9f%e6%88%90-kubeconfig-%e6%96%87%e4%bb%b6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>为 Service Account 生成 kubeconfig 文件，这样就可以在本地使用 <code>kubectl</code> 命令行工具访问 Kubernetes 集群。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8b949e;font-weight:bold;font-style:italic">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-weight:bold;font-style:italic"></span>set -euo pipefail
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Variables</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">NAMESPACE</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;sa-test&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">SERVICE_ACCOUNT_NAME</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;testsa&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">KUBECONFIG_FILE</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;kubeconfig_</span><span style="color:#a5d6ff">${</span><span style="color:#79c0ff">SERVICE_ACCOUNT_NAME</span><span style="color:#a5d6ff">}</span><span style="color:#a5d6ff">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">SECRET_NAME</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;</span><span style="color:#79c0ff">$SERVICE_ACCOUNT_NAME</span><span style="color:#a5d6ff">-token&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Create Secret token</span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># k8s 1.22+ 需要手动创建 kubernetes.io/service-account-token 类型的 Secret，为 ServiceAccount 生成长期有效的 token</span>
+</span></span><span style="display:flex;"><span>kubectl -n <span style="color:#79c0ff">$NAMESPACE</span> apply -f - <span style="color:#a5d6ff">&lt;&lt;EOF
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">apiVersion: v1
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">kind: Secret
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">metadata:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">  name: $SECRET_NAME
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">  annotations:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    kubernetes.io/service-account.name: $SERVICE_ACCOUNT_NAME
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">type: kubernetes.io/service-account-token
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Extract the bearer token from the secret</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">SA_TOKEN</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#ff7b72">$(</span>kubectl get secret <span style="color:#79c0ff">$SECRET_NAME</span> <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>           --namespace <span style="color:#79c0ff">$NAMESPACE</span> <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>           -o <span style="color:#79c0ff">jsonpath</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;{.data.token}&#39;</span> | base64 --decode<span style="color:#ff7b72">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Get the API server endpoint</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">APISERVER</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#ff7b72">$(</span>kubectl config view --minify -o <span style="color:#79c0ff">jsonpath</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;{.clusters[0].cluster.server}&#39;</span><span style="color:#ff7b72">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Get the certificate authority</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">CA_CERT</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#ff7b72">$(</span>kubectl get secret <span style="color:#79c0ff">$SECRET_NAME</span> <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>          --namespace <span style="color:#79c0ff">$NAMESPACE</span> <span style="color:#79c0ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#79c0ff"></span>          -o <span style="color:#79c0ff">jsonpath</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;{.data.ca\.crt}&#39;</span><span style="color:#ff7b72">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b949e;font-style:italic"># Create kubeconfig file</span>
+</span></span><span style="display:flex;"><span>cat &gt; <span style="color:#79c0ff">$KUBECONFIG_FILE</span> <span style="color:#a5d6ff">&lt;&lt;EOF
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">apiVersion: v1
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">kind: Config
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">clusters:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">- name: kubernetes
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">  cluster:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    certificate-authority-data: $CA_CERT
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    server: $APISERVER
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">contexts:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">- name: $SERVICE_ACCOUNT_NAME-context
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">  context:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    cluster: kubernetes
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    namespace: $NAMESPACE
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    user: $SERVICE_ACCOUNT_NAME
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">current-context: $SERVICE_ACCOUNT_NAME-context
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">users:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">- name: $SERVICE_ACCOUNT_NAME
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">  user:
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    token: $SA_TOKEN
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">EOF</span>
+</span></span></code></pre></div>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "maoqide-1" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    @
+    
+      2018 -
+    
+    2024
+     Maoqide 
+    ·
+    
+     <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+    
+      <p><a href="https://beian.miit.gov.cn/" target="_blank" title="Check ICP info" rel="noopener">浙ICP备19006182号</a></p>
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MHZR8L7VXH"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MHZR8L7VXH', { 'anonymize_ip': false });
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?c3c6dd2eb79bc741d95463b6040ac868";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
